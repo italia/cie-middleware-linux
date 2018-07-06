@@ -1,0 +1,397 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Crypto">
+      <UniqueIdentifier>{f4cf8e8b-40bf-4688-b73b-fc58ba3d0720}</UniqueIdentifier>
+      <Extensions>Crypto\*.h</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Crypto">
+      <UniqueIdentifier>{77f57c95-b08d-4ac5-b723-cd1b13120791}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PKCS11">
+      <UniqueIdentifier>{32a6a2b4-71eb-41ad-9c5b-7587b1eb5332}</UniqueIdentifier>
+      <Extensions>PKCS11\*.*</Extensions>
+    </Filter>
+    <Filter Include="Header Files\PKCS11">
+      <UniqueIdentifier>{27128c25-49de-4034-a8a9-08e816c8d35a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CSP">
+      <UniqueIdentifier>{1ad14eff-15f0-411b-bea3-9a5951aedb73}</UniqueIdentifier>
+      <Extensions>CSP\*.h</Extensions>
+    </Filter>
+    <Filter Include="Source Files\CSP">
+      <UniqueIdentifier>{54c3bf99-9671-4b89-95ac-1f6e9db912f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{23478b52-d710-4c7f-9e74-eb3166320e2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{b33d7669-be33-4ada-8640-8bc54cecadeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{ce7f44dd-9a52-416b-9243-f6c937213b96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UI">
+      <UniqueIdentifier>{6ba62d40-8dc6-4cca-86c6-f6a49741eddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PCSC">
+      <UniqueIdentifier>{66e39367-40bb-4470-9524-a179f139f531}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PCSC">
+      <UniqueIdentifier>{49992170-328e-47f2-86dc-c4b5dbdb081d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\AES.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\ASNParser.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\Base64.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\DES3.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\MAC.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\SHA1.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\SHA256.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="crypto\RSA.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\CardContext.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\CardTemplate.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\CIEP11Template.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\initP11.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\Mechanism.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\P11Object.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\PKCS11Functions.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\session.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="PKCS11\Slot.cpp">
+      <Filter>Source Files\PKCS11</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\abilitaCIE.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\cambioPIN.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\CSP.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\IAS.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\funccallinfo.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\IniSettings.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\log.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\SyncroEvent.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\util.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\UtilException.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\sbloccoPIN.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Bitmap.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Message.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\PIN.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PCSC\APDU.cpp">
+      <Filter>Source Files\PCSC</Filter>
+    </ClCompile>
+    <ClCompile Include="PCSC\CardLocker.cpp">
+      <Filter>Source Files\PCSC</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\ModuleInfo.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\NotImpl.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\StoreProvider.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="PCSC\Token.cpp">
+      <Filter>Source Files\PCSC</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\TLV.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\safeDesktop.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\Verifica.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="PCSC\PCSC.cpp">
+      <Filter>Source Files\PCSC</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\ExtAuthKey.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\SystemTray.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Array.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypto\MD5.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="Crypto\SHA512.cpp">
+      <Filter>Source Files\Crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\tinyxml2.cpp">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="CSP\update.cpp">
+      <Filter>Source Files\CSP</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\CardContext.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\CardTemplate.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\CIEP11Template.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\InitP11.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\Mechanism.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\P11Object.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\PKCS11Functions.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\session.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="PKCS11\Slot.h">
+      <Filter>Header Files\PKCS11</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\IAS.h">
+      <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Array.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\defines.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\funccallinfo.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\IniSettings.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\log.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\ModuleInfo.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\SyncroEvent.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\util.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\UtilException.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\CardMod.h">
+      <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="PCSC\APDU.h">
+      <Filter>Header Files\PCSC</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\AtlBitmapSkinButton.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\atlcontrols.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Bitmap.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="PCSC\CardLocker.h">
+      <Filter>Header Files\PCSC</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Message.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="PCSC\PCSC.h">
+      <Filter>Header Files\PCSC</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\PIN.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="res\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PCSC\Token.h">
+      <Filter>Header Files\PCSC</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\TLV.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\VCEdit.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI/safeDesktop.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\Base64.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\DES3.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\MAC.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\RSA.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\SHA1.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\sha256.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\AES.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\ASNParser.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Verifica.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CacheLib\CacheLib.h">
+      <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\SystemTray.h">
+      <Filter>Header Files\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\MD5.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="CSP\CSP.h">
+      <Filter>Header Files\CSP</Filter>
+    </ClInclude>
+    <ClInclude Include="Crypto\sha512.h">
+      <Filter>Header Files\Crypto</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\tinyxml2.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res/CIEPKI.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="custom.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\Cancel2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\ATEMG\ATEMGPerso\ATEMGAttivazione\res\OK2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Cancel.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Cancel2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\OK.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\OK2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bitmap1.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Background.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\CIE.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

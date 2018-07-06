@@ -1,0 +1,20 @@
+version: '1.0.{build}'
+
+image: Visual Studio 2017
+
+platform: 
+  - Win32
+  - x64
+
+configuration:
+  - Debug
+
+# Disable the Release builds until we fix code signing
+#  - Release
+
+init:
+  - cmd: git config --global core.autocrlf true
+  - cmd: msbuild /version
+
+test: off
+deploy: off
