@@ -168,7 +168,11 @@ DWORD WINAPI CardReadFile(
 				//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
 
 				std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(cer.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());	
+#else
 				RSA *rsa_key = pkey->pkey.rsa;
+#endif
 				keylen = RSA_size(rsa_key);	//TODO: is this really RSA_size()?
 				//keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
 				if (keylen == 0)

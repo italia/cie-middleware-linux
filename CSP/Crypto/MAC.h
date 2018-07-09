@@ -14,8 +14,8 @@ class CMAC
 	BCRYPT_KEY_HANDLE key2;
 	ByteDynArray iv;
 #else
-	des_key_schedule k1,k2,k3;
-	des_cblock initVec;
+	DES_key_schedule k1,k2,k3;
+	DES_cblock initVec;
 #endif
 public:
 	CMAC();

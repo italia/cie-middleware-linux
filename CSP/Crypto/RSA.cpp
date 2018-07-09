@@ -72,12 +72,23 @@ void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, B
 	auto BNpubexp = BN_new();
 	BN_set_word(BNpubexp, 65537);
 	RSA_generate_key_ex(keyPriv, size, BNpubexp, nullptr);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
+	RSA_get0_key(keyPriv, &n_, &e_, &d_);
+	module.resize(BN_num_bytes(n_));
+	BN_bn2bin(n_, module.data());
+	privexp.resize(BN_num_bytes(d_));
+	BN_bn2bin(d_, privexp.data());
+	pubexp.resize(BN_num_bytes(e_));
+	BN_bn2bin(e_, pubexp.data());
+#else
 	module.resize(BN_num_bytes(keyPriv->n));
 	BN_bn2bin(keyPriv->n, module.data());
 	privexp.resize(BN_num_bytes(keyPriv->d));
 	BN_bn2bin(keyPriv->d, privexp.data());
 	pubexp.resize(BN_num_bytes(keyPriv->e));
 	BN_bn2bin(keyPriv->e, pubexp.data());
+#endif
 
 	exit_func
 }
@@ -86,13 +97,25 @@ CRSA::CRSA(ByteArray &mod,ByteArray &exp)
 {
 	KeySize = mod.size();
 	keyPriv = RSA_new();
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
+	RSA_get0_key(keyPriv, &n_, &e_, &d_);
+	BIGNUM *n__ = BN_dup(n_);
+	BIGNUM *d__ = BN_new();
+	BIGNUM *e__ = BN_dup(e_);
+	n__ = BN_bin2bn(mod.data(), (int)mod.size(), n__);
+	e__ = BN_bin2bn(exp.data(), (int)exp.size(), e__);
+	RSA_set0_key(keyPriv, n__, e__, d__);
+#else
 	keyPriv->n = BN_bin2bn(mod.data(), (int)mod.size(), keyPriv->n);
 	keyPriv->d = BN_new(); 
 	keyPriv->e = BN_bin2bn(exp.data(), (int)exp.size(), keyPriv->e);
+#endif
 }
 
 CRSA::~CRSA(void)
 {
+	//TODO: should prolly free BN_dup/BN_new here above
 	if (keyPriv!=nullptr)
 		RSA_free(keyPriv);
 }

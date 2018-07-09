@@ -1269,14 +1269,25 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(certDS.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
 	//ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
 	//IFNULL_FAIL(pkey, "unable to extract public key from certificate");
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());
+#else
 	RSA *rsa_key = pkey->pkey.rsa;
+#endif
 	//pubKeyParser.Parse(pubKeyData);
 	//CASNTag &pubKey = *pubKeyParser.tags[0];
 	
 	BYTE *n_b = new BYTE[RSA_size(rsa_key)];        //TODO: are these really RSA_size()? or better n_size?
 	BYTE *e_b = new BYTE[RSA_size(rsa_key)];	//TODO: should this be e_size?
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
+	RSA_get0_key(rsa_key, &n_, &e_, &d_);
+	size_t n_size = BN_bn2bin(n_, n_b);
+	size_t e_size = BN_bn2bin(e_, e_b);
+#else
 	size_t n_size = BN_bn2bin(rsa_key->n, n_b);
 	size_t e_size = BN_bn2bin(rsa_key->e, e_b);
+#endif
 	ByteArray bArr_n(n_b, n_size);
 	ByteArray bArr_e(e_b, e_size);
 	ByteDynArray bArrN{bArr_n};

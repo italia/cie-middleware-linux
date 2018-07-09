@@ -1,6 +1,6 @@
 // EsempioPKCS11.cpp : Defines the entry point for the console application.
 //
-
+#include <functional>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/bio.h>
