@@ -1,11 +1,11 @@
 #pragma once
 
-#pragma pack(1)
+//#pragma pack(1)
 #include "pkcs11.h"
-#pragma pack()
+//#pragma pack()
 #include "../Util/SyncroMutex.h"
 #include "../Util/Thread.h"
-#pragma pack()
+//#pragma pack()
 #include "CardContext.h"
 #include <map>
 #include <vector>

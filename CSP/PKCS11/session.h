@@ -1,8 +1,8 @@
 #pragma once
 
-#pragma pack(1)
+//#pragma pack(1)
 #include "pkcs11.h"
-#pragma pack()
+//#pragma pack()
 
 #include "Mechanism.h"
 #include "Slot.h"

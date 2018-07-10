@@ -1,9 +1,9 @@
 #pragma once
 #include "../Crypto/SHA1.h"
 #include "../Crypto/MD5.h"
-#pragma pack(1)
+//#pragma pack(1)
 #include "pkcs11.h"
-#pragma pack()
+//#pragma pack()
 
 #include <memory>
 

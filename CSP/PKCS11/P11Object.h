@@ -3,9 +3,9 @@
 #include "session.h"
 #include <map>
 
-#pragma pack(1)
+//#pragma pack(1)
 #include "pkcs11.h"
-#pragma pack()
+//#pragma pack()
 
 namespace p11 {
 

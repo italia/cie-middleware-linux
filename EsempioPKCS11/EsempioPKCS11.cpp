@@ -11,9 +11,9 @@
 #include <vector>
 #include <memory>
 
-#pragma pack(1)
+//#pragma pack(1)
 #include "pkcs11.h"
-#pragma pack()
+//#pragma pack()
 
 using namespace std;
 typedef unsigned char BYTE;
