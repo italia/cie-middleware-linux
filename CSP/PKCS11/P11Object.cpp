@@ -3,7 +3,7 @@
 #include "P11Object.h"
 #include "CardTemplate.h"
 
-static char *szCompiledFile=__FILE__;
+static const char *szCompiledFile=__FILE__;
 
 namespace p11 {
 
@@ -35,10 +35,11 @@ void CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 {
 	init_func
 
+		CK_RV ret = CKR_OK;
 		for (unsigned int i=0;i<ulCount;i++) {
 
 		CK_ULONG ulValLen=pTemplate[i].ulValueLen;
-		pTemplate[i].ulValueLen=-1;
+		pTemplate[i].ulValueLen=CK_UNAVAILABLE_INFORMATION;
 
 		ByteArray *attr=getAttribute(pTemplate[i].type);
 		if (attr != nullptr) {
@@ -46,14 +47,20 @@ void CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 				pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
 			else {
 				if (attr->size() > ulValLen)
-					throw p11_error(CKR_BUFFER_TOO_SMALL);
-				ByteArray((uint8_t*)pTemplate[i].pValue, attr->size()).copy(*attr);
-				pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
+					ret = CKR_BUFFER_TOO_SMALL;//throw p11_error(CKR_BUFFER_TOO_SMALL);
+				else {
+					ByteArray((uint8_t*)pTemplate[i].pValue, attr->size()).copy(*attr);
+					pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
+				}
 			}
 		}
-		else
-			throw p11_error(CKR_ATTRIBUTE_TYPE_INVALID);
+		else {
+			ret = CKR_ATTRIBUTE_TYPE_INVALID;//throw p11_error(CKR_ATTRIBUTE_TYPE_INVALID);
+		}
 	}
+
+	if(ret != CKR_OK)
+		throw p11_error(ret);
 }
 
 CK_ULONG CP11Object::GetObjectSize()
