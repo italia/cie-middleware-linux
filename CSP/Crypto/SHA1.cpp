@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include "SHA1.h"
 
-static char *szCompiledFile=__FILE__;
+static const char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
 
@@ -58,8 +58,8 @@ CSHA1::~CSHA1() {
 }
 
 void CSHA1::Init() {
-	if (isInit)
-		throw logged_error("Un'operazione di hash è già in corso");
+	/*if (isInit)
+		throw logged_error("Un'operazione di hash è già in corso");*/	//TODO: commented cause can be called from DigestReset in response to a C_Sign (teh first one was from C_SignInit)
 	SHA1_Init(&ctx);
 	isInit = true;
 }

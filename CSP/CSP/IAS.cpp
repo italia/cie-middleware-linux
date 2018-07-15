@@ -1099,7 +1099,7 @@ void IAS::IconaSbloccoPIN() {
 		}
 #else
 		std::cout << "Launching SbloccoPIN ICON" << std::endl;	
-		//TODO: shoudl also pass ICON here if we manage the notification first through the tray
+		//TODO: should also pass ICON here if we manage the notification first through the tray
 		SbloccoPIN(nullptr, nullptr, ""/*"ICON"*/, 0);	//TODO: it may be a thread, since Win counterpart seems not to WaitForSingleObject() the process to complete
 #endif
 	}
