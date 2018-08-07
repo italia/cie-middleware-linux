@@ -220,11 +220,15 @@ void CIEtemplateInitSession(void *pTemplateData){
 
 			ASN1_INTEGER *serial = X509_get_serialNumber(certDS.get()); 
 			BIGNUM *bn = ASN1_INTEGER_to_BN(serial, NULL);
+#if false
 			int n = BN_num_bytes(bn);
 			tmpPder = pder = new BYTE[n];
 			pderlen = BN_bn2bin(bn, pder);
-			//pderlen = i2d_ASN1_INTEGER(serial, nullptr);
-			//i2d_ASN1_INTEGER(serial, &tmpPder);
+#else
+			pderlen = i2d_ASN1_INTEGER(serial, nullptr);
+			tmpPder = pder = new BYTE[pderlen];
+			i2d_ASN1_INTEGER(serial, &tmpPder);
+#endif
 			ByteArray serArr{pder, pderlen};
 			ByteDynArray ser{serArr};
 			cie->cert->addAttribute(CKA_SERIAL_NUMBER, ser);
@@ -262,7 +266,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 			sprintf(temp, "%02i", tmFrom->tm_mon+1/*.wMonth*/); VarToByteArray(start.month).copy(ByteArray((BYTE*)temp, 2));
 			sprintf(temp, "%02i", tmFrom->tm_mday/*.wDay*/); VarToByteArray(start.day).copy(ByteArray((BYTE*)temp, 2));
 			struct tm *tmTo = localtime( &sTo );
-			sprintf(temp, "%04i", tmTo->tm_year+1900/*.wYear*/); VarToByteArray(end.year).copy(ByteArray((BYTE*)temp, 2));
+			sprintf(temp, "%04i", tmTo->tm_year+1900/*.wYear*/); VarToByteArray(end.year).copy(ByteArray((BYTE*)temp, 4));
 			sprintf(temp, "%02i", tmTo->tm_mon+1/*.wMonth*/); VarToByteArray(end.month).copy(ByteArray((BYTE*)temp, 2));
 			sprintf(temp, "%02i", tmTo->tm_mday/*.wDay*/); VarToByteArray(end.day).copy(ByteArray((BYTE*)temp, 2));
 			cie->cert->addAttribute(CKA_START_DATE, VarToByteArray(start));
