@@ -132,7 +132,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 
 		BYTE *p = (BYTE*)certRaw.data();
 		const BYTE* cp = p;  
-		unique_ptr<X509,std::function<void(X509*)>> certDS{d2i_X509(nullptr, &cp, certRaw.size()), [](X509* val){ X509_free(val);}};
+		unique_ptr<X509,std::function<void(X509*)>> certDS{d2i_X509(nullptr, &cp, GetASN1DataLenght(certRaw)), [](X509* val){ X509_free(val);}};
 		//PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
 		if (certDS != nullptr) {
 			//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
@@ -208,7 +208,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->cert->addAttribute(CKA_ID, VarToByteArray(label));
 			cie->cert->addAttribute(CKA_PRIVATE, VarToByteArray(vfalse));
 			cie->cert->addAttribute(CKA_TOKEN, VarToByteArray(vtrue));
-			cie->cert->addAttribute(CKA_VALUE, ByteArray(p, certRaw.size()/*certDS->pbCertEncoded, certDS->cbCertEncoded*/));
+			cie->cert->addAttribute(CKA_VALUE, ByteArray(p, GetASN1DataLenght(certRaw)/*certDS->pbCertEncoded, certDS->cbCertEncoded*/));
 			BYTE *pder, *tmpPder;	
 			size_t pderlen = i2d_X509_NAME(X509_get_issuer_name(certDS.get()), nullptr);
 			tmpPder = pder = new BYTE[pderlen];

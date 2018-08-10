@@ -54,8 +54,11 @@ using ATOM = void*;
 #define ERROR_CANCELLED			1223
 #define ERROR_INSUFFICIENT_BUFFER	122
 
-
-#define OutputDebugString(s)	std::cout << s << std::endl
+#ifdef __DEBUG__ 
+	#define OutputDebugString(s)	std::cout << s << std::endl
+#else
+	#define OutputDebugString(s)
+#endif
 
 #define ERR_CARD_FILE_DEACTIVATED		0x6283
 #define ERR_CARD_FILE_TERMINATED		0x6285

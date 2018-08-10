@@ -8,6 +8,9 @@
 #else
 #include <sys/stat.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #endif
 #include "CacheLib.h"
 #include <stdio.h>
@@ -36,8 +39,9 @@ bool PathFileExists(const char *path)
 	return (stat(path, &buffer) == 0);
 }
 
-std::string GetCardDir() {
-
+std::string GetCardDir() 
+{
+	int status = 0;
 	if (commonData[0] == 0) {
 		char szPath[MAX_PATH];
 #ifdef WIN32
@@ -47,8 +51,32 @@ std::string GetCardDir() {
   		if (temp != NULL) {
 			strncpy(szPath, temp, MAX_PATH);
 		}
-		else strcpy(szPath, "");
+		else if (struct passwd *pw = getpwuid(getuid())) {
+			snprintf(szPath, MAX_PATH, "%s/%s", pw->pw_dir, ".ciepki/");
+			typedef struct stat st;
+			st s;
+
+			if (stat(szPath, &s) != 0)
+			{
+		            if (mkdir(szPath, 0777) != 0 && errno != EEXIST)
+			    {
+			        status = -1;
+			    }
+			}
+			else if (!S_ISDIR(s.st_mode))
+			{
+			    status = -2;
+			}
+		}
+		else {
+			status = -3;
+		}
 #endif
+		if (status != 0) {
+			OutputDebugString("CIEPKI base directory cannot be found. Please set CIEDIR env variable or make sure your user has a home.");
+		   	strcpy(szPath, "");
+		}
+
 		commonData = szPath;
 	}
 	return commonData;
@@ -121,8 +149,6 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 		throw logged_error("CIE non abilitata");
 		
 }
-
-
 
 void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, uint8_t *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
