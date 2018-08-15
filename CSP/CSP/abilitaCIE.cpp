@@ -95,7 +95,7 @@ DWORD WINAPI _abilitaCIE(
 					desk.reset(new safeDesktop("AbilitaCIE"));
 
 				CMessage msg(MB_OKCANCEL, "Abilitazione CIE",
-					"Premere OK per effettuare la verifica di autenticità",
+					"Premere OK per effettuare la verifica di autenticita'",
 					"e abilitare l'uso della CIE su questo PC");
 
 				if (msg.DoModal() == IDOK) {
@@ -197,7 +197,7 @@ DWORD WINAPI _abilitaCIE(
 								}
 								CMessage msg(MB_OK,
 									"Abilitazione CIE",
-									"Il PIN è bloccato. Può esere sbloccato verificando il PUK");
+									"Il PIN e' bloccato. Può esere sbloccato verificando il PUK");
 								msg.DoModal();
 								break;
 							}
@@ -243,7 +243,7 @@ DWORD WINAPI _abilitaCIE(
 
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
-								"La CIE è abilitata all'uso");
+								"La CIE e' abilitata all'uso");
 							msg.DoModal();
 						}
 						catch (std::exception &ex) {
@@ -251,8 +251,8 @@ DWORD WINAPI _abilitaCIE(
 							OutputDebugString(ex.what());
 							CMessage msg(MB_OK,
 								"Abilitazione CIE",
-								"Si è verificato un errore nella verifica di",
-								"autenticità del documento");
+								"Si e' verificato un errore nella verifica di",
+								"autenticita' del documento");
 
 							msg.DoModal();
 							break;
@@ -279,7 +279,7 @@ DWORD WINAPI _abilitaCIE(
 		OutputDebugString(ex.what());
 		CMessage msg(MB_OK,
 			"CIE",
-			"Si è verificato un errore nella verifica di autenticità del documento");
+			"Si e' verificato un errore nella verifica di autenticita' del documento");
 		msg.DoModal();
 	}
 

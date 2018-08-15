@@ -62,7 +62,9 @@ public:
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	INT_PTR DoModal(){std::cout << "TODO: implement CVerifica" << std::endl; return IDOK;}
+#ifndef WIN32
+	INT_PTR DoModal();
+#endif
 };
 
 

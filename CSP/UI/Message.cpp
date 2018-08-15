@@ -2,6 +2,9 @@
 
 #include "../StdAfx.h"
 #include "Message.h"
+#ifndef WIN32
+	#include "helper.h"
+#endif
 
 CMessage::CMessage(DWORD tipo, const char *title, const char *riga1, const char *riga2, const char *riga3, const char *riga4)
 {
@@ -153,3 +156,11 @@ LRESULT CMessage::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	return 0;
 #endif
 }
+
+#ifndef WIN32
+INT_PTR CMessage::DoModal()
+{
+	INT_PTR ret = UIhelper::makeMessageDialog(riga1, riga2, riga3, riga4, title, tipo);
+	return ret;
+}
+#endif

@@ -2,6 +2,9 @@
 
 #include "../StdAfx.h"
 #include "PIN.h"
+#ifndef WIN32
+        #include "helper.h"
+#endif
 
 CPin::CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title, bool repeat)
 {
@@ -188,5 +191,60 @@ void CPin::ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title) {
 
 	SendMessage(edit.m_hWnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&ebt);
 	return 0;
+}
+#endif
+
+
+#ifndef WIN32
+INT_PTR CPin::DoModal()
+{
+#if 0
+        if(fgets(PIN, sizeof(PIN), stdin))
+                PIN[strcspn(PIN, "\n")] = '\0';
+        return IDOK;
+#else
+	bool again;
+	INT_PTR ret;
+        char PIN2[100];
+
+        do {
+                again = false;
+                if(!repeat)
+                        ret = UIhelper::makePinDialog(PinLen, message, message2, message3, title, PIN);
+                else ret = UIhelper::makeDualPinDialog(PinLen, message, message2, message3, title, PIN, PIN2);
+
+                if(ret == 1)
+                {
+                        if (PIN[0] == 0) {
+				UIhelper::showPassiveMessage("Inserire il PIN e premere OK", "PIN vuoto");
+                                again = true;
+                        }
+                        else if (strnlen(PIN, 99) != PinLen) {
+                                char tip[100];
+                                sprintf(tip, "Il PIN deve essere di %i cifre", PinLen);
+				UIhelper::showPassiveMessage(tip, "Lunghezza PIN errata");
+                                again = true;
+                        }
+                        else if (repeat) {
+                                if (PIN2[0] == 0) {
+					UIhelper::showPassiveMessage("Inserire il PIN e premere OK", "PIN vuoto");
+                                        again = true;
+                                }
+                                else if (strnlen(PIN2, 99) != PinLen) {
+                                        char tip[100];
+                                        sprintf(tip, "Il PIN deve essere di %i cifre", PinLen);
+					UIhelper::showPassiveMessage(tip, "Lunghezza PIN errata");
+                                        again = true;
+                                }
+                                else if (strncmp(PIN, PIN2, 99) != 0) {
+					UIhelper::showPassiveMessage("Il PIN deve essere digitato due volte", "PIN non corrispondente");
+                                        again = true;
+                                }
+                        }
+                }
+        } while(again);
+
+        return ret;
+#endif
 }
 #endif

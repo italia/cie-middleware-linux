@@ -1,6 +1,9 @@
 
 #include "../StdAfx.h"
 #include "Verifica.h"
+#ifndef WIN32
+        #include "helper.h"
+#endif
 
 CVerifica::CVerifica(HWND *wnd)
 {
@@ -102,3 +105,10 @@ LRESULT CVerifica::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bH
 	return 0;
 #endif
 }
+
+#ifndef WIN32
+INT_PTR CVerifica::DoModal()
+{
+	return IDOK;
+}
+#endif

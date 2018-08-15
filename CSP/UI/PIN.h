@@ -67,11 +67,7 @@ public:
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 #ifdef WIN32
 	void ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title);
+#else
+	INT_PTR DoModal();
 #endif
-	INT_PTR DoModal()
-	{
-		if(fgets(PIN, sizeof(PIN), stdin))
-			PIN[strcspn(PIN, "\n")] = '\0';
-		return IDOK;
-	}
 };

@@ -15,6 +15,8 @@ target_sources(ciepki
 	"${CMAKE_CURRENT_LIST_DIR}/VCEdit.h"
 	"${CMAKE_CURRENT_LIST_DIR}/Verifica.h"
 	"${CMAKE_CURRENT_LIST_DIR}/Verifica.cpp"
+	"${CMAKE_CURRENT_LIST_DIR}/helper"
+	"${CMAKE_CURRENT_LIST_DIR}/helper.cpp"
 	PUBLIC
 		#"${CMAKE_CURRENT_LIST_DIR}/foo.h"
 	)

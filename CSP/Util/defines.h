@@ -43,6 +43,7 @@ using ATOM = void*;
 #define MB_OKCANCEL	1
 
 #define IDOK		1
+#define IDCANCEL	2
 
 #define NIIF_NONE	0
 

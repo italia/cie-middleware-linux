@@ -70,7 +70,9 @@ public:
 	LRESULT OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-	INT_PTR DoModal(){return IDOK;}
+#ifndef WIN32
+	INT_PTR DoModal();
+#endif
 	BOOL EndDialog(HWND hDlg, INT_PTR nResult=0){return 1;}
 };
 
