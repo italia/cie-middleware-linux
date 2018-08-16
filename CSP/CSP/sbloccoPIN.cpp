@@ -192,8 +192,7 @@ void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
 		tray->HideIcon();
 	}
 #else
-	std::cout << __FILE__ << " Implement TrayNotification()" << std::endl;	//TODO: impl. this? 
-	abort();
+	//TODO: implement something?
 #endif
 }
 

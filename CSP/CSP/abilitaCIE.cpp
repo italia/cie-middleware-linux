@@ -1,5 +1,6 @@
 #include "../StdAfx.h"
 #include <winscard.h>
+#include <condition_variable>
 #include "../PCSC/PCSC.h"
 #include <reader.h>
 #include "IAS.h"
@@ -16,6 +17,9 @@
 #include <string>
 #include "../Util/defines.h"
 #include "../Util/funccallinfo.h"
+#ifndef WIN32
+	#include "helper.h"
+#endif
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
@@ -95,8 +99,8 @@ DWORD WINAPI _abilitaCIE(
 					desk.reset(new safeDesktop("AbilitaCIE"));
 
 				CMessage msg(MB_OKCANCEL, "Abilitazione CIE",
-					"Premere OK per effettuare la verifica di autenticita'",
-					"e abilitare l'uso della CIE su questo PC");
+					"Si vuole procedere alla verifica di autenticita'",
+					"e abilitare l'uso della CIE su questo PC?");
 
 				if (msg.DoModal() == IDOK) {
 					
@@ -156,7 +160,7 @@ DWORD WINAPI _abilitaCIE(
 								#ifdef WIN32
 								SetThreadDesktop(th.hDesk);
 								#endif
-								CVerifica ver(th.progWin);
+								CVerifica ver(th.progWin);	//TODO: progWin should really be set when it really has a value, then it should sync with the callback through a conditional variable 
 								ver.DoModal();
 								return 0;
 							}).detach();
@@ -164,8 +168,7 @@ DWORD WINAPI _abilitaCIE(
 							ias->Callback = [](int prog, const char *desc, void *data) {
 								HWND progWin = *(HWND*)data;
 								if (progWin != nullptr) {
-									//TODO: do something
-									std::cout << desc << std::endl;//SendMessage(progWin, WM_COMMAND, 100 + prog, (LPARAM)desc);
+									SendMessage(progWin, WM_COMMAND, 100 + prog, (LPARAM)desc);
 								}
 							};
 							ias->CallbackData = &progWin;
@@ -175,8 +178,7 @@ DWORD WINAPI _abilitaCIE(
 							DWORD rs = CardAuthenticateEx(&cData, ROLE_USER, FULL_PIN, (BYTE*)pin.PIN, (DWORD)strnlen(pin.PIN, sizeof(pin.PIN)), nullptr, 0, &attempts);
 							if (rs == SCARD_W_WRONG_CHV) {
 								if (progWin != nullptr) {
-									//TODO: do something
-									//SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
+									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 								}
 								std::string num;
 								if (attempts > 0)
@@ -192,8 +194,7 @@ DWORD WINAPI _abilitaCIE(
 							}
 							else if (rs == SCARD_W_CHV_BLOCKED) {
 								if (progWin != nullptr) {
-									//TODO: do something
-									//SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
+									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 								}
 								CMessage msg(MB_OK,
 									"Abilitazione CIE",
@@ -205,8 +206,7 @@ DWORD WINAPI _abilitaCIE(
 								throw logged_error("Autenticazione fallita");
 
 							if (progWin != nullptr) {
-								//TODO: do something
-								std::cout << "Lettura certificato" << std::endl;//SendMessage(progWin, WM_COMMAND, 100 + 4, (LPARAM)"Lettura certificato");
+								SendMessage(progWin, WM_COMMAND, 100 + 4, (LPARAM)"Lettura certificato");
 							}
 
 							ByteDynArray Serial; len = 0;
@@ -224,19 +224,16 @@ DWORD WINAPI _abilitaCIE(
 							hashSet[0xa3] = sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)));
 
 							if (progWin != nullptr) {
-								//TODO: do something
-								std::cout << "Verifica SOD" << std::endl;//SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
+								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
 							}
 							ias->VerificaSOD(SOD, hashSet);
 
 							if (progWin != nullptr) {
-								//TODO: do something
-								std::cout << "Cifratura dati" << std::endl;//SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
+								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
 							}
 							ias->SetCache(PAN, CertCIE, ByteArray((uint8_t*)pin.PIN, 4));
 							if (progWin != nullptr) {
-								//TODO: do something
-								//SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
+								SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
 							}
 
 							Tran.unlock();

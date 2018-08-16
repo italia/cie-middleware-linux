@@ -21,7 +21,7 @@ CMessage::CMessage(DWORD tipo, const char *title, const char *riga1, const char 
 #ifdef WIN32
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 #else
-	std::cout << __FILE__ << ": " << title << std::endl << riga1 << std::endl << riga2 << std::endl << riga3 << std::endl << riga4 << std::endl;
+	//std::cout << __FILE__ << ": " << title << std::endl << riga1 << std::endl << riga2 << std::endl << riga3 << std::endl << riga4 << std::endl;
 #endif
 }
 

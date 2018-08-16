@@ -9,11 +9,18 @@ namespace UIhelper {
 
 enum BackendType {BACKEND_ZENITY=0, BACKEND_KDIALOG=1, BACKEND_NONE=-1};
 
-static int execute(const char *cmdline, char *dataIn, int len)
+static int execute(const char *cmdline, char *dataIn, int len, HWND *wnd=nullptr)
 {
-	FILE *f = popen(cmdline, "r");
-	fgets(dataIn, len, f);
-	return  WEXITSTATUS(pclose(f));
+	FILE *f = popen(cmdline, wnd?"w":"r");
+	if(wnd)
+		*((FILE**)wnd) = f;
+	else
+	{
+		fgets(dataIn, len, f);
+		return  WEXITSTATUS(pclose(f));
+	}
+
+	return 0;
 }
 
 static BackendType getBackend()
@@ -41,6 +48,18 @@ static BackendType getBackend()
 	return BACKEND_NONE;
 }
 
+static void stripCrlf(char *dataIn)
+{
+	int pos;
+
+	do {
+		pos = strlen(dataIn);
+		if(pos > 0 && (dataIn[pos-1] == '\r' || dataIn[pos-1] == '\n'))
+			dataIn[pos-1] = '\0';
+		else break;
+	} while (pos > 0);
+}
+
 INT_PTR makeDualPinDialog(int PinLen, const char *message, const char *message2, const char *message3, const char *title, char *destPin1, char *destPin2)
 {
 	BackendType backend = getBackend();
@@ -57,7 +76,7 @@ INT_PTR makeDualPinDialog(int PinLen, const char *message, const char *message2,
 	       	msg += message3;
 	}
 	const char *cmdLine[] = {
-		"zenity --forms --title=\"%s\" --text=\"%s\" --add-password=\"PIN\" --add-password=\"Conferma PIN\"",
+		"zenity --forms --title=\"%s\" --text=\"%s\" --add-password=\"PIN\" --add-password=\"Conferma PIN\" --width=350 --height=150",
 		"kdialog --title \"%s\" --password \"%s\""
 	};
 	char dataIn[1024];
@@ -85,19 +104,8 @@ INT_PTR makeDualPinDialog(int PinLen, const char *message, const char *message2,
 			destPin1[PinLen] = '\0';
 			destPin2[PinLen] = '\0';
 
-			int pos;
-			do {
-				pos = strlen(destPin1);
-				if(pos > 0 && (destPin1[pos-1] == '\r' || destPin1[pos-1] == '\n'))
-					destPin1[pos-1] = '\0';
-				else break;
-			} while (pos > 0);
-			do {
-				pos = strlen(destPin2);
-				if(pos > 0 && (destPin2[pos-1] == '\r' || destPin2[pos-1] == '\n'))
-					destPin2[pos-1] = '\0';
-				else break;
-			} while (pos > 0);
+			stripCrlf(destPin1);
+			stripCrlf(destPin2);
 
 			return IDOK;
 	}
@@ -121,7 +129,7 @@ INT_PTR makePinDialog(int PinLen, const char *message, const char *message2, con
 	       	msg += message3;
 	}
 	const char *cmdLine[] = {
-		"zenity --entry --title=\"%s\" --text=\"%s\" --hide-text",
+		"zenity --entry --title=\"%s\" --text=\"%s\" --hide-text --width=350 --height=150",
 		"kdialog --title \"%s\" --password \"%s\""
 	};
 	char dataIn[1024];
@@ -136,13 +144,7 @@ INT_PTR makePinDialog(int PinLen, const char *message, const char *message2, con
 		case 0://ok
 			strncpy(destPin, dataIn, PinLen);
 			destPin[PinLen] = '\0';
-			int pos;
-			do {
-				pos = strlen(destPin);
-				if(pos > 0 && (destPin[pos-1] == '\r' || destPin[pos-1] == '\n'))
-					destPin[pos-1] = '\0';
-				else break;
-			} while (pos > 0);
+			stripCrlf(destPin);
 
 			return IDOK;
 	}
@@ -171,9 +173,9 @@ INT_PTR makeMessageDialog(const char *message, const char *message1, const char 
 	       	msg += message3;
 	}
 	const char *cmdLine[][2] = {
-		{"zenity --info --ok-label=\"Ok\" --title=\"%s\" --text=\"%s\"",
+		{"zenity --info --ok-label=\"Ok\" --title=\"%s\" --text=\"%s\" --width=350 --height=150",
 		"kdialog --title \"%s\"  --msgbox \"%s\""},
-		{"zenity --question --ok-label=\"Ok\" --cancel-label=\"Annulla\" --title=\"%s\" --text=\"%s\"",
+		{"zenity --question --ok-label=\"Ok\" --cancel-label=\"Annulla\" --title=\"%s\" --text=\"%s\" --width=350 --height=150",
 		"kdialog --title \"%s\" --warningcontinuecancel \"%s\""}
 	};
 	char dataIn[1024];
@@ -203,11 +205,62 @@ void showPassiveMessage(const char *msg, const char *title)
 	char cmd[300];
 
 	const char *cmdLine[] = {
-		"zenity --error --title=\"%s\" --text=\"%s\"",
+		"zenity --error --title=\"%s\" --text=\"%s\" --width=350 --height=150",
 		"kdialog --title \"%s\" --passivepopup \"%s\" 5"
 	};
 	sprintf(cmd, cmdLine[backend], title, msg);
 	int ret = execute(cmd, dataIn, sizeof(dataIn));
+}
+
+void makeProgressDialog(int steps, HWND *wnd)
+{
+	static std::string handleKdialog;	//these statics mean that you annot open more than one progress box at once
+	static FILE *handleZenity = nullptr;
+
+	BackendType backend = getBackend();
+	if(backend < 0)
+		return;
+
+	switch(backend)
+	{
+		case BACKEND_KDIALOG:
+			*wnd = &handleKdialog;
+			break;
+
+		case BACKEND_ZENITY:
+			*wnd = handleZenity;
+			break;
+	}
+			
+	char dataIn[1024];
+	char cmd[300];
+
+	const char *cmdLine[] = {
+		"zenity --progress --text=\"\" --title=\"\" --percentage=0 --auto-close --no-cancel --width=350 --height=70",
+		"kdialog --progressbar \"\" %d"
+	};
+	sprintf(cmd, cmdLine[backend], steps);
+	int ret = execute(cmd, dataIn, sizeof(dataIn), (backend == BACKEND_ZENITY ? wnd : nullptr));
+	//TODO: check if ret == 0?
+
+	switch(backend)
+	{
+		case BACKEND_KDIALOG:
+		{
+			stripCrlf(dataIn);
+			string handle = string(dataIn);
+
+			sprintf(cmd, "qdbus %s showCancelButton false", dataIn);
+			ret = execute(cmd, dataIn, sizeof(dataIn));
+
+			**(std::string**)wnd = handle;
+		}
+			break;
+
+		case BACKEND_ZENITY:
+			//'wnd' set inside execute()
+			break;
+	}
 }
 
 #if 0
@@ -235,3 +288,54 @@ int main()
 #endif
 
 }
+
+LRESULT WINAPI SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	UIhelper::BackendType backend = UIhelper::getBackend();
+	if(backend < 0)
+		return -1;
+
+	char dataIn[1024];
+	char cmd[300];
+
+	switch(backend)
+	{
+		case UIhelper::BACKEND_KDIALOG:
+		{
+			if((std::string*)hWnd && ((std::string*)hWnd)->length() > 0)
+			{
+				const char *hnd = ((std::string*)hWnd)->c_str();
+				if(wParam == 100+7)
+				{
+					sprintf(cmd, "qdbus %s close", hnd);
+					int ret = UIhelper::execute(cmd, dataIn, sizeof(dataIn));
+
+					return ret;
+				}
+
+				sprintf(cmd, "qdbus %s setLabelText \"%s\"", hnd, lParam);
+				int ret = UIhelper::execute(cmd, dataIn, sizeof(dataIn));
+
+				sprintf(cmd, "qdbus %s Set \"\" value %d", hnd, wParam-100);
+				ret = UIhelper::execute(cmd, dataIn, sizeof(dataIn));
+			}
+		}
+			break;
+
+		case UIhelper::BACKEND_ZENITY:			
+		{
+			FILE *f = (FILE*)hWnd;
+			if(f)
+			{
+				fprintf(f, "%d\n# %s\n", (wParam-100)*100/7, lParam);
+				fflush(f);
+				if(wParam == 100+7)
+					pclose(f);
+			}
+		}
+			break;
+	}
+
+	return 0;
+}
+

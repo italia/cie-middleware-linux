@@ -19,7 +19,7 @@ CPin::CPin(int PinLen, const char *message, const char *message2, const char *me
 	this->repeat = repeat;
 	this->PinLen = PinLen;
 
-	std::cout << __FILE__ << ": " << title << std::endl << message << std::endl << message2 << std::endl << message3 << std::endl << "Repeat: " << repeat << std::endl << "PinLen: " << PinLen << std::endl;
+	//std::cout << __FILE__ << ": " << title << std::endl << message << std::endl << message2 << std::endl << message3 << std::endl << "Repeat: " << repeat << std::endl << "PinLen: " << PinLen << std::endl;
 }
 
 CPin::~CPin()

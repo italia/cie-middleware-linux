@@ -1,9 +1,11 @@
 #pragma once
 
+#define StatusWord uint16_t
+
+#ifndef WIN32
 #include <iostream>
 #include "funccallinfo.h"
 
-#define StatusWord uint16_t
 using PCSTR = const char*;
 using HRESULT = uint32_t;
 using LRESULT = long;
@@ -22,13 +24,9 @@ using NOTIFYICONDATA = void*;
 using LPRECT = void*;
 using ATOM = void*;
 
-#ifdef WIN32
-  #define PATH_SEPARATOR	'\\'
-  #define PATH_SEPARATOR_STR	"\\"
-#else
-  #define PATH_SEPARATOR	'/'
-  #define PATH_SEPARATOR_STR	"/"
-#endif
+#define PATH_SEPARATOR		'/'
+#define PATH_SEPARATOR_STR	"/"
+
 #define LOBYTE(W)	((uint8_t)(W&0xFF))
 #define HIBYTE(W)	((uint8_t)((W>>8)&0xFF))
 #define GetLastError()	-1
@@ -50,6 +48,7 @@ using ATOM = void*;
 #define E_UNEXPECTED	0x8000FFFF
 
 #define WM_APP		0
+#define WM_COMMAND	0x0111
 
 #define ERROR_SUCCESS			0
 #define ERROR_CANCELLED			1223
@@ -60,6 +59,11 @@ using ATOM = void*;
 #else
 	#define OutputDebugString(s)
 #endif
+
+#else
+  #define PATH_SEPARATOR	'\\'
+  #define PATH_SEPARATOR_STR	"\\"
+#endif //WIN32
 
 #define ERR_CARD_FILE_DEACTIVATED		0x6283
 #define ERR_CARD_FILE_TERMINATED		0x6285

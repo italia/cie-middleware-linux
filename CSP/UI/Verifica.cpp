@@ -9,8 +9,8 @@ CVerifica::CVerifica(HWND *wnd)
 {
 #ifdef WIN32
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
-	this->wnd = wnd;
 #endif
+	this->wnd = wnd;
 }
 
 CVerifica::~CVerifica()
@@ -109,6 +109,7 @@ LRESULT CVerifica::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bH
 #ifndef WIN32
 INT_PTR CVerifica::DoModal()
 {
+	UIhelper::makeProgressDialog(7, wnd);
 	return IDOK;
 }
 #endif
