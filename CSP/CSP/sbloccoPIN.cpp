@@ -116,7 +116,7 @@ DWORD WINAPI _sbloccoPIN(
 							else if (ris == SCARD_W_CHV_BLOCKED) {
 								CMessage msg(MB_OK,
 									"Sblocco PIN",
-									"Il PUK è bloccato. La CIE non può più essere sbloccata");
+									"Il PUK e' bloccato. La CIE non può più essere sbloccata");
 								msg.DoModal();
 								if (threadId != 0) {
 									//TODO: do something
@@ -128,7 +128,7 @@ DWORD WINAPI _sbloccoPIN(
 								throw logged_error("Autenticazione fallita");
 
 							CMessage msg(MB_OK, "Sblocco PIN",
-								"Il PIN è stato sbloccato correttamente");
+								"Il PIN e' stato sbloccato correttamente");
 							msg.DoModal();
 							if (threadId != 0) {
 								//TODO: do something
@@ -139,7 +139,7 @@ DWORD WINAPI _sbloccoPIN(
 							std::string dump;
 							OutputDebugString(ex.what());
 							CMessage msg(MB_OK, "Sblocco PIN",
-								"Si è verificato un errore nella verifica del PUK");
+								"Si e' verificato un errore nella verifica del PUK");
 							msg.DoModal();
 							if (threadId != 0) {
 								//TODO: do something
@@ -174,8 +174,8 @@ DWORD WINAPI _sbloccoPIN(
 		SCardFreeMemory(hSC, readers);
 	}
 	catch (std::exception &ex) {		
-		//MessageBox(nullptr, "Si è verificato un errore nella verifica di autenticità del documento", "CIE", MB_OK);
-		CMessage msg(MB_OK, "CIE", "Si è verificato un errore nella verifica di autenticità del documento");
+		//MessageBox(nullptr, "Si e' verificato un errore nella verifica di autenticita' del documento", "CIE", MB_OK);
+		CMessage msg(MB_OK, "CIE", "Si e' verificato un errore nella verifica di autenticita' del documento");
 		msg.DoModal();
 	}
 

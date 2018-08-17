@@ -102,7 +102,7 @@ bool CacheExists(const char *PAN) {
 void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
 {
 	if (PAN == nullptr)
-		throw logged_error("Il PAN è necessario");
+		throw logged_error("Il PAN e' necessario");
 
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
@@ -129,7 +129,7 @@ void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
 
 void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 	if (PAN == nullptr)
-		throw logged_error("Il PAN è necessario");
+		throw logged_error("Il PAN e' necessario");
 
 	char szPath[MAX_PATH];
 	GetCardPath(PAN, szPath);
@@ -152,7 +152,7 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 
 void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, uint8_t *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
-		throw logged_error("Il PAN è necessario");
+		throw logged_error("Il PAN e' necessario");
 
 	auto szDir=GetCardDir();
 	char chDir[MAX_PATH];

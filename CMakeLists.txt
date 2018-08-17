@@ -9,15 +9,18 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__ -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__ -O0")
 
-set( PKCS11_HEADERS PKCS11/linux.h PKCS11/pkcs11f.h PKCS11/pkcs11.h PKCS11/pkcs11t.h )
-set( EXAMPLEPKCS11_SOURCES EsempioPKCS11/EsempioPKCS11.cpp )
-
 #find PCSClite library
 find_path(PCSCLITE_INCLUDE pcsclite.h WinSCard.h
 	HINTS ${PC_PCSC_INCLUDEDIR} ${PC_PCSC_INCLUDE_DIRS}
 	PATH_SUFFIXES PCSC)
 find_library(PCSCLITE_LIBRARY NAMES PCSC WinSCard pcsclite 
 	HINTS ${PC_PCSC_LIBDIR} ${PC_PCSC_LIBRARY_DIRS})
+
+set( PKCS11_HEADERS PKCS11/linux.h PKCS11/pkcs11f.h PKCS11/pkcs11.h PKCS11/pkcs11t.h )
+set( EXAMPLEPKCS11_SOURCES EsempioPKCS11/EsempioPKCS11.cpp )
+set( CIEUNLOCKPIN_SOURCES Utils/sbloccopin.cpp )
+set( CIECHANGEPIN_SOURCES Utils/cambiopin.cpp )
+set( UTILS_HEADERS CSP/Util CSP/UI CSP/CSP ${PCSCLITE_INCLUDE} )
 
 #find OpenSSL library
 find_package(OpenSSL REQUIRED)
@@ -58,5 +61,11 @@ install(FILES ${CMAKE_BINARY_DIR}/ciepki.pc
 
 
 add_executable(EsempioPKCS11 ${EXAMPLEPKCS11_SOURCES} ${PKCS11_HEADERS})
+add_executable(cieunlockpin ${CIEUNLOCKPIN_SOURCES} ${UTILS_HEADERS})
+add_executable(ciechangepin ${CIECHANGEPIN_SOURCES} ${UTILS_HEADERS})
+target_include_directories(cieunlockpin PRIVATE ${UTILS_HEADERS})
+target_include_directories(ciechangepin PRIVATE ${UTILS_HEADERS})
 target_link_libraries(ciepki ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} OpenSSL::Crypto ciecache Threads::Threads)
 target_link_libraries(EsempioPKCS11 ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} OpenSSL::Crypto Threads::Threads)
+target_link_libraries(cieunlockpin ciepki)
+target_link_libraries(ciechangepin ciepki)

@@ -76,7 +76,7 @@ DWORD WINAPI _cambioPIN() {
 		switch (ris) {
 		case SCARD_S_SUCCESS:
 		{
-			CMessage msg(MB_OK, "Cambio PIN", "Il PIN è stato cambiato correttamente");
+			CMessage msg(MB_OK, "Cambio PIN", "Il PIN e' stato cambiato correttamente");
 			msg.DoModal();
 			return;
 		}
@@ -99,7 +99,7 @@ DWORD WINAPI _cambioPIN() {
 		}
 		case SCARD_W_CHV_BLOCKED:
 		{
-			CMessage msg(MB_OK, "Cambio PIN", "Il PIN è bloccato");
+			CMessage msg(MB_OK, "Cambio PIN", "Il PIN e' bloccato");
 			msg.DoModal();
 			return;
 		}
