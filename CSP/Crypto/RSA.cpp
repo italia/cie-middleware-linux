@@ -1,10 +1,13 @@
 #include "../StdAfx.h"
 #include "RSA.h"
+
+#ifndef _WIN32
 #include <openssl/bn.h>
+#endif
 
 static const char *szCompiledFile=__FILE__;
 
-#ifdef WIN32
+#ifdef _WIN32
 
 class init_rsa {
 public:

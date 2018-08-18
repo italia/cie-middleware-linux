@@ -1,10 +1,12 @@
 #include "../StdAfx.h"
 #include "sha512.h"
+#ifndef _WIN32
 #include <openssl/sha.h>
+#endif
 
 static const char *szCompiledFile=__FILE__;
 
-#ifdef WIN32
+#ifdef _WIN32
 
 class init_sha512 {
 public:

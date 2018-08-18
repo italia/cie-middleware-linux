@@ -1,9 +1,11 @@
 #pragma once
 
-//#include <windows.h>
-//#include <atlbase.h>
-//#include <atlhost.h>
-//#include <atlstr.h>
+#ifdef _WIN32
+#include <windows.h>
+#include <atlbase.h>
+#include <atlhost.h>
+#include <atlstr.h>
+#endif
 #include <stdint.h> 
 #include <winscard.h>
 #include "Util/defines.h"

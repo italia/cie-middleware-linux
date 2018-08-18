@@ -1,5 +1,5 @@
 #pragma once
-#ifdef WIN32
+#ifdef _WIN32
 #include <bcrypt.h>
 #else
 #include <openssl/des.h>

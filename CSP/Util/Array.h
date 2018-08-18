@@ -10,11 +10,11 @@
 #include <stdexcept>
 #include <string>
 #include <cstdint>
-/*#undef min
+#ifdef _WIN32
 #ifndef min
 #define min(a,b) ((a)<(b)) ? (a) : (b)
 #endif
-*/
+#endif
 class ByteArray;
 class ByteDynArray;
 

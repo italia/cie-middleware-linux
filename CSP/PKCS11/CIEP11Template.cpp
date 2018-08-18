@@ -5,13 +5,15 @@
 #include "../Crypto/ASNParser.h"
 #include <stdio.h>
 #include <cstring>
-#include <time.h>
 #include "../Crypto/AES.h"
 #include "../PCSC/PCSC.h"
+#ifndef _WIN32
+#include <time.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#endif
 
 using std::unique_ptr;
 
@@ -19,9 +21,9 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 	if (apduSize == 2) {
 		WORD code = *(WORD*)apdu;
 		if (code == 0xfffd) {
-			int bufLen = *respSize;
+			size_t bufLen = *respSize;
 			*respSize = sizeof(data->hCard)+2;
-			memcpy(resp, &data->hCard, sizeof(data->hCard));
+			memcpy_s(resp, bufLen, &data->hCard, sizeof(data->hCard));
 			resp[sizeof(data->hCard)] = 0;
 			resp[sizeof(data->hCard) + 1] = 0;
 
@@ -130,17 +132,28 @@ void CIEtemplateInitSession(void *pTemplateData){
 		CK_BBOOL vtrue = TRUE;
 		CK_BBOOL vfalse = FALSE;
 
+	      #ifdef _WIN32
+		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
+	      #else
 		BYTE *p = (BYTE*)certRaw.data();
 		const BYTE* cp = p;  
-		unique_ptr<X509,std::function<void(X509*)>> certDS{d2i_X509(nullptr, &cp, GetASN1DataLenght(certRaw)), [](X509* val){ X509_free(val);}};
-		//PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
+		unique_ptr<X509,std::function<void(X509*)>> certDS{d2i_X509(nullptr, &cp, GetASN1DataLenght(certRaw)), [](X509* val){ X509_free(val);}};		
+	      #endif
 		if (certDS != nullptr) {
-			//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
+		      #ifdef _WIN32
+			auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
+		      #endif
 
 			cie->pubKey = std::make_shared<CP11PublicKey>(cie);
 			cie->privKey = std::make_shared<CP11PrivateKey>(cie);
 			cie->cert = std::make_shared<CP11Certificate>(cie);
 
+		      #ifdef _WIN32
+			CASNParser keyParser;
+			keyParser.Parse(ByteArray(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData));
+			auto Module = SkipZero(keyParser.tags[0]->tags[0]->content);
+			auto Exponent = SkipZero(keyParser.tags[0]->tags[1]->content);
+		      #else
 			/*char pubkey_algoname[PUBKEY_ALGO_LEN];
 			int pubkey_algonid = OBJ_obj2nid(cert->cert_info->key->algor->algorithm);
 			if (pubkey_algonid == NID_undef) {
@@ -152,16 +165,13 @@ void CIEtemplateInitSession(void *pTemplateData){
 			strncpy(buf, sslbuf, PUBKEY_ALGO_LEN);
 		       	if (pubkey_algonid == NID_rsaEncryption || pubkey_algonid == NID_dsa) {...) */
 
-			unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(certDS.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
-			//IFNULL_FAIL(pkey, "unable to extract public key from certificate");
-		#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(certDS.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};			
+		       #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		        RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());
-		#else
+		       #else
 			RSA *rsa_key = pkey->pkey.rsa;
-		#endif
-
-			//CASNParser keyParser;
-			//keyParser.Parse(ByteArray(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData));
+		       #endif
+			
 			BYTE *n_b = new BYTE[RSA_size(rsa_key)];	//TODO: are these really RSA_size()?
 			BYTE *e_b = new BYTE[RSA_size(rsa_key)];
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -177,10 +187,11 @@ void CIEtemplateInitSession(void *pTemplateData){
 			ByteArray bArr_e(e_b, e_size);
 			ByteDynArray bArrN{bArr_n};
 			ByteDynArray bArrE{bArr_e};
-			auto Module = SkipZero(bArrN);		//keyParser.tags[0]->tags[0]->content);
-			auto Exponent = SkipZero(bArrE);	//keyParser.tags[0]->tags[1]->content);
+			auto Module = SkipZero(bArrN);
+			auto Exponent = SkipZero(bArrE);
 			delete[] n_b;
 			delete[] e_b;
+		      #endif
 			CK_LONG keySizeBits = (CK_LONG)Module.size() * 8;
 			cie->pubKey->addAttribute(CKA_LABEL, VarToByteArray(label));
 			cie->pubKey->addAttribute(CKA_ID, VarToByteArray(label));
@@ -208,27 +219,33 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->cert->addAttribute(CKA_ID, VarToByteArray(label));
 			cie->cert->addAttribute(CKA_PRIVATE, VarToByteArray(vfalse));
 			cie->cert->addAttribute(CKA_TOKEN, VarToByteArray(vtrue));
-			cie->cert->addAttribute(CKA_VALUE, ByteArray(p, GetASN1DataLenght(certRaw)/*certDS->pbCertEncoded, certDS->cbCertEncoded*/));
+		      #ifdef _WIN32
+			cie->cert->addAttribute(CKA_VALUE, ByteArray(certDS->pbCertEncoded, certDS->cbCertEncoded));
+			cie->cert->addAttribute(CKA_ISSUER, ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
+			cie->cert->addAttribute(CKA_SERIAL_NUMBER, ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData));
+			cie->cert->addAttribute(CKA_SUBJECT, ByteArray(certDS->pCertInfo->Subject.pbData, certDS->pCertInfo->Subject.cbData));
+		      #else
+			cie->cert->addAttribute(CKA_VALUE, ByteArray(p, GetASN1DataLenght(certRaw)));
 			BYTE *pder, *tmpPder;	
 			size_t pderlen = i2d_X509_NAME(X509_get_issuer_name(certDS.get()), nullptr);
 			tmpPder = pder = new BYTE[pderlen];
 			i2d_X509_NAME(X509_get_issuer_name(certDS.get()), &tmpPder);
-			ByteArray arrIssuer{pder, pderlen/*certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData*/};
+			ByteArray arrIssuer{pder, pderlen};
 			ByteDynArray dynIssuer{arrIssuer};
 			cie->cert->addAttribute(CKA_ISSUER, dynIssuer);
 			delete[] pder;
 
 			ASN1_INTEGER *serial = X509_get_serialNumber(certDS.get()); 
 			BIGNUM *bn = ASN1_INTEGER_to_BN(serial, NULL);
-#if false
+		       #if false
 			int n = BN_num_bytes(bn);
 			tmpPder = pder = new BYTE[n];
 			pderlen = BN_bn2bin(bn, pder);
-#else
+		       #else
 			pderlen = i2d_ASN1_INTEGER(serial, nullptr);
 			tmpPder = pder = new BYTE[pderlen];
 			i2d_ASN1_INTEGER(serial, &tmpPder);
-#endif
+		       #endif
 			ByteArray serArr{pder, pderlen};
 			ByteDynArray ser{serArr};
 			cie->cert->addAttribute(CKA_SERIAL_NUMBER, ser);
@@ -238,16 +255,29 @@ void CIEtemplateInitSession(void *pTemplateData){
 			pderlen = i2d_X509_NAME(X509_get_subject_name(certDS.get()), nullptr);
 			tmpPder = pder = new BYTE[pderlen];
 			i2d_X509_NAME(X509_get_subject_name(certDS.get()), &tmpPder);
-			ByteArray arrSubject{pder, pderlen/*certDS->pCertInfo->Subject.pbData, certDS->pCertInfo->Subject.cbData*/};
+			ByteArray arrSubject{pder, pderlen};
 			ByteDynArray dynSubject{arrSubject};
 			cie->cert->addAttribute(CKA_SUBJECT, dynSubject);
 			delete[] pder;
+		      #endif
 
 			CK_CERTIFICATE_TYPE certx509 = CKC_X_509;
 			cie->cert->addAttribute(CKA_CERTIFICATE_TYPE, VarToByteArray(certx509));
 			CK_DATE start, end;
-			//SYSTEMTIME sFrom, sTo;
 			char temp[10];
+		      #ifdef _WIN32
+			SYSTEMTIME sFrom, sTo;			
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotBefore, &sFrom))
+				throw logged_error("Errore nella data di inizio validita' certificato");
+			if (!FileTimeToSystemTime(&certDS->pCertInfo->NotAfter, &sTo))
+				throw logged_error("Errore nella data di fine validita' certificato");
+			sprintf_s(temp, "%04i", sFrom.wYear); VarToByteArray(start.year).copy(ByteArray((BYTE*)temp, 4));
+			sprintf_s(temp, "%02i", sFrom.wMonth); VarToByteArray(start.month).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sFrom.wDay); VarToByteArray(start.day).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%04i", sTo.wYear); VarToByteArray(end.year).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sTo.wMonth); VarToByteArray(end.month).copy(ByteArray((BYTE*)temp, 2));
+			sprintf_s(temp, "%02i", sTo.wDay); VarToByteArray(end.day).copy(ByteArray((BYTE*)temp, 2));
+		      #else						
 			ASN1_TIME *not_before = X509_get_notBefore(certDS.get());
 			ASN1_TIME *not_after = X509_get_notAfter(certDS.get());
 
@@ -273,6 +303,7 @@ void CIEtemplateInitSession(void *pTemplateData){
 			cie->cert->addAttribute(CKA_END_DATE, VarToByteArray(end));
 
 			ASN1_TIME_free(epoch);
+		      #endif
 
 			cie->slot.AddP11Object(cie->cert);
 		}

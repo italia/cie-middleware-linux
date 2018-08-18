@@ -2,7 +2,7 @@
 #define _WIN32_IE 0x0501
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <ShellAPI.h>
 #endif
 
@@ -17,13 +17,13 @@ class CSystemTray
 {
 // Construction/destruction
 public:
-    CSystemTray(){};
+    CSystemTray();
     CSystemTray(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage, 
               LPCTSTR szTip, HICON icon, UINT uID, 
               BOOL bhidden = false,
               LPCTSTR szBalloonTip = NULL, LPCTSTR szBalloonTitle = NULL, 
-      DWORD dwBalloonIcon = NIIF_NONE, UINT uBalloonTimeout = 10){std::cout << __FILE__ << ": " << szBalloonTitle << std::endl << szBalloonTip << std::endl;}
-    virtual ~CSystemTray() {};
+              DWORD dwBalloonIcon = NIIF_NONE, UINT uBalloonTimeout = 10);
+    virtual ~CSystemTray();
 
 // Operations
 public:
@@ -34,70 +34,70 @@ public:
     BOOL Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage, LPCTSTR szTip,
 		   HICON icon, UINT uID, BOOL bHidden = false,
            LPCTSTR szBalloonTip = NULL, LPCTSTR szBalloonTitle = NULL, 
-           DWORD dwBalloonIcon = NIIF_NONE, UINT uBalloonTimeout = 10){return 0;}
+           DWORD dwBalloonIcon = NIIF_NONE, UINT uBalloonTimeout = 10);
 
     // Change or retrieve the Tooltip text
-    BOOL   SetTooltipText(LPCTSTR pszTooltipText){return 0;}
-    BOOL   SetTooltipText(UINT nID){return 0;}
-    LPTSTR GetTooltipText() const {return "--- tooltip ---";}
+    BOOL   SetTooltipText(LPCTSTR pszTooltipText);
+    BOOL   SetTooltipText(UINT nID);
+    LPTSTR GetTooltipText() const;
 
     // Change or retrieve the icon displayed
-    BOOL  SetIcon(HICON hIcon){return 0;}
-    BOOL  SetIcon(LPCTSTR lpszIconName){return 0;}
-    BOOL  SetIcon(UINT nIDResource){return 0;}
-    BOOL  SetStandardIcon(LPCTSTR lpIconName){return 0;}
-    BOOL  SetStandardIcon(UINT nIDResource){return 0;}
-    HICON GetIcon() const{return nullptr;}
+    BOOL  SetIcon(HICON hIcon);
+    BOOL  SetIcon(LPCTSTR lpszIconName);
+    BOOL  SetIcon(UINT nIDResource);
+    BOOL  SetStandardIcon(LPCTSTR lpIconName);
+    BOOL  SetStandardIcon(UINT nIDResource);
+    HICON GetIcon() const;
 
-    void  SetFocus(){}
-    BOOL  HideIcon(){return 0;}
-    BOOL  ShowIcon(){return 0;}
-    BOOL  AddIcon(){return 0;}
-    BOOL  RemoveIcon(){return 0;}
+    void  SetFocus();
+    BOOL  HideIcon();
+    BOOL  ShowIcon();
+    BOOL  AddIcon();
+    BOOL  RemoveIcon();
 
     BOOL ShowBalloon(LPCTSTR szText, LPCTSTR szTitle = NULL,
-                     DWORD dwIcon = NIIF_NONE, UINT uTimeout = 10){std::cout << __FILE__ << ": " << szTitle << std::endl << szText << std::endl;return 0;}
+                     DWORD dwIcon = NIIF_NONE, UINT uTimeout = 10);
 
     // Change or retrieve the window to send icon notification messages to
-    BOOL  SetNotificationWnd(HWND hNotifyWnd){return 0;}
-    HWND  GetNotificationWnd() const{return nullptr;}
+    BOOL  SetNotificationWnd(HWND hNotifyWnd);
+    HWND  GetNotificationWnd() const;
 
     // Change or retrieve the window to send menu commands to
-    BOOL  SetTargetWnd(HWND hTargetWnd){return 0;}
-    HWND  GetTargetWnd() const{return nullptr;}
+    BOOL  SetTargetWnd(HWND hTargetWnd);
+    HWND  GetTargetWnd() const;
 
     // Change or retrieve  notification messages sent to the window
-    BOOL  SetCallbackMessage(UINT uCallbackMessage){return 0;}
-    UINT  GetCallbackMessage() const{return 0;}
+    BOOL  SetCallbackMessage(UINT uCallbackMessage);
+    UINT  GetCallbackMessage() const;
 
     HWND  GetSafeHwnd() const  { return (this)? m_hWnd : NULL; }
 
-	// Static functions
+    // Static functions
 public:
-    static void MinimiseToTray(HWND hWnd){}
-    static void MaximiseFromTray(HWND hWnd){}
+    static void MinimiseToTray(HWND hWnd);
+    static void MaximiseFromTray(HWND hWnd);
 
 public:
     // Default handler for tray notification message
 	void(*TrayNotification)(CSystemTray* tray ,WPARAM uID, LPARAM lEvent);
 	void(*TrayBaloonTimeout)(CSystemTray* tray);
-	virtual LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent){return 0;}
+	virtual LRESULT OnTrayNotification(WPARAM uID, LPARAM lEvent);
 
 // Overrides
     // ClassWizard generated virtual function overrides
     //{{AFX_VIRTUAL(CSystemTray)
-	//}}AFX_VIRTUAL
+    //}}AFX_VIRTUAL
 
 // Static callback functions and data
 public:
-    static LRESULT PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){return 0;}
+    static LRESULT PASCAL WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     static CSystemTray* m_pThis;
 
 // Implementation
 protected:
-    void Initialise(){}
-    void InstallIconPending(){}
-    ATOM RegisterClass(HINSTANCE hInstance){}
+    void Initialise();
+    void InstallIconPending();
+    ATOM RegisterClass(HINSTANCE hInstance);
 
 // Implementation
 protected:
@@ -118,19 +118,19 @@ protected:
 
 // Static data
 protected:
-    static BOOL RemoveTaskbarIcon(HWND hWnd){return 0;}
+    static BOOL RemoveTaskbarIcon(HWND hWnd);
 
     static UINT  m_nMaxTooltipLength;
     static const UINT m_nTaskbarCreatedMsg;
     static HWND  m_hWndInvisible;
 
-    static BOOL GetW2K(){}
-    static void GetTrayWndRect(LPRECT lprect){}
+    static BOOL GetW2K();
+    static void GetTrayWndRect(LPRECT lprect);
 
 // message map functions
 public:
-    LRESULT OnTaskbarCreated(WPARAM wParam, LPARAM lParam){return 0;}
-    LRESULT OnSettingChange(UINT uFlags, LPCTSTR lpszSection){return 0;}
+    LRESULT OnTaskbarCreated(WPARAM wParam, LPARAM lParam);
+    LRESULT OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 };
 
 

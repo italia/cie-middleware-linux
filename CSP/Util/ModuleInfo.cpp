@@ -10,7 +10,11 @@ CModuleInfo::CModuleInfo()
 
 HANDLE CModuleInfo::getApplicationModule()
 {
+#ifdef _WIN32
+	return (HANDLE)GetModuleHandle(NULL);
+#else
 	return nullptr;
+#endif
 }
 
 HANDLE CModuleInfo::getModule() {
@@ -20,7 +24,7 @@ HANDLE CModuleInfo::getModule() {
 void CModuleInfo::init(HANDLE module)
 {
 	this->module = module;
-#ifdef WIN32
+#ifdef _WIN32
 	char path[MAX_PATH];
 	if (GetModuleFileName((HMODULE)module,path,MAX_PATH)==0)
 		throw windows_error(GetLastError());

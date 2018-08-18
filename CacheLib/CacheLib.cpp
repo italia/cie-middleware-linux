@@ -1,4 +1,4 @@
-﻿#ifdef WIN32
+﻿#ifdef _WIN32
 #include "stdafx.h"
 #include "sddl.h"
 #include "Aclapi.h"
@@ -27,6 +27,7 @@
 
 std::string commonData;
 
+#ifndef _WIN32
 bool CreateDirectory(const char *chDir, void *flags)
 {
 	const int dir_err = mkdir(chDir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -38,13 +39,14 @@ bool PathFileExists(const char *path)
 	struct stat buffer;
 	return (stat(path, &buffer) == 0);
 }
+#endif
 
 std::string GetCardDir() 
 {
 	int status = 0;
 	if (commonData[0] == 0) {
 		char szPath[MAX_PATH];
-#ifdef WIN32
+#ifdef _WIN32
 		ExpandEnvironmentStrings("%PROGRAMDATA%\\CIEPKI", szPath, MAX_PATH);
 #else
 		const char *temp = getenv("CIEDIR");
@@ -71,12 +73,12 @@ std::string GetCardDir()
 		else {
 			status = -3;
 		}
-#endif
+
 		if (status != 0) {
 			OutputDebugString("CIEPKI base directory cannot be found. Please set CIEDIR env variable or make sure your user has a home.");
 		   	strcpy(szPath, "");
 		}
-
+#endif		
 		commonData = szPath;
 	}
 	return commonData;
@@ -90,7 +92,7 @@ void GetCardPath(const char *PAN, char szPath[MAX_PATH]) {
 
 	Path += std::string(PAN);
 	Path += ".cache";
-	strncpy(szPath, Path.c_str(), MAX_PATH);
+	strcpy_s(szPath, MAX_PATH, Path.c_str());
 }
 
 bool CacheExists(const char *PAN) {
@@ -156,7 +158,11 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 
 	auto szDir=GetCardDir();
 	char chDir[MAX_PATH];
+#ifdef _WIN32
+	strcpy_s(chDir, szDir.c_str());
+#else
 	strcpy(chDir, szDir.c_str());
+#endif
 
 	if (!PathFileExists(chDir)) {
 		
@@ -164,7 +170,7 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 		//Edge gira in low integrity quindi non potrà scrivere (enrollare) ma solo leggere il certificato
 		bool done = false;
 		CreateDirectory(chDir, nullptr);
-#ifdef WIN32
+#ifdef _WIN32
 		if (IsWindows8OrGreater()) {
 			PACL pOldDACL = nullptr, pNewDACL = nullptr;
 			PSECURITY_DESCRIPTOR pSD = nullptr;

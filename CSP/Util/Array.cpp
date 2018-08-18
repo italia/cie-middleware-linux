@@ -1,6 +1,6 @@
 #include "Array.h"
 #include <fstream>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <bcrypt.h>
 #else
@@ -93,13 +93,13 @@ bool ByteArray::operator!=(const ByteArray &src) const {
 void ByteArray::copy(const ByteArray &src, size_t start) {
 	if (src._size + start>_size)
 		throw logged_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + start, _size));
-	::memcpy(_data + start, src._data, min(_size - (start), src._size));
+	::memcpy_s(_data + start, _size - (start), src._data, src._size);
 }
 
 void ByteArray::rightcopy(const ByteArray &src, size_t end) {
 	if (src._size + end>_size)
 		throw logged_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + end, _size));
-	::memcpy(_data + _size - end - src._size, src._data, min((end + src._size), src._size));
+	::memcpy_s(_data + _size - end - src._size, (end + src._size), src._data, src._size);
 }
 
 ByteArray &ByteArray::fill(const uint8_t value) {
@@ -129,7 +129,7 @@ ByteArray &ByteArray::random() {
 class init_rnd {
 public:
 	void initRand() {
-#ifdef WIN32
+#ifdef _WIN32
 		SYSTEMTIME tm;
 		GetSystemTime(&tm);
 #else
@@ -263,7 +263,7 @@ void ByteDynArray::resize(size_t size, bool bKeepData) {
 		uint8_t* pbtNewData = new uint8_t[size];
 		size_t dwMinSize = min(size, _size);
 		if (dwMinSize>0)
-			memcpy(pbtNewData, _data, min(size, dwMinSize));
+			memcpy_s(pbtNewData, size, _data, dwMinSize);
 		clear();
 		_data = pbtNewData;
 		_size = size;

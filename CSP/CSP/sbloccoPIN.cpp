@@ -1,6 +1,6 @@
 #include "../StdAfx.h"
-#include <thread>
 #include <winscard.h>
+#include "../PCSC/PCSC.h"
 #include <reader.h>
 #include "IAS.h"
 #include "CSP.h"
@@ -12,15 +12,24 @@
 #include "CardMod.h"
 #include "../UI/SystemTray.h"
 #include "../UI/safeDesktop.h"
-#include "../PCSC/PCSC.h"
-#ifdef WIN32
-#include <atlbase.h>
+#include <string>
+#ifdef __linux__
+	#include "../Util/defines.h"
+	#include "../Util/funccallinfo.h"
+	#include "helper.h"	
+#elif defined(_WIN32)
+	#include <atlbase.h>
 #endif
+#include "sbloccoPIN.h"
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
 
-#include "sbloccoPIN.h"
+#ifdef _WIN64
+#pragma comment(linker, "/export:SbloccoPIN")
+#else
+#pragma comment(linker, "/export:SbloccoPIN=_SbloccoPIN@16")
+#endif
 
 DWORD WINAPI _sbloccoPIN(
 	DWORD threadId) {
@@ -64,9 +73,15 @@ DWORD WINAPI _sbloccoPIN(
 					len = SCARD_AUTOALLOCATE;
 					cData.hScard = conn;
 					SCardGetAttrib(cData.hScard, SCARD_ATTR_ATR_STRING, (BYTE*)&cData.pbAtr, &len);
+				      #ifdef _WIN32
+					cData.pfnCspAlloc = (PFN_CSP_ALLOC)CryptMemAlloc;
+					cData.pfnCspReAlloc = (PFN_CSP_REALLOC)CryptMemRealloc;
+					cData.pfnCspFree = (PFN_CSP_FREE)CryptMemFree;
+				      #elif defined(__linux__)
 					cData.pfnCspAlloc = (PFN_CSP_ALLOC)malloc;//CryptMemAlloc;	//TODO: are there more secure alternatives?
 					cData.pfnCspReAlloc = (PFN_CSP_REALLOC)realloc;//CryptMemRealloc;
 					cData.pfnCspFree = (PFN_CSP_FREE)free;//CryptMemFree;
+				      #endif
 					cData.cbAtr = len;
 					cData.pwszCardName = L"CIE";
 					auto isCIE = CardAcquireContext(&cData, 0);
@@ -108,8 +123,11 @@ DWORD WINAPI _sbloccoPIN(
 									"prima di bloccare il PUK");
 								msg.DoModal();
 								if (threadId != 0) {
+									#ifdef _WIN32
+									PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+									#else
 									//TODO: do something
-									//PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+									#endif
 								}
 								break;
 							}
@@ -119,8 +137,11 @@ DWORD WINAPI _sbloccoPIN(
 									"Il PUK e' bloccato. La CIE non può più essere sbloccata");
 								msg.DoModal();
 								if (threadId != 0) {
+									#ifdef _WIN32
+									PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+									#else
 									//TODO: do something
-									//PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+									#endif
 								}
 								break;
 							}
@@ -131,8 +152,11 @@ DWORD WINAPI _sbloccoPIN(
 								"Il PIN e' stato sbloccato correttamente");
 							msg.DoModal();
 							if (threadId != 0) {
+								#ifdef _WIN32
+								PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+								#else
 								//TODO: do something
-								//PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+								#endif
 							}
 						}
 						catch (std::exception &ex) {
@@ -142,19 +166,28 @@ DWORD WINAPI _sbloccoPIN(
 								"Si e' verificato un errore nella verifica del PUK");
 							msg.DoModal();
 							if (threadId != 0) {
+								#ifdef _WIN32
+								PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+								#else
 								//TODO: do something
-								//PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+								#endif
 							}
 							break;
 						}
 					}
 					else if (threadId != 0) {
+							#ifdef _WIN32
+							PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+							#else
 							//TODO: do something
-							//PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+							#endif
 					}
 				} else if (threadId != 0) {
+						#ifdef _WIN32
+						PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+						#else
 						//TODO: do something
-						//PostThreadMessage(threadId, WM_COMMAND, 1, 0);
+						#endif
 				}
 				break;
 			}
@@ -167,14 +200,16 @@ DWORD WINAPI _sbloccoPIN(
 				"nei lettori di smart card");
 			msg.DoModal();
 			if (threadId != 0) {
+				#ifdef _WIN32
+				PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+				#else
 				//TODO: do something
-				//PostThreadMessage(threadId, WM_COMMAND, 0, 0);
+				#endif
 			}
 		}
 		SCardFreeMemory(hSC, readers);
 	}
-	catch (std::exception &ex) {		
-		//MessageBox(nullptr, "Si e' verificato un errore nella verifica di autenticita' del documento", "CIE", MB_OK);
+	catch (std::exception &ex) {				
 		CMessage msg(MB_OK, "CIE", "Si e' verificato un errore nella verifica di autenticita' del documento");
 		msg.DoModal();
 	}
@@ -185,26 +220,26 @@ DWORD WINAPI _sbloccoPIN(
 }
 
 void TrayNotification(CSystemTray* tray, WPARAM uID, LPARAM lEvent) {
-#ifdef WIN32
+      #ifdef _WIN32
 	if (lEvent == WM_LBUTTONUP || lEvent== 0x405) {
 		std::thread thread(_sbloccoPIN, GetCurrentThreadId());
 		thread.detach();
 		tray->HideIcon();
 	}
-#else
+      #else
 	//TODO: implement something?
-#endif
+      #endif
 }
 
-extern "C" int CALLBACK SbloccoPIN(
-	/*_In_*/ HINSTANCE hInstance,
-	/*_In_*/ HINSTANCE hPrevInstance,
-	/*_In_*/ LPCSTR     lpCmdLine,
-	/*_In_*/ int       nCmdShow
+int CALLBACK SbloccoPIN(
+	_In_ HINSTANCE hInstance,
+	_In_ HINSTANCE hPrevInstance,
+	_In_ LPCSTR     lpCmdLine,
+	_In_ int       nCmdShow
 	)
 {
 	init_CSP_func
-#ifdef WIN32
+      #ifdef _WIN32
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
@@ -216,7 +251,7 @@ extern "C" int CALLBACK SbloccoPIN(
 	wndClass.style |= CS_DROPSHADOW;
 	wndClass.lpszClassName = "CIEDialog";
 	RegisterClass(&wndClass);
-#endif
+      #endif
 
 	ODS("Start SbloccoPIN");
 	if (!CheckOneInstance("CIESbloccoOnce")) {
@@ -225,7 +260,7 @@ extern "C" int CALLBACK SbloccoPIN(
 	}	
 
 	if (strcmp(lpCmdLine, "ICON") == 0) {
-#ifdef WIN32
+	      #ifdef _WIN32
 		CSystemTray tray(wndClass.hInstance, nullptr, WM_APP, "Premere per sbloccare il PIN della CIE",
 			LoadIcon(wndClass.hInstance, MAKEINTRESOURCE(IDI_CIE)), 1);
 		tray.ShowBalloon("Premere per sbloccare il PIN dalla CIE", "CIE", NIIF_INFO);
@@ -245,9 +280,9 @@ extern "C" int CALLBACK SbloccoPIN(
 			}
 			DispatchMessage(&Msg);
 		}
-#else
+	      #else
 		std::cout << __FILE__ <<  " Premere per sbloccare il PIN della CIE" << std::endl;	//TODO: implement something?
-#endif
+	      #endif
 	}
 	else {
 		//std::thread thread(_sbloccoPIN, 0);

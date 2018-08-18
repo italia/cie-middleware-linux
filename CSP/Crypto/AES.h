@@ -1,6 +1,6 @@
 #pragma once
 #include "../StdAfx.h"
-#ifdef WIN32
+#ifdef _WIN32
 
 #include <bcrypt.h>
 #define AES_ENCRYPT 0

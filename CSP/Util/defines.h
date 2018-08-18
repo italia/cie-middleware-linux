@@ -2,8 +2,9 @@
 
 #define StatusWord uint16_t
 
-#ifndef WIN32
+#ifndef _WIN32
 #include <iostream>
+#include <algorithm>
 #include "funccallinfo.h"
 
 using PCSTR = const char*;
@@ -16,13 +17,18 @@ using HMODULE = void*;
 using UINT = unsigned int;
 using WPARAM = unsigned int;
 using LPARAM = long;
-using WCHAR = /*uint16_t;*/wchar_t;
+using WCHAR = wchar_t;
 using INT_PTR = int;
 using HINSTANCE = HANDLE;
 using HICON = HANDLE;
 using NOTIFYICONDATA = void*;
 using LPRECT = void*;
 using ATOM = void*;
+using LPWSTR = wchar_t*;
+using PWSTR = wchar_t*;
+
+#define memcpy_s(A,B,C,D)	memcpy(A,C,std::min(B,D))
+#define strcpy_s(A,B,C)		strncpy(A,C,B)
 
 #define PATH_SEPARATOR		'/'
 #define PATH_SEPARATOR_STR	"/"
@@ -36,6 +42,12 @@ using ATOM = void*;
 #define CALLBACK	
 #define PASCAL
 #define WINAPI
+#define APIENTRY
+#define DLL_PROCESS_ATTACH	1
+#define DLL_PROCESS_DETACH	0
+
+#define _In_
+#define _Out_
 
 #define MB_OK		0
 #define MB_OKCANCEL	1
@@ -63,7 +75,7 @@ using ATOM = void*;
 #else
   #define PATH_SEPARATOR	'\\'
   #define PATH_SEPARATOR_STR	"\\"
-#endif //WIN32
+#endif //_WIN32
 
 #define ERR_CARD_FILE_DEACTIVATED		0x6283
 #define ERR_CARD_FILE_TERMINATED		0x6285

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifdef _WIN32
+#include "../stdafx.h"
+#endif
 #include <string>
 #include "Array.h"
 

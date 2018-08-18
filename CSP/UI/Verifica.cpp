@@ -1,13 +1,13 @@
 
 #include "../StdAfx.h"
 #include "Verifica.h"
-#ifndef WIN32
+#ifndef _WIN32
         #include "helper.h"
 #endif
 
 CVerifica::CVerifica(HWND *wnd)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 #endif
 	this->wnd = wnd;
@@ -15,13 +15,13 @@ CVerifica::CVerifica(HWND *wnd)
 
 CVerifica::~CVerifica()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	DeleteObject(txtFont);
 #endif
 }
 
 LRESULT CVerifica::OnCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = FALSE;
 	if (wParam >= 100) {
 		bHandled = TRUE;
@@ -39,7 +39,7 @@ LRESULT CVerifica::OnCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHan
 
 
 LRESULT CVerifica::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	SetBkMode((HDC)wParam, TRANSPARENT);
 	return (INT_PTR)::GetStockObject(NULL_PEN);
@@ -49,7 +49,7 @@ LRESULT CVerifica::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 }
 
 LRESULT CVerifica::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	return (LRESULT)HTCAPTION;
 #else
@@ -58,7 +58,7 @@ LRESULT CVerifica::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHan
 }
 
 LRESULT CVerifica::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)  {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	SetBkMode((HDC)wParam, TRANSPARENT);
 	return (INT_PTR)::GetStockObject(NULL_PEN);
@@ -68,7 +68,7 @@ LRESULT CVerifica::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL&
 }
 LRESULT CVerifica::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	CenterWindow();
 	SetIcon(LoadIcon((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(IDI_CIE)));
 	backGround.LoadImageResource(IDB_BACKGROUND);
@@ -88,7 +88,7 @@ LRESULT CVerifica::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& b
 
 LRESULT CVerifica::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	RECT rect;
 	ZeroMem(rect);
 	GetUpdateRect(&rect);
@@ -106,7 +106,7 @@ LRESULT CVerifica::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bH
 #endif
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 INT_PTR CVerifica::DoModal()
 {
 	UIhelper::makeProgressDialog(7, wnd);

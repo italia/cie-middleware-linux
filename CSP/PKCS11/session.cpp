@@ -47,7 +47,10 @@ namespace {
 			return *this;
 		}
 
-		~resetter() //noexcept(noexcept(reset()))
+		~resetter() 
+		      #ifdef _WIN32
+			noexcept(noexcept(reset()))
+		      #endif
 		{
 			reset();
 		}
@@ -80,7 +83,11 @@ namespace p11 {
 
 	CK_SLOT_ID CSession::GetNewSessionID() {
 		init_func
-		return __sync_add_and_fetch (&dwSessionCnt, 1);//InterlockedIncrement(&dwSessionCnt);
+	      #ifdef _WIN32
+		return InterlockedIncrement(&dwSessionCnt);
+	      #else
+		return __sync_add_and_fetch (&dwSessionCnt, 1);
+	      #endif
 	}
 
 	CK_SESSION_HANDLE CSession::AddSession(std::unique_ptr<CSession> pSession)

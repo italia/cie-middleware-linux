@@ -3,9 +3,13 @@
 #include "session.h"
 #include <map>
 
-//#pragma pack(1)
+#ifdef _WIN32
+#pragma pack(1)
+#endif
 #include "pkcs11.h"
-//#pragma pack()
+#ifdef _WIN32
+#pragma pack()
+#endif
 
 namespace p11 {
 

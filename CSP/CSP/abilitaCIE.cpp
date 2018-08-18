@@ -1,6 +1,5 @@
 #include "../StdAfx.h"
 #include <winscard.h>
-#include <condition_variable>
 #include "../PCSC/PCSC.h"
 #include <reader.h>
 #include "IAS.h"
@@ -13,18 +12,24 @@
 #include <functional>
 #include "../Crypto/ASNParser.h"
 #include "../UI/safeDesktop.h"
-//#include <atlbase.h>
 #include <string>
-#include "../Util/defines.h"
-#include "../Util/funccallinfo.h"
-#ifndef WIN32
-	#include "helper.h"
+#ifdef __linux__
+	#include "../Util/defines.h"
+	#include "../Util/funccallinfo.h"
+	#include "helper.h"	
+#elif defined(_WIN32)
+	#include <atlbase.h>
 #endif
+#include "abilitaCIE.h"
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
 
-#include "abilitaCIE.h"
+#ifdef _WIN64
+	#pragma comment(linker, "/export:AbilitaCIE")
+#else
+	#pragma comment(linker, "/export:AbilitaCIE=_AbilitaCIE@16")
+#endif
 
 struct threadData {
 	HWND *progWin;
@@ -83,9 +88,15 @@ DWORD WINAPI _abilitaCIE(
 					len = SCARD_AUTOALLOCATE;
 					cData.hScard = conn;
 					SCardGetAttrib(cData.hScard, SCARD_ATTR_ATR_STRING, (BYTE*)&cData.pbAtr, &len);
-					cData.pfnCspAlloc = (PFN_CSP_ALLOC)malloc/*CryptMemAlloc*/;	//TODO: are there more secure alternatives?
-					cData.pfnCspReAlloc = (PFN_CSP_REALLOC)realloc/*CryptMemRealloc*/;
-					cData.pfnCspFree = (PFN_CSP_FREE)free/*CryptMemFree*/;
+				      #ifdef _WIN32
+					cData.pfnCspAlloc = (PFN_CSP_ALLOC)CryptMemAlloc;
+					cData.pfnCspReAlloc = (PFN_CSP_REALLOC)CryptMemRealloc;
+					cData.pfnCspFree = (PFN_CSP_FREE)CryptMemFree;
+				      #elif defined(__linux__)
+					cData.pfnCspAlloc = (PFN_CSP_ALLOC)malloc;	//TODO: are there more secure alternatives?
+					cData.pfnCspReAlloc = (PFN_CSP_REALLOC)realloc;
+					cData.pfnCspFree = (PFN_CSP_FREE)free;
+				      #endif
 					cData.cbAtr = len;
 					cData.pwszCardName = L"CIE";
 					auto isCIE = CardAcquireContext(&cData, 0);
@@ -157,9 +168,9 @@ DWORD WINAPI _abilitaCIE(
 							th.progWin = &progWin;
 							th.hDesk = (HDESK)(*desk);
 							std::thread([&th]() -> DWORD {
-								#ifdef WIN32
+							      #ifdef _WIN32
 								SetThreadDesktop(th.hDesk);
-								#endif
+							      #endif
 								CVerifica ver(th.progWin);	//TODO: progWin should really be set when it really has a value, then it should sync with the callback through a conditional variable 
 								ver.DoModal();
 								return 0;
@@ -167,9 +178,8 @@ DWORD WINAPI _abilitaCIE(
 
 							ias->Callback = [](int prog, const char *desc, void *data) {
 								HWND progWin = *(HWND*)data;
-								if (progWin != nullptr) {
+								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + prog, (LPARAM)desc);
-								}
 							};
 							ias->CallbackData = &progWin;
 
@@ -177,9 +187,8 @@ DWORD WINAPI _abilitaCIE(
 
 							DWORD rs = CardAuthenticateEx(&cData, ROLE_USER, FULL_PIN, (BYTE*)pin.PIN, (DWORD)strnlen(pin.PIN, sizeof(pin.PIN)), nullptr, 0, &attempts);
 							if (rs == SCARD_W_WRONG_CHV) {
-								if (progWin != nullptr) {
+								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-								}
 								std::string num;
 								if (attempts > 0)
 									num = "Sono rimasti " + std::to_string(attempts ) + " tentativi prima del blocco";
@@ -193,9 +202,8 @@ DWORD WINAPI _abilitaCIE(
 								break;
 							}
 							else if (rs == SCARD_W_CHV_BLOCKED) {
-								if (progWin != nullptr) {
+								if (progWin != nullptr)
 									SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-								}
 								CMessage msg(MB_OK,
 									"Abilitazione CIE",
 									"Il PIN e' bloccato. Può esere sbloccato verificando il PUK");
@@ -205,9 +213,8 @@ DWORD WINAPI _abilitaCIE(
 							else if (rs != SCARD_S_SUCCESS)
 								throw logged_error("Autenticazione fallita");
 
-							if (progWin != nullptr) {
+							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 4, (LPARAM)"Lettura certificato");
-							}
 
 							ByteDynArray Serial; len = 0;
 
@@ -223,18 +230,15 @@ DWORD WINAPI _abilitaCIE(
 							cData.pfnCspFree(data);
 							hashSet[0xa3] = sha256.Digest(CertCIE.left(GetASN1DataLenght(CertCIE)));
 
-							if (progWin != nullptr) {
+							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 5, (LPARAM)"Verifica SOD");
-							}
 							ias->VerificaSOD(SOD, hashSet);
 
-							if (progWin != nullptr) {
+							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 6, (LPARAM)"Cifratura dati");
-							}
 							ias->SetCache(PAN, CertCIE, ByteArray((uint8_t*)pin.PIN, 4));
-							if (progWin != nullptr) {
+							if (progWin != nullptr)
 								SendMessage(progWin, WM_COMMAND, 100 + 7, (LPARAM)"");
-							}
 
 							Tran.unlock();
 
@@ -286,14 +290,14 @@ DWORD WINAPI _abilitaCIE(
 }
 
 
-extern "C" int CALLBACK AbilitaCIE(
-	/*_In_*/ HINSTANCE hInstance,
-	/*_In_*/ HINSTANCE hPrevInstance,
-	/*_In_*/ LPCSTR     lpCmdLine,
-	/*_In_*/ int       nCmdShow
+int CALLBACK AbilitaCIE(
+	_In_ HINSTANCE hInstance,
+	_In_ HINSTANCE hPrevInstance,
+	_In_ LPCSTR     lpCmdLine,
+	_In_ int       nCmdShow
 	)
 {
-#ifdef WIN32
+      #ifdef _WIN32
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
@@ -304,7 +308,7 @@ extern "C" int CALLBACK AbilitaCIE(
 	wndClass.style |= CS_DROPSHADOW;
 	wndClass.lpszClassName = "CIEDialog";
 	RegisterClass(&wndClass);
-#endif
+      #endif
 
 	ODS("Start AbilitaCIE");
 	if (!CheckOneInstance("CIEAbilitaOnce")) {

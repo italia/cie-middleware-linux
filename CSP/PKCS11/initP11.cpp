@@ -1,4 +1,6 @@
-//#include "..\StdAfx.h"
+#ifdef _WIN32
+#include "..\StdAfx.h"
+#endif
 #include "InitP11.h"
 
 namespace p11 {

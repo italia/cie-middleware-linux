@@ -8,22 +8,22 @@
 #include "../Crypto/SHA1.h"
 #include "../Crypto/DES3.h"
 #include "../Crypto/MAC.h"
-#ifdef WIN32
-#include <shlwapi.h>
-#include <shlobj.h>
-#include <intsafe.h>
+#ifdef _WIN32
+	#include <shlwapi.h>
+	#include <shlobj.h>
+	#include <intsafe.h>
+#include "../res/resource.h"
+#elif defined(__linux__)
+	#include <openssl/x509.h>
+	#include <openssl/x509v3.h>
+	#include <openssl/bio.h>
+	#include <openssl/err.h>
+	#include "abilitaCIE.h"
+	#include "sbloccoPIN.h"
 #endif
 #include "../Util/ModuleInfo.h"
-//#include "../res/resource.h"
 #include "../../CacheLib/CacheLib.h"
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
 #include <unordered_map>
-
-#include "abilitaCIE.h"
-#include "sbloccoPIN.h"
 
 #define CIE_KEY_DH_ID 0x81
 #define CIE_KEY_ExtAuth_ID 0x84
@@ -177,13 +177,13 @@ void IAS::readfile(WORD id, ByteDynArray &content){
 		if (sw == 0x9000) {
 			content.append(chn);
 			WORD chnSize;
-#ifdef WIN32
+		      #ifdef _WIN32
 			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
 				throw logged_error("File troppo grande");
-#else			
+		      #elif defined(__linux__)			
 			chnSize = chn.size();	//TODO: check SizeTToWord()
-			cnt += chnSize;	//TODO: check for overflow, see WordAdd() here above
-#endif
+			cnt += chnSize;		//TODO: check for overflow, see WordAdd() here above
+		      #endif
 			chunk = 128;
 		}
 		else {
@@ -221,13 +221,13 @@ void IAS::readfile_SM(WORD id, ByteDynArray &content) {
 		if (sw == 0x9000) {
 			content.append(chn);
 			WORD chnSize;
-#ifdef WIN32
+		      #ifdef _WIN32
 			if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
 				throw logged_error("File troppo grande");
-#else			
+		      #elif defined(__linux__)			
 			chnSize = chn.size();	//TODO: check SizeTToWord()
-			cnt += chnSize;	//TODO: check for overflow, see WordAdd() here above
-#endif
+			cnt += chnSize;		//TODO: check for overflow, see WordAdd() here above
+		      #endif
 			chunk = 128;
 		}
 		else {
@@ -595,7 +595,7 @@ ByteDynArray IAS::SM(ByteArray &keyEnc, ByteArray &keySig, ByteArray &apdu, Byte
 		auto len = datafield.size();
 		auto lenBA = VarToByteArray(len);
 		auto va = (lenBA.reverse().right(3));
-		elabResp.set(&smHead, &va, &datafield, (uint8_t)0x00, (uint8_t)0x00);	
+		elabResp.set(&smHead, &va, &datafield, (uint8_t)0x00, (uint8_t)0x00);
 	}
 	return elabResp;
 }
@@ -991,7 +991,7 @@ void IAS::SetCache(const char *PAN, const ByteArray &certificate, const ByteArra
 int integrity = 0;
 bool IsLowIntegrity()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	if (integrity == 0) {
 
 		HANDLE hToken;
@@ -1049,7 +1049,7 @@ bool IsLowIntegrity()
 bool IsUserInteractive()
 {
 	BOOL bIsUserInteractive = true;
-#ifdef WIN32
+#ifdef _WIN32
 	HWINSTA hWinStation = GetProcessWindowStation();
 	if (hWinStation != NULL)
 	{
@@ -1066,7 +1066,7 @@ bool IsUserInteractive()
 void IAS::IconaSbloccoPIN() {
 	init_func
 		if (IsUserInteractive()) {
-#ifdef WIN32
+#ifdef _WIN32
 		PROCESS_INFORMATION pi;
 		STARTUPINFO si;
 		ZeroMem(si);
@@ -1078,7 +1078,7 @@ void IAS::IconaSbloccoPIN() {
 		token.Transmit(VarToByteArray(getHandle), &resp);
 		SCARDHANDLE hCard = *(SCARDHANDLE*)resp.data();
 
-#ifdef WIN32
+#ifdef _WIN32
 		char runDll32Path[MAX_PATH];
 		GetSystemDirectory(runDll32Path, MAX_PATH);
 		strcat_s(runDll32Path, "\\");
@@ -1134,7 +1134,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 	dumpHexData(PAN.mid(5, 6), PANStr, false);
 	if (!CacheExists(PANStr.c_str())) {
 		if (askEnable && IsUserInteractive() && !IsLowIntegrity()) {
-#ifdef WIN32
+#ifdef _WIN32
 			PROCESS_INFORMATION pi;
 			STARTUPINFO si;
 			ZeroMem(si);
@@ -1148,7 +1148,7 @@ void IAS::GetCertificate(ByteDynArray &certificate,bool askEnable) {
 
 			SCardEndTransaction(hCard, SCARD_UNPOWER_CARD);
 
-#ifdef WIN32			// check impersonation
+#ifdef _WIN32			// check impersonation
 			HANDLE token=NULL;
 			OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, FALSE, &token);
 
@@ -1256,47 +1256,22 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	ByteArray certRaw = SOD.mid((int)signerCert.startPos, (int)(signerCert.endPos - signerCert.startPos));
 
+      #ifdef _WIN32
+	PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
+      #elif defined(__linux__)
 	BYTE *p = (BYTE*)certRaw.data();
 	const BYTE* cp = p;
 	std::unique_ptr<X509,std::function<void(X509*)>> certDS{d2i_X509(nullptr, &cp, certRaw.size()), [](X509* val){ X509_free(val);}};
-	//PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());
-	if (certDS.get() == nullptr)
+      #endif
+	if (certDS == nullptr)
 		throw logged_error("Certificato DS non valido");
-
-	//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
-
-	//CASNParser pubKeyParser;
-	std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(certDS.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
-	//ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
-	//IFNULL_FAIL(pkey, "unable to extract public key from certificate");
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());
-#else
-	RSA *rsa_key = pkey->pkey.rsa;
-#endif
-	//pubKeyParser.Parse(pubKeyData);
-	//CASNTag &pubKey = *pubKeyParser.tags[0];
-	
-	BYTE *n_b = new BYTE[RSA_size(rsa_key)];        //TODO: are these really RSA_size()? or better n_size?
-	BYTE *e_b = new BYTE[RSA_size(rsa_key)];	//TODO: should this be e_size?
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
-	RSA_get0_key(rsa_key, &n_, &e_, &d_);
-	size_t n_size = BN_bn2bin(n_, n_b);
-	size_t e_size = BN_bn2bin(e_, e_b);
-#else
-	size_t n_size = BN_bn2bin(rsa_key->n, n_b);
-	size_t e_size = BN_bn2bin(rsa_key->e, e_b);
-#endif
-	ByteArray bArr_n(n_b, n_size);
-	ByteArray bArr_e(e_b, e_size);
-	ByteDynArray bArrN{bArr_n};
-	ByteDynArray bArrE{bArr_e};
-	auto mod = SkipZero(bArrN); 	//keyParser.tags[0]->tags[0]->content);
-	auto exp = SkipZero(bArrE);    //keyParser.tags[0]->tags[1]->content);
-	delete[] n_b;
-	delete[] e_b;
-/*
+      #ifdef _WIN32
+	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(certDS); });
+      		
+	ByteArray pubKeyData(certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.pbData, certDS->pCertInfo->SubjectPublicKeyInfo.PublicKey.cbData);
+	CASNParser pubKeyParser;
+	pubKeyParser.Parse(pubKeyData);
+	CASNTag &pubKey = *pubKeyParser.tags[0];
 	CASNTag &modTag = pubKey.Child(0, 02);
 	ByteArray mod = modTag.content;
 	while (mod[0] == 0)
@@ -1305,7 +1280,36 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	ByteArray exp = expTag.content;
 	while (exp[0] == 0)
 		exp = exp.mid(1);
-*/
+      #elif defined(__linux__)
+	std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(certDS.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
+
+       #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());
+       #else
+	RSA *rsa_key = pkey->pkey.rsa;
+       #endif
+	
+	BYTE *n_b = new BYTE[RSA_size(rsa_key)];        //TODO: are these really RSA_size()? or better n_size?
+	BYTE *e_b = new BYTE[RSA_size(rsa_key)];	//TODO: should this be e_size?
+       #if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
+	RSA_get0_key(rsa_key, &n_, &e_, &d_);
+	size_t n_size = BN_bn2bin(n_, n_b);
+	size_t e_size = BN_bn2bin(e_, e_b);
+       #else
+	size_t n_size = BN_bn2bin(rsa_key->n, n_b);
+	size_t e_size = BN_bn2bin(rsa_key->e, e_b);
+       #endif
+	ByteArray bArr_n(n_b, n_size);
+	ByteArray bArr_e(e_b, e_size);
+	ByteDynArray bArrN{bArr_n};
+	ByteDynArray bArrE{bArr_e};
+	auto mod = SkipZero(bArrN); 	//keyParser.tags[0]->tags[0]->content);
+	auto exp = SkipZero(bArrE);    //keyParser.tags[0]->tags[1]->content);
+	delete[] n_b;
+	delete[] e_b;
+      #endif
+
 	ByteArray signatureData = signature.content;
 
 	CRSA rsa(mod, exp);
@@ -1332,11 +1336,15 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 	issuerName.Reparse();
 	CASNParser issuerParser;
 
+      #ifdef _WIN32
+	issuerParser.Parse(ByteArray(certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData));
+      #elif defined(__linux__)
 	BYTE *pder, *tmpPder;   
         size_t pderlen = i2d_X509_NAME(X509_get_issuer_name(certDS.get()), nullptr);
 	tmpPder = pder = new BYTE[pderlen];
 	i2d_X509_NAME(X509_get_issuer_name(certDS.get()), &tmpPder);
-	issuerParser.Parse(ByteArray(pder, pderlen/*certDS->pCertInfo->Issuer.pbData, certDS->pCertInfo->Issuer.cbData*/));
+	issuerParser.Parse(ByteArray(pder, pderlen));
+      #endif
 
 	CASNTag &CertIssuer = *issuerParser.tags[0];
 	if (issuerName.tags.size() != CertIssuer.tags.size())
@@ -1347,8 +1355,15 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		certElem.tags[0]->Verify(SODElem.tags[0]->content);
 		certElem.tags[1]->Verify(SODElem.tags[1]->content);
 	}
+      #if defined(__linux__)
 	delete[] pder;	//TODO: check if it was not copied by ByteArray
+      #endif
 
+      #ifdef _WIN32
+	ByteDynArray certSerial=ByteArray(certDS->pCertInfo->SerialNumber.pbData, certDS->pCertInfo->SerialNumber.cbData);
+	if (certSerial.reverse() != signerCertSerialNumber.content)
+		throw logged_error("Serial Number del certificato non corrispondente");
+      #elif defined(__linux__)
 	ASN1_INTEGER *serial = X509_get_serialNumber(certDS.get()); 
 	BIGNUM *bn = ASN1_INTEGER_to_BN(serial, NULL);
 	int n = BN_num_bytes(bn);
@@ -1365,6 +1380,7 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 		throw logged_error("Serial Number del certificato non corrispondente");
 	}
 	else delete[] pder;
+      #endif
 
 	// ora verifico gli hash dei DG
 	//log.Info("Verifica hash DG");
@@ -1403,9 +1419,10 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 }
 
 #define DWL_MSGRESULT 0
+
 BOOL CheckOneInstance(char *nome)
 {
-#ifdef WIN32
+      #ifdef _WIN32
 	auto m_hStartEvent = CreateEvent(NULL, true, false, nome);
 	if (GetLastError() == ERROR_ALREADY_EXISTS && m_hStartEvent != nullptr) {
 		CloseHandle(m_hStartEvent);
@@ -1413,7 +1430,7 @@ BOOL CheckOneInstance(char *nome)
 		return FALSE;
 	}
 	return TRUE;
-#else
+      #else
 	static std::unordered_map<std::string,bool> instanceMap;
 
 	std::string key{nome};
@@ -1423,5 +1440,5 @@ BOOL CheckOneInstance(char *nome)
 		instanceMap[key] = true;
 		return true;
 	}
-#endif
+      #endif
 }

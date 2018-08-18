@@ -1,11 +1,17 @@
 #pragma once
 
-//#pragma pack(1)
+#ifdef _WIN32
+#pragma pack(1)
+#endif
 #include "pkcs11.h"
-//#pragma pack()
+#ifdef _WIN32
+#pragma pack()
+#endif
 #include "../Util/SyncroMutex.h"
 #include "../Util/Thread.h"
-//#pragma pack()
+#ifdef _WIN32
+#pragma pack()
+#endif
 #include "CardContext.h"
 #include <map>
 #include <vector>

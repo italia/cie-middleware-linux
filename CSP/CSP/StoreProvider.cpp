@@ -1,6 +1,6 @@
 #include "../StdAfx.h"
-#ifdef WIN32
-#include <Wincrypt.h>
+#ifdef _WIN32
+	#include <Wincrypt.h>
 #endif
 #include <stdio.h>
 #include "../Util/ModuleInfo.h"

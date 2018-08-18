@@ -95,13 +95,13 @@ StatusWord CToken::Transmit(APDU &apdu, ByteDynArray *resp)
 	if (apdu.bLC && apdu.bLE) {
 		iAPDUSize = apdu.btLC + 6;
 		pbtAPDU[4] = apdu.btLC;
-		memcpy(pbtAPDU + 5, apdu.pbtData, min(uint8_t(2995), apdu.btLC));
+		memcpy_s(pbtAPDU + 5, size_t{2995}, apdu.pbtData, size_t{apdu.btLC});
 		pbtAPDU[5 + apdu.btLC] = apdu.btLE;
 		}
 	else if (apdu.bLC && !apdu.bLE) {
 		iAPDUSize = apdu.btLC + 5;
 		pbtAPDU[4] = apdu.btLC;
-		memcpy(pbtAPDU + 5, apdu.pbtData, min(uint8_t(2995), apdu.btLC));
+		memcpy_s(pbtAPDU + 5, size_t{2995}, apdu.pbtData, size_t{apdu.btLC});
 		}
 	else if (!apdu.bLC && apdu.bLE) {
 			iAPDUSize = 5;

@@ -1,4 +1,3 @@
-#ifdef WIN32
 #include "../StdAfx.h"
 #include "SystemTray.h"
 
@@ -26,7 +25,7 @@ static const char THIS_FILE[]=__FILE__;
 CSystemTray* CSystemTray::m_pThis = NULL;
 
 UINT CSystemTray::m_nMaxTooltipLength  = 64;   
-#ifdef WIN32
+#ifdef _WIN32
 const UINT CSystemTray::m_nTaskbarCreatedMsg = ::RegisterWindowMessage(_T("TaskbarCreated"));
 #endif
 HWND  CSystemTray::m_hWndInvisible;
@@ -35,7 +34,9 @@ HWND  CSystemTray::m_hWndInvisible;
 
 CSystemTray::CSystemTray()
 {
+#ifdef _WIN32
     Initialise();
+#endif
 }
 
 CSystemTray::CSystemTray(HINSTANCE hInst,			
@@ -50,21 +51,24 @@ CSystemTray::CSystemTray(HINSTANCE hInst,
                      DWORD dwBalloonIcon,
                      UINT uBalloonTimeout)
 {
+#ifdef _WIN32
     Initialise();
     Create(hInst, hParent, uCallbackMessage, szToolTip, icon, uID, bHidden,
            szBalloonTip, szBalloonTitle, dwBalloonIcon, uBalloonTimeout);
+#endif
 }
 
 void CSystemTray::Initialise()
 {
+#ifdef _WIN32
     m_pThis = this;
 
     memset(&m_tnd, 0, sizeof(m_tnd));
-    m_bEnabled = FALSE;
+    m_bEnabled = false;
     m_bHidden  = TRUE;
     m_bRemoved = TRUE;
 
-    m_bShowIconPending = FALSE;
+    m_bShowIconPending = false;
 
     m_hSavedIcon = NULL;
 
@@ -72,10 +76,12 @@ void CSystemTray::Initialise()
 	m_uCreationFlags = 0;
 	TrayNotification = NULL;
 	TrayBaloonTimeout = NULL;
+#endif
 }
 
 ATOM CSystemTray::RegisterClass(HINSTANCE hInstance)
 {
+#ifdef _WIN32
 	WNDCLASSEX wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX); 
@@ -92,7 +98,10 @@ ATOM CSystemTray::RegisterClass(HINSTANCE hInstance)
 	wcex.lpszClassName	= TRAYICON_CLASS;
 	wcex.hIconSm		= 0;
 
-    return RegisterClassEx(&wcex);
+	return RegisterClassEx(&wcex);
+#else
+	return 0;
+#endif
 }
 
 BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage, 
@@ -102,7 +111,8 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
                        DWORD dwBalloonIcon /*=NIIF_NONE*/,
                        UINT uBalloonTimeout /*=10*/)
 {
-	m_bEnabled = true;
+#ifdef _WIN32
+    m_bEnabled = true;
    
     m_nMaxTooltipLength = _countof(m_tnd.szTip);
     
@@ -181,23 +191,31 @@ BOOL CSystemTray::Create(HINSTANCE hInst, HWND hParent, UINT uCallbackMessage,
         m_tnd.szInfo[0] = _T('\0');
     }
     return bResult;
+#else
+	return false;
+#endif
 }
 
 CSystemTray::~CSystemTray()
 {
+#ifdef _WIN32
     RemoveIcon();
     m_IconList.clear();
     if (m_hWnd)
         ::DestroyWindow(m_hWnd);
+#endif
 }
 
 void CSystemTray::SetFocus()
 {
+#ifdef _WIN32
     Shell_NotifyIcon ( NIM_SETFOCUS, &m_tnd );
+#endif
 }
 
 BOOL CSystemTray::AddIcon()
 {
+#ifdef _WIN32
     if (!m_bRemoved)
         RemoveIcon();
 
@@ -207,14 +225,18 @@ BOOL CSystemTray::AddIcon()
         if (!Shell_NotifyIcon(NIM_ADD, &m_tnd))
             m_bShowIconPending = TRUE;
         else
-            m_bRemoved = m_bHidden = FALSE;
+            m_bRemoved = m_bHidden = false;
     }
-    return (m_bRemoved == FALSE);
+    return (m_bRemoved == false);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::RemoveIcon()
 {
-    m_bShowIconPending = FALSE;
+#ifdef _WIN32
+    m_bShowIconPending = false;
 
     if (!m_bEnabled || m_bRemoved)
         return TRUE;
@@ -224,10 +246,14 @@ BOOL CSystemTray::RemoveIcon()
         m_bRemoved = m_bHidden = TRUE;
 
     return (m_bRemoved == TRUE);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::HideIcon()
 {
+#ifdef _WIN32
     if (!m_bEnabled || m_bRemoved || m_bHidden)
         return TRUE;
 
@@ -238,10 +264,14 @@ BOOL CSystemTray::HideIcon()
     m_bHidden = Shell_NotifyIcon( NIM_MODIFY, &m_tnd);
 
     return (m_bHidden == TRUE);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::ShowIcon()
 {
+#ifdef _WIN32
     if (m_bRemoved)
         return AddIcon();
 
@@ -253,13 +283,17 @@ BOOL CSystemTray::ShowIcon()
     m_tnd.dwStateMask = NIS_HIDDEN;
     Shell_NotifyIcon ( NIM_MODIFY, &m_tnd );
 
-    return (m_bHidden == FALSE);
+    return (m_bHidden == false);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetIcon(HICON hIcon)
 {
+#ifdef _WIN32
     if (!m_bEnabled)
-        return FALSE;
+        return false;
 
     m_tnd.uFlags = NIF_ICON;
     m_tnd.hIcon = hIcon;
@@ -268,10 +302,14 @@ BOOL CSystemTray::SetIcon(HICON hIcon)
         return TRUE;
     else
         return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetIcon(LPCTSTR lpszIconName)
 {
+#ifdef _WIN32
 	HICON hIcon = (HICON) ::LoadImage(m_hInstance, 
 		lpszIconName,
 		IMAGE_ICON, 
@@ -279,14 +317,18 @@ BOOL CSystemTray::SetIcon(LPCTSTR lpszIconName)
 		LR_LOADFROMFILE);
 
 	if (!hIcon)
-		return FALSE;
+		return false;
 	BOOL returnCode = SetIcon(hIcon);
 	::DestroyIcon(hIcon);
 	return returnCode;
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetIcon(UINT nIDResource)
 {
+#ifdef _WIN32
 	HICON hIcon = (HICON) ::LoadImage(m_hInstance, 
 		MAKEINTRESOURCE(nIDResource),
 		IMAGE_ICON, 
@@ -296,34 +338,50 @@ BOOL CSystemTray::SetIcon(UINT nIDResource)
 	BOOL returnCode = SetIcon(hIcon);
 	::DestroyIcon(hIcon);
 	return returnCode;
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetStandardIcon(LPCTSTR lpIconName)
 {
+#ifdef _WIN32
     HICON hIcon = ::LoadIcon(NULL, lpIconName);
 
     return SetIcon(hIcon);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetStandardIcon(UINT nIDResource)
 {
+#ifdef _WIN32
     HICON hIcon = ::LoadIcon(NULL, MAKEINTRESOURCE(nIDResource));
 
     return SetIcon(hIcon);
+#else
+	return false;
+#endif
 }
  
 HICON CSystemTray::GetIcon() const
 {
+#ifdef _WIN32
     return (m_bEnabled)? m_tnd.hIcon : NULL;
+#else
+	return nullptr;
+#endif
 }
 
 
 BOOL CSystemTray::SetTooltipText(LPCTSTR pszTip)
 {
-	ASSERT(_tcsnlen(pszTip, m_nMaxTooltipLength+1) < m_nMaxTooltipLength);
+#ifdef _WIN32
+    ASSERT(_tcsnlen(pszTip, m_nMaxTooltipLength+1) < m_nMaxTooltipLength);
 
     if (!m_bEnabled)
-        return FALSE;
+        return false;
 
     m_tnd.uFlags = NIF_TIP;
     _tcsncpy_s(m_tnd.szTip, pszTip, m_nMaxTooltipLength-1);
@@ -332,23 +390,31 @@ BOOL CSystemTray::SetTooltipText(LPCTSTR pszTip)
         return TRUE;
     else
         return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
+#else
+	return false;
+#endif
 }
 
 BOOL CSystemTray::SetTooltipText(UINT nID)
 {
+#ifdef _WIN32
     TCHAR strBuffer[1024];
     ASSERT(1024 >= m_nMaxTooltipLength);
 
     if (!LoadString(m_hInstance, nID, strBuffer, m_nMaxTooltipLength-1))
-        return FALSE;
+        return false;
 
     return SetTooltipText(strBuffer);
+#else
+	return false;
+#endif
 }
 
 LPTSTR CSystemTray::GetTooltipText() const
 {
+#ifdef _WIN32
     if (!m_bEnabled)
-        return FALSE;
+        return false;
 
     static TCHAR strBuffer[1024];
     ASSERT(1024 >= m_nMaxTooltipLength);
@@ -361,6 +427,9 @@ LPTSTR CSystemTray::GetTooltipText() const
 #endif
 
     return strBuffer;
+#else
+	return "---tooltip---";
+#endif
 }
 
 BOOL CSystemTray::ShowBalloon(LPCTSTR szText,
@@ -368,6 +437,7 @@ BOOL CSystemTray::ShowBalloon(LPCTSTR szText,
                             DWORD   dwIcon   /*=NIIF_NONE*/,
                             UINT    uTimeout /*=10*/ )
 {
+#ifdef _WIN32
     ASSERT(strnlen_s(szText,257) < 256);
 
     if (szTitle)
@@ -395,52 +465,72 @@ BOOL CSystemTray::ShowBalloon(LPCTSTR szText,
     m_tnd.szInfo[0] = _T('\0');
 
     return bSuccess;
+#else
+	return false;
+#endif
 }
 
 
 BOOL CSystemTray::SetNotificationWnd(HWND hNotifyWnd)
 {
+#ifdef _WIN32
     if (!m_bEnabled)
-        return FALSE;
+        return false;
 
     if (!hNotifyWnd || !::IsWindow(hNotifyWnd))
     {
-        ASSERT(FALSE);
-        return FALSE;
+        ASSERT(false);
+        return false;
     }
 
     m_tnd.hWnd = hNotifyWnd;
     m_tnd.uFlags = 0;
 
     if (m_bHidden)
-        return TRUE;
+        return true;
     else
         return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
+#else
+	return false;
+#endif
 }
 
 HWND CSystemTray::GetNotificationWnd() const
 {
+#ifdef _WIN32
     return m_tnd.hWnd;
+#else
+    return nullptr;
+#endif
 }
 
 BOOL CSystemTray::SetTargetWnd(HWND hTargetWnd)
 {
+#ifdef _WIN32
     m_hTargetWnd = hTargetWnd;
     return TRUE;
+#else
+    return false;
+#endif
 }
 
 HWND CSystemTray::GetTargetWnd() const
 {
+#ifdef _WIN32
     if (m_hTargetWnd)
         return m_hTargetWnd;
     else
         return m_tnd.hWnd;
+#else
+	return nullptr;
+#endif
 }
 
 BOOL CSystemTray::SetCallbackMessage(UINT uCallbackMessage)
 {
+#ifdef _WIN32
     if (!m_bEnabled)
-        return FALSE;
+        return false;
 
     ASSERT(uCallbackMessage >= WM_APP);
 
@@ -451,28 +541,44 @@ BOOL CSystemTray::SetCallbackMessage(UINT uCallbackMessage)
         return TRUE;
     else
         return Shell_NotifyIcon(NIM_MODIFY, &m_tnd);
+#else
+	return false;
+#endif
 }
 
 UINT CSystemTray::GetCallbackMessage() const
 {
+#ifdef _WIN32
     return m_tnd.uCallbackMessage;
+#else
+	return 0;
+#endif
 }
 
 LRESULT CSystemTray::OnTaskbarCreated(WPARAM wParam, LPARAM lParam) 
 {
+#ifdef _WIN32
     InstallIconPending();
     return 0L;
+#else
+	return 0L;
+#endif
 }
 
 LRESULT CSystemTray::OnSettingChange(UINT uFlags, LPCTSTR lpszSection) 
 {
+#ifdef _WIN32
     if (uFlags == SPI_SETWORKAREA)
         InstallIconPending();
 	return 0L;
+#else
+	return 0L;
+#endif
 }
 
 LRESULT CSystemTray::OnTrayNotification(WPARAM wParam, LPARAM lParam) 
 {
+#ifdef _WIN32
     if (wParam != m_tnd.uID)
         return 0L;
 
@@ -489,10 +595,14 @@ LRESULT CSystemTray::OnTrayNotification(WPARAM wParam, LPARAM lParam)
 			TrayNotification(this,wParam,lParam);
 	}
     return 1;
+#else
+	return 0L;
+#endif
 }
 
 LRESULT PASCAL CSystemTray::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+#ifdef _WIN32
     CSystemTray* pTrayIcon = m_pThis;
     if (pTrayIcon->GetSafeHwnd() != hWnd)
         return ::DefWindowProc(hWnd, message, wParam, lParam);
@@ -504,10 +614,14 @@ LRESULT PASCAL CSystemTray::WindowProc(HWND hWnd, UINT message, WPARAM wParam, L
         return pTrayIcon->OnTrayNotification(wParam, lParam);
 
     return ::DefWindowProc(hWnd, message, wParam, lParam);
+#else
+	return 0L;
+#endif
 }
 
 void CSystemTray::InstallIconPending()
 {
+#ifdef _WIN32
     if (!m_bShowIconPending || m_bHidden)
         return;
 
@@ -517,12 +631,14 @@ void CSystemTray::InstallIconPending()
 
     m_bShowIconPending = !m_bHidden;
 
-    ASSERT(m_bHidden == FALSE);
+    ASSERT(m_bHidden == false);
+#endif
 }
 
 
 BOOL CALLBACK FindTrayWnd(HWND hwnd, LPARAM lParam)
 {
+#ifdef _WIN32
     TCHAR szClassName[256];
     GetClassName(hwnd, szClassName, 255);
 
@@ -543,14 +659,18 @@ BOOL CALLBACK FindTrayWnd(HWND hwnd, LPARAM lParam)
             lpRect->top = rectClock.bottom;
         else
             lpRect->right = rectClock.left;
-        return FALSE;
+        return false;
     }
  
     return TRUE;
+#else
+	return false;
+#endif
 }
  
 void CSystemTray::GetTrayWndRect(LPRECT lprect)
 {
+#ifdef _WIN32
 #define DEFAULT_RECT_WIDTH 150
 #define DEFAULT_RECT_HEIGHT 30
 
@@ -601,10 +721,12 @@ void CSystemTray::GetTrayWndRect(LPRECT lprect)
 		lprect->left = lprect->right - DEFAULT_RECT_WIDTH;
 		lprect->top = lprect->bottom - DEFAULT_RECT_HEIGHT;
 	}
+#endif
 }
 
 BOOL CSystemTray::RemoveTaskbarIcon(HWND hWnd)
 {
+#ifdef _WIN32
     if (!::IsWindow(m_hWndInvisible))
     {
 		m_hWndInvisible = CreateWindowEx(0, "Static", _T(""), WS_POPUP,
@@ -612,22 +734,28 @@ BOOL CSystemTray::RemoveTaskbarIcon(HWND hWnd)
 				NULL, 0, NULL, 0);
 
 		if (!m_hWndInvisible)
-			return FALSE;
+			return false;
     }
 
     SetParent(hWnd, m_hWndInvisible);
 
     return TRUE;
+#else
+	return false;
+#endif
 }
 
 void CSystemTray::MinimiseToTray(HWND hWnd)
 {
+#ifdef _WIN32
     RemoveTaskbarIcon(hWnd);
 	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) &~ WS_VISIBLE);
+#endif
 }
 
 void CSystemTray::MaximiseFromTray(HWND hWnd)
 {
+#ifdef _WIN32
     ::SetParent(hWnd, NULL);
 
 	SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) | WS_VISIBLE);
@@ -638,5 +766,5 @@ void CSystemTray::MaximiseFromTray(HWND hWnd)
         SetActiveWindow(m_hWndInvisible);
     SetActiveWindow(hWnd);
     SetForegroundWindow(hWnd);
-}
 #endif
+}

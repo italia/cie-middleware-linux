@@ -1,5 +1,5 @@
 #include "../StdAfx.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <conio.h>
 #include <dbghelp.h>
 #endif
@@ -352,16 +352,17 @@ long ByteArrayToInt(ByteArray &ba)
 	exit_func
 }
 
-/*
+#ifdef _WIN32
 std::string WinErr(HRESULT err) {
 	char szWinErrBuffer[300];
 	FormatMessage(FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), szWinErrBuffer, 300, NULL);
 	return std::string(szWinErrBuffer);
-}*/
+}
+#endif
 
 const char *  CardErr(DWORD dwSW) {
 	const char *msg="";
-#ifdef WIN32
+#ifdef _WIN32
 	switch (dwSW) {
 		case ERR_CARD_FILE_DEACTIVATED		: msg="File is deactivated"; break;
 		case ERR_CARD_FILE_TERMINATED		: msg="File is terminated"; break;
@@ -410,13 +411,15 @@ const char *  CardErr(DWORD dwSW) {
 		case ERR_CARD_OVERFLOW_UNDERFLOW	: msg="Overflow through INCREASE / Underflow through DECREASE"; break;
 		default: msg="Unknown status code"; break;
 	}
+#else
+	//TODO: implement something
 #endif
 	return(msg);
 }
 
 
 const char *SystemErr(DWORD dwExcept){
-#ifdef WIN32
+#ifdef _WIN32
 	switch (dwExcept){
 		case EXCEPTION_ACCESS_VIOLATION: return "Access Violation"; break;
  		case EXCEPTION_DATATYPE_MISALIGNMENT: return "Datatype Misalignment"; break;
@@ -443,6 +446,7 @@ const char *SystemErr(DWORD dwExcept){
 		default: return ""; break;
 	}
 #else
+	//TODO: implement something
 	return "";
 #endif
 }
@@ -519,6 +523,7 @@ void putASN1Length(size_t len, ByteArray &data) {
 	}
 }
 
+#ifndef _WIN32
 int _vscprintf (const char * format, va_list pargs) { 
 	int retval; 
 	va_list argcopy; 
@@ -527,6 +532,7 @@ int _vscprintf (const char * format, va_list pargs) {
 	va_end(argcopy); 
 	return retval; 
 }
+#endif
 
 std::string stdPrintf(const char *format, ...) {
 	std::string result;
@@ -534,7 +540,7 @@ std::string stdPrintf(const char *format, ...) {
 	va_start(args, format);
 	int size = _vscprintf(format, args) + 1;
 	result.resize(size);
-#ifdef WIN32
+#ifdef _WIN32
 	vsprintf_s(&result[0], size, format, args);
 #else
 	vsnprintf(&result[0], size, format, args);

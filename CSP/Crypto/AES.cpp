@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include "AES.h"
 
-static char *szCompiledFile=__FILE__;
+static const char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
 

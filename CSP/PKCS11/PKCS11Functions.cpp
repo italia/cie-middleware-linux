@@ -44,13 +44,15 @@ const char *getAttributeName(DWORD dwId);
 bool bModuleInit=false;
 
 // funzione DllMain
-// inizializzo moduleInfo
-static void DllMainP11();//__attribute__((constructor));
-void DllMainP11()
+// inizilizzo moduleInfo
+BOOL APIENTRY DllMainP11( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved
+					 )
 {
-	if (/*ul_reason_for_call==DLL_PROCESS_ATTACH &&*/ !bModuleInit) {
+	if (ul_reason_for_call==DLL_PROCESS_ATTACH && !bModuleInit) {
 		bModuleInit=true;
-		moduleInfo.init(nullptr);
+		moduleInfo.init(hModule);
 		std::string mainMutexName;
 		//mainMutexName="CIE_P11_Mutex_"+moduleInfo.szModuleName;
 		//p11Mutex.Create(mainMutexName.c_str());
@@ -60,13 +62,10 @@ void DllMainP11()
 		initLog(configPath.c_str(), __DATE__ " " __TIME__);
 		Log.initModule("PKCS11", __DATE__ " " __TIME__);
 		p11::InitP11(configPath.c_str());
-	}
-}
 
-static void DllMainP11_destr();// __attribute__((destructor));
-void DllMainP11_destr()
-{
-	if (/*ul_reason_for_call==DLL_PROCESS_DETACH &&*/ bModuleInit) {
+	}
+
+	if (ul_reason_for_call==DLL_PROCESS_DETACH && bModuleInit) {
 
 		if (bP11Initialized) {
 			Log.write("%s","Forzatura C_Finalize");
@@ -80,7 +79,10 @@ void DllMainP11_destr()
 		CSlot::DeleteSlotList();
 		CCardTemplate::DeleteTemplateList();
 		p11slotEvent.set();
+
 	}
+
+	return TRUE;
 }
 
 // funzione CheckMechanismParam
@@ -180,16 +182,17 @@ CK_RV CK_ENTRY C_Initialize(CK_VOID_PTR pReserved)
 {
 	init_p11_func
 	std::unique_lock<std::mutex> lock(p11Mutex);
-
+	
 	logParam(pReserved)
 	
 	CK_C_INITIALIZE_ARGS_PTR ptr=(CK_C_INITIALIZE_ARGS_PTR)pReserved;
 
 	if (bP11Initialized)
-		return CKR_OK;
-	else DllMainP11();
-	//	throw p11_error(CKR_CRYPTOKI_ALREADY_INITIALIZED)
-
+		return CKR_OK;	//throw p11_error(CKR_CRYPTOKI_ALREADY_INITIALIZED)
+      #ifndef _WIN32
+	else DllMainP11(nullptr, DLL_PROCESS_ATTACH, nullptr);
+      #endif
+	
 	// verifico che i flag siano supportati
 	CK_C_INITIALIZE_ARGS_PTR iargs = NULL_PTR;
 	if (pReserved) {
@@ -259,7 +262,9 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 		it->second->CloseAllSessions();
 	}
 
-	DllMainP11_destr();
+      #ifndef _WIN32
+	DllMainP11(nullptr, DLL_PROCESS_DETACH, nullptr);
+      #endif
 
 	return CKR_OK;
 	exit_p11_func
@@ -443,12 +448,12 @@ CK_RV CK_ENTRY C_GetInfo(CK_INFO_PTR pInfo /* location that receives information
 
 	pInfo->cryptokiVersion.major = 2; /* Cryptoki interface ver */
 	pInfo->cryptokiVersion.minor = 10;   //12345678901234567890123456789012
-	memcpy((char*)pInfo->manufacturerID,"IPZS                            ", 32);
+	memcpy_s((char*)pInfo->manufacturerID,32,"IPZS                            ", 32);
 
 	pInfo->flags = 0; /* must be zero */
 
 	/* libraryDescription and libraryVersion are new for v2.0 */
-	memcpy((char*)pInfo->libraryDescription,"CIE PKCS11                      ", 32);
+	memcpy_s((char*)pInfo->libraryDescription,32,"CIE PKCS11                      ", 32);
 
 	pInfo->libraryVersion.major = 1; /* version of library */
 	pInfo->libraryVersion.minor = 0; /* version of library */
@@ -907,7 +912,7 @@ CK_RV CK_ENTRY C_GetMechanismList(CK_SLOT_ID slotID, CK_MECHANISM_TYPE_PTR pMech
 	}
 
 	if (*pulCount >= dwNumMechansms) {
-		memcpy(pMechanismList, P11mechanisms, dwNumMechansms * sizeof(CK_MECHANISM_TYPE));
+		memcpy_s(pMechanismList, dwNumMechansms * sizeof(CK_MECHANISM_TYPE), P11mechanisms, dwNumMechansms * sizeof(CK_MECHANISM_TYPE));
 		return CKR_OK;
 	}
 	else

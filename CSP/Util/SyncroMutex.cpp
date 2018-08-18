@@ -6,7 +6,7 @@ static const char *szCompiledFile=__FILE__;
 
 CSyncroMutex::CSyncroMutex(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	hMutex=NULL;
 #endif
 }
@@ -14,7 +14,7 @@ CSyncroMutex::CSyncroMutex(void)
 void CSyncroMutex::Create(void)
 {
 	init_func_internal
-#ifdef WIN32
+#ifdef _WIN32
 	hMutex=CreateMutex(NULL,FALSE,NULL);
 	ER_ASSERT(hMutex!=NULL,	"Errore nella creazione del Mutex");
 #endif
@@ -24,7 +24,7 @@ void CSyncroMutex::Create(void)
 void CSyncroMutex::Create(const char *szName)
 {
 	init_func_internal
-#ifdef WIN32
+#ifdef _WIN32
 	hMutex=OpenMutex(SYNCHRONIZE,FALSE,szName);
 	if (hMutex==NULL) {
 		HRESULT r=GetLastError();
@@ -63,7 +63,7 @@ void CSyncroMutex::Create(const char *szName)
 CSyncroMutex::~CSyncroMutex(void)
 {
 	init_func_internal
-#ifdef WIN32
+#ifdef _WIN32
 	if (hMutex)
 		CloseHandle(hMutex);
 #endif
@@ -73,7 +73,7 @@ CSyncroMutex::~CSyncroMutex(void)
 void CSyncroMutex::Lock()
 {
 	init_func_internal
-#ifdef WIN32
+#ifdef _WIN32
 	DWORD res=WaitForSingleObject(hMutex,INFINITE);
 	ER_ASSERT(res==S_OK || res==WAIT_ABANDONED,"Errore nel rilascio del mutex");
 #else
@@ -85,7 +85,7 @@ void CSyncroMutex::Lock()
 void CSyncroMutex::Unlock()
 {
 	init_func_internal
-#ifdef WIN32
+#ifdef _WIN32
 	if (!ReleaseMutex(hMutex)) {
 		ER_ASSERT(FALSE,"Errore nel rilascio del mutex")
 	}

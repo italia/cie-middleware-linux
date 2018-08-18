@@ -43,7 +43,11 @@ namespace p11 {
 
 	CK_SLOT_ID CSlot::GetNewSlotID() {
 		init_func
-		return __sync_add_and_fetch (&dwSlotCnt, 1);//InterlockedIncrement(&dwSlotCnt);
+	      #ifdef _WIN32
+		return InterlockedIncrement(&dwSlotCnt);
+	      #else
+		return __sync_add_and_fetch (&dwSlotCnt, 1);
+	      #endif
 	}
 
 	static DWORD slotMonitor(SlotMap *pSlotMap)
@@ -84,7 +88,11 @@ namespace p11 {
 				Context.validate();
 				ris = SCardGetStatusChange(Context, 1000, state.data(), (DWORD)dwSlotNum);
 				if (ris != SCARD_S_SUCCESS) {
-					if (CSlot::bMonitorUpdate || ris == SCARD_E_SYSTEM_CANCELLED || ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == SCARD_E_INVALID_HANDLE) {
+					if (CSlot::bMonitorUpdate || ris == SCARD_E_SYSTEM_CANCELLED || ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE 
+				      #ifdef _WIN32
+					|| ris == ERROR_INVALID_HANDLE
+				      #endif
+				) {
 						Log.write("Monitor Update");
 						break;
 					}
@@ -324,7 +332,11 @@ namespace p11 {
 					return false;
 			}
 			else {
-				if (ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == SCARD_E_INVALID_HANDLE) {
+				if (ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE 
+			      #ifdef _WIN32
+				|| ris == ERROR_INVALID_HANDLE
+			      #endif
+				) {
 					// devo prendere un nuovo context e riprovare
 					if (!retry)
 						retry = true;
@@ -350,13 +362,13 @@ namespace p11 {
 			pInfo->flags |= CKF_TOKEN_PRESENT;
 
 		memset(pInfo->slotDescription, ' ', 64);
-		size_t SDLen = std::min(size_t(64), szName.size() - 1);
-		memcpy(pInfo->slotDescription, szName.c_str(), std::min(size_t(64), SDLen));
+		size_t SDLen = std::min(size_t{64}, szName.size() - 1);
+		memcpy_s(pInfo->slotDescription, size_t{64}, szName.c_str(), SDLen);
 
 		memset(pInfo->manufacturerID, ' ', 32);
 		// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
-		size_t MIDLen = std::min(size_t(32), szName.size());
-		memcpy(pInfo->manufacturerID, szName.c_str(), std::min(size_t(32), MIDLen));
+		size_t MIDLen = std::min(size_t{32}, szName.size());
+		memcpy_s(pInfo->manufacturerID, size_t{32}, szName.c_str(), MIDLen);
 
 		pInfo->hardwareVersion.major = 0;
 		pInfo->hardwareVersion.minor = 0;
@@ -378,7 +390,7 @@ namespace p11 {
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
 		memset(pInfo->label, ' ', sizeof(pInfo->label));
-		memcpy((char*)pInfo->label, pTemplate->szName.c_str(), std::min(size_t(32), std::min(pTemplate->szName.length(), sizeof(pInfo->label))));
+		memcpy_s((char*)pInfo->label, size_t{32}, pTemplate->szName.c_str(), std::min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
 		std::string manifacturer;
@@ -391,7 +403,7 @@ namespace p11 {
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
-		memcpy((char*)pInfo->manufacturerID, manifacturer.c_str(), std::min(size_t(32), manifacturer.size()));
+		memcpy_s((char*)pInfo->manufacturerID, size_t{32}, manifacturer.c_str(), manifacturer.size());
 
 		if (baSerial.isEmpty() || pSerialTemplate != pTemplate) {
 			pSerialTemplate = pTemplate;
@@ -403,12 +415,12 @@ namespace p11 {
 
 		memset(pInfo->serialNumber, ' ', sizeof(pInfo->serialNumber));
 		size_t UIDsize = std::min(sizeof(pInfo->serialNumber), baSerial.size());
-		memcpy(pInfo->serialNumber, baSerial.data(), std::min(size_t(16), UIDsize));
+		memcpy_s(pInfo->serialNumber, size_t{16}, baSerial.data(), UIDsize);
 
-		memcpy((char*)pInfo->label + pTemplate->szName.length() + 1, baSerial.data(), std::min(sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.size()));
+		memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.data(), baSerial.size());
 
 		memset(pInfo->model, ' ', sizeof(pInfo->model));
-		memcpy(pInfo->model, model.c_str(), std::min(model.length(), std::min(size_t(16), sizeof(pInfo->model))));
+		memcpy_s(pInfo->model, size_t{16}, model.c_str(), std::min(model.length(), sizeof(pInfo->model)));
 
 		CK_FLAGS dwFlags;
 		pTemplate->FunctionList.templateGetTokenFlags(*this, dwFlags);
@@ -436,7 +448,7 @@ namespace p11 {
 		pInfo->firmwareVersion.major = 0;
 		pInfo->firmwareVersion.minor = 0;
 
-		memcpy((char*)pInfo->utcTime, "1234567890123456", 16);  // OK
+		memcpy_s((char*)pInfo->utcTime, 16, "1234567890123456", 16);  // OK
 	}
 
 	void CSlot::CloseAllSessions()
@@ -598,7 +610,11 @@ namespace p11 {
 
 	CK_OBJECT_HANDLE CSlot::GetNewObjectID() {
 		init_func
-		return __sync_add_and_fetch (&dwP11ObjCnt, 1);//InterlockedIncrement(&dwP11ObjCnt);
+	      #ifdef _WIN32
+		return InterlockedIncrement(&dwP11ObjCnt);
+	      #else
+		return __sync_add_and_fetch (&dwP11ObjCnt, 1);
+	      #endif
 	}
 
 	void CSlot::DelObjectHandle(const std::shared_ptr<CP11Object>& pObject)
@@ -638,7 +654,11 @@ namespace p11 {
 				return;
 			}
 			else {
-				if (ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE || ris == SCARD_E_INVALID_HANDLE) {
+				if (ris == SCARD_E_SERVICE_STOPPED || ris == SCARD_E_INVALID_HANDLE 
+				    #ifdef _WIN32
+					|| ris == ERROR_INVALID_HANDLE
+				    #endif
+				) {
 					if (!retry)
 						retry = true;
 					else {

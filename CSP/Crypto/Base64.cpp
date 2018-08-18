@@ -1,8 +1,11 @@
 #include "../StdAfx.h"
 #include "Base64.h"
-//#include <Wincrypt.h>
 
 static const char *szCompiledFile=__FILE__;
+
+#ifdef _WIN32
+#include <Wincrypt.h>
+#else
 
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -79,6 +82,7 @@ void CryptStringToBinary(const char* encoded, size_t encodedSize, EncodingType t
 		break;
 	}
 }
+#endif
 
 CBase64::CBase64()
 {

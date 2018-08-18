@@ -1,9 +1,14 @@
 #include "../StdAfx.h"
 #include <Thread.h>
 #include <algorithm>
-#ifdef WIN32
-#include <windows.h>
-#include <bcrypt.h>
+#ifdef _WIN32
+	#include <windows.h>
+	#include <bcrypt.h>
+#elif defined (__linux__)
+	#include <openssl/x509.h>
+	#include <openssl/x509v3.h>
+	#include <openssl/bio.h>
+	#include <openssl/err.h>
 #endif
 #include "CardMod.h"
 #include "../PCSC/Token.h"
@@ -12,11 +17,6 @@
 #include "IAS.h"
 #include <functional>
 #include <fstream>
-#include <openssl/x509.h>
-#include <openssl/x509v3.h>
-#include <openssl/bio.h>
-#include <openssl/err.h>
-
 
 #define CIE_KEY_BITLEN 2048
 
@@ -33,7 +33,7 @@
 #pragma comment(linker, "/export:CardAcquireContext=_CardAcquireContext@8")
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 typedef struct {
 	PUBLICKEYSTRUC  publickeystruc;
 	RSAPUBKEY rsapubkey;
@@ -46,7 +46,7 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 		if (code == 0xfffd) {
 			size_t bufLen = *respSize;
 			*respSize = sizeof(data->hScard)+2;
-			memcpy(resp, &data->hScard, std::min(bufLen, sizeof(data->hScard)));
+			memcpy_s(resp, bufLen, &data->hScard, sizeof(data->hScard));
 			resp[sizeof(data->hScard)] = 0;
 			resp[sizeof(data->hScard)+1] = 0;
 			return SCARD_S_SUCCESS;
@@ -159,30 +159,39 @@ DWORD WINAPI CardReadFile(
 			ias->GetCertificate(cert, false);
 			DWORD keylen = 2048;
 			if (!cert.isEmpty()) {
+			      #ifdef __linux__
 				BYTE *p = (BYTE*)cert.data();
 				const BYTE* cp = p;
 				std::unique_ptr<X509,std::function<void(X509*)>> cer{d2i_X509(nullptr, &cp, cert.size()), [](X509* val){ X509_free(val);}};
-				//PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
+			      #elif defined(_WIN32)
+				PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
+			      #endif
 				if (cer == nullptr)
 					throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
-				//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
-
+			      #ifdef _WIN32
+				auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
+				keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
+			      #elif defined(__linux__)
 				std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(cer.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			       #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 				RSA *rsa_key = EVP_PKEY_get0_RSA(pkey.get());	
-#else
+			       #else
 				RSA *rsa_key = pkey->pkey.rsa;
-#endif
+			       #endif
 				keylen = RSA_size(rsa_key);	//TODO: is this really RSA_size()?
-				//keylen = CertGetPublicKeyLength(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, &cer->pCertInfo->SubjectPublicKeyInfo);
+			      #endif
 				if (keylen == 0)
 					throw logged_error(stdPrintf("Errore nella lettura della lunghezza della chiave del certificato:%08x", GetLastError()));
 			}
 
 			CONTAINER_MAP_RECORD value;
 			
-			std::string emptyStr{};
+		      #ifdef __linux__
+			std::string emptyStr{};		      
 			swprintf(value.wszGuid, sizeof(value.wszGuid), L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), emptyStr, false).c_str());
+		      #elif defined(_WIN32)
+			swprintf_s(value.wszGuid, L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), std::string(), false).c_str());
+		      #endif
 			value.wSigKeySizeBits = (WORD)keylen;
 			value.wKeyExchangeKeySizeBits = 0;
 			value.bReserved = 0;
@@ -207,7 +216,7 @@ DWORD WINAPI CardReadFile(
 	if (pcbData != nullptr && *pcbData != 0)
 		dataLen = std::min(dataLen, *pcbData);
 	*ppbData = (PBYTE)pCardData->pfnCspAlloc(dataLen);
-	memcpy(*ppbData, response.data(), dataLen);
+	memcpy_s(*ppbData, dataLen, response.data(), dataLen);
 	if (pcbData != nullptr)
 		*pcbData = (DWORD)dataLen;
 	return SCARD_S_SUCCESS;
@@ -224,7 +233,7 @@ DWORD WINAPI CardSignData(
 	__in    PCARD_DATA          pCardData,
 	__inout PCARD_SIGNING_INFO  pInfo) {
 	init_CSP_func
-#ifdef WIN32
+      #ifdef _WIN32
 	if (pInfo->bContainerIndex != CIE_CONTAINER_ID)
 		throw CSP_error(SCARD_E_NO_KEY_CONTAINER);
 	if (pInfo->dwKeySpec != AT_SIGNATURE)
@@ -288,12 +297,12 @@ DWORD WINAPI CardSignData(
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
 	return E_UNEXPECTED;
-#else
+      #elif defined(__linux__)
 	std::cout << "should implement CardSignData" << std::endl;
 	abort();
 	exit_CSP_func
 	return E_UNEXPECTED;
-#endif
+      #endif
 }
 
 bool abilitaSbloccoPIN = true;
@@ -391,7 +400,7 @@ DWORD WINAPI CardAuthenticateEx(
 }
 
 void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
-#ifdef WIN32
+      #ifdef _WIN32
 	value.dwVersion = CONTAINER_INFO_CURRENT_VERSION;
 	value.dwReserved = 0;
 
@@ -402,29 +411,34 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
 	ByteDynArray cert;
 	ias->GetCertificate(cert);
 
+      #if defined(__linux__)
 	BYTE *p = (BYTE*)cert.data();
 	const BYTE* cp = p;
 	std::unique_ptr<X509,std::function<void(X509*)>> cer{d2i_X509(nullptr, &cp, cert.size()), [](X509* val){ X509_free(val);}};
-	//PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
+      #elif defined(_WIN32)
+	PCCERT_CONTEXT cer = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, cert.data(), (DWORD)cert.size());
+      #endif
 	if (cer == nullptr)
 		throw logged_error(stdPrintf("Errore nella lettura del certificato:%08x", GetLastError()));
-	//auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
-
-	DWORD PubKeyLen = 0;
-#ifdef WIN32
+      #ifdef _WIN32
+	auto _1 = scopeExit([&]() noexcept {CertFreeCertificateContext(cer); });
+      #endif
+      
+	DWORD PubKeyLen = 0;     
+      #ifdef _WIN32
 	PCERT_PUBLIC_KEY_INFO pinf = &(cer->pCertInfo->SubjectPublicKeyInfo);
 	if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pinf->PublicKey.pbData, pinf->PublicKey.cbData, 0, NULL, &PubKeyLen))
 		throw logged_error(stdPrintf("Errore nella decodifica della chiave pubblica:%08x", GetLastError()));
 	PUBKEYSTRUCT_BASE* PubKey = (PUBKEYSTRUCT_BASE*)pCardData->pfnCspAlloc(PubKeyLen);
 	if (!CryptDecodeObject(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, pinf->PublicKey.pbData, pinf->PublicKey.cbData, 0, PubKey, &PubKeyLen))
 		throw logged_error(stdPrintf("Errore nella decodifica della chiave pubblica:%08x", GetLastError()));
-#else
+      #elif defined(__linux__)
 	std::unique_ptr<EVP_PKEY,std::function<void(EVP_PKEY*)>> pkey{X509_get_pubkey(cer.get()), [](EVP_PKEY* val){ EVP_PKEY_free(val);}};
 	RSA *rsa_key = pkey->pkey.rsa;
 	PubKeyLen = sizeof(RSA); //TODO: check this. Is it RSA_Size(rsa_key)?
 	PUBKEYSTRUCT_BASE* PubKey = (PUBKEYSTRUCT_BASE*)pCardData->pfnCspAlloc(PubKeyLen);
 	PubKey = rsa_key;
-#endif
+      #endif
 	PubKey->publickeystruc.aiKeyAlg = CALG_RSA_SIGN;
 
 	value.cbKeyExPublicKey = 0;
@@ -432,10 +446,10 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
 	value.cbSigPublicKey = PubKeyLen;
 	value.pbSigPublicKey = (PBYTE)PubKey;
 	value.dwVersion = CONTAINER_INFO_CURRENT_VERSION;
-#else
+      #elif defined(__linux__)
 	std::cout << "Must implements GetContainerInfo" << std::endl;
 	abort();
-#endif
+      #endif
 }
 
 DWORD WINAPI CardGetContainerProperty(
@@ -468,7 +482,7 @@ DWORD WINAPI CardGetContainerProperty(
 	*pdwDataLen = (DWORD)response.size();
 	if (cbData < response.size())
 		return ERROR_INSUFFICIENT_BUFFER;
-	memcpy(pbData, response.data(), std::min(cbData, response.size()));
+	memcpy_s(pbData, cbData, response.data(), response.size());
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
 	return E_UNEXPECTED;
@@ -483,7 +497,7 @@ __out                                       PDWORD      pdwDataLen,
 __in                                        DWORD       dwFlags)
 {
 	init_CSP_func
-#ifdef WIN32
+      #ifdef _WIN32
 	*pdwDataLen = 0;
 	ByteDynArray response;
 	if (lstrcmpW(wszProperty, CP_CARD_GUID) == 0) {
@@ -610,16 +624,16 @@ __in                                        DWORD       dwFlags)
 	*pdwDataLen = (DWORD)response.size();
 	if (cbData < response.size())
 		return ERROR_INSUFFICIENT_BUFFER;
-	memcpy(pbData, response.data(), std::min(cbData, response.size()));
+	memcpy_s(pbData, cbData, response.data(), response.size());
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
 	return E_UNEXPECTED;
-#else
+      #elif defined(__linux__)
 	std::cout << "Must implement CardGetProperty" << std::endl;
 	abort();
 	exit_CSP_func
 	return E_UNEXPECTED;
-#endif
+      #endif
 }
 
 DWORD
@@ -879,7 +893,11 @@ extern "C" DWORD WINAPI CardAcquireContext(
 
 	CModuleInfo info;
 	info.init(info.getApplicationModule());
-	auto pid = std::hash<std::thread::id>{}(std::this_thread::get_id()); //GetCurrentProcessId();
+      #ifdef _WIN32
+	auto pid = GetCurrentProcessId();
+      #elif defined(__linux__)
+	auto pid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+      #endif
 	OutputDebugString(stdPrintf("Process: %i %08x %s", pid, pid, info.szModuleName.c_str()).c_str());
 
 	ByteDynArray data;

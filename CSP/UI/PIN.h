@@ -4,7 +4,7 @@
 
 #include "AtlBitmapSkinButton.h"
 #include "atlcontrols.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include "../res/resource.h"       // simboli principali
 #include <windows.h>      // simboli principali
 #endif
@@ -16,11 +16,11 @@
 extern CModuleInfo moduleInfo;
 
 class CPin
-#ifdef WIN32
+#ifdef _WIN32
 	: public CDialogImpl<CPin>
 #endif
 {
-#ifdef WIN32
+#ifdef _WIN32
 	CAtlBitmapButton okButton, cancelButton;
 	CBitmap backGround;
 	CEdit edit;
@@ -38,7 +38,7 @@ public:
 	CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title = NULL, bool repeat = false);
 	~CPin();
 
-#ifdef WIN32
+#ifdef _WIN32
 	enum { IDD = IDD_PIN };
 
 	BEGIN_MSG_MAP(CPin)
@@ -65,7 +65,7 @@ public:
 	LRESULT OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-#ifdef WIN32
+#ifdef _WIN32
 	void ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title);
 #else
 	INT_PTR DoModal();

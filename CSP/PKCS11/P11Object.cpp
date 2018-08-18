@@ -47,7 +47,7 @@ void CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 				pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
 			else {
 				if (attr->size() > ulValLen)
-					ret = CKR_BUFFER_TOO_SMALL;//throw p11_error(CKR_BUFFER_TOO_SMALL);
+					ret = CKR_BUFFER_TOO_SMALL;
 				else {
 					ByteArray((uint8_t*)pTemplate[i].pValue, attr->size()).copy(*attr);
 					pTemplate[i].ulValueLen = (CK_ULONG)attr->size();
@@ -55,7 +55,7 @@ void CP11Object::GetAttributeValue(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
 			}
 		}
 		else {
-			ret = CKR_ATTRIBUTE_TYPE_INVALID;//throw p11_error(CKR_ATTRIBUTE_TYPE_INVALID);
+			ret = CKR_ATTRIBUTE_TYPE_INVALID;
 		}
 	}
 

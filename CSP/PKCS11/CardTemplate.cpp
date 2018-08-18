@@ -1,5 +1,7 @@
 //#include "../StdAfx.h"
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 #include "CardTemplate.h"
 #include "../Util/util.h"
 #include "../Util/ModuleInfo.h"
@@ -26,8 +28,13 @@ CCardTemplate::CCardTemplate(void)
 
 CCardTemplate::~CCardTemplate(void)
 {
-	if (hLibrary)
+	if (hLibrary) {
+	      #ifdef _WIN32
+		FreeLibrary(hLibrary);
+	      #else
 		dlclose(hLibrary);
+	      #endif
+	}
 }
 
 void CCardTemplate::AddTemplate(std::shared_ptr<CCardTemplate> pTemplate) {

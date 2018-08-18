@@ -1,6 +1,7 @@
 #include "../StdAfx.h"
-#include <reader.h>
+#include <winscard.h>
 #include "../PCSC/PCSC.h"
+#include <reader.h>
 #include "IAS.h"
 #include "CSP.h"
 #include "../Util/ModuleInfo.h"
@@ -11,9 +12,15 @@
 #include <functional>
 #include "../Crypto/ASNParser.h"
 #include "../UI/safeDesktop.h"
-#ifdef WIN32
-#include <atlbase.h>
+#include <string>
+#ifdef __linux__
+	#include "../Util/defines.h"
+	#include "../Util/funccallinfo.h"
+	#include "helper.h"	
+#elif defined(_WIN32)
+	#include <atlbase.h>
 #endif
+#include "cambioPIN.h"
 
 extern CModuleInfo moduleInfo;
 extern "C" DWORD WINAPI CardAcquireContext(IN PCARD_DATA pCardData, __in DWORD dwFlags);
@@ -119,9 +126,15 @@ DWORD WINAPI _cambioPIN() {
 		DWORD len = SCARD_AUTOALLOCATE;
 		cData.hScard = hCard;
 		SCardGetAttrib(cData.hScard, SCARD_ATTR_ATR_STRING, (BYTE*)&cData.pbAtr, &len);
-		cData.pfnCspAlloc = (PFN_CSP_ALLOC)malloc/*CryptMemAlloc*/;	//TODO: use something more secure
-		cData.pfnCspReAlloc = (PFN_CSP_REALLOC)realloc/*CryptMemRealloc*/;
-		cData.pfnCspFree = (PFN_CSP_FREE)free/*CryptMemFree*/;
+	      #ifdef _WIN32
+		cData.pfnCspAlloc = (PFN_CSP_ALLOC)CryptMemAlloc;
+		cData.pfnCspReAlloc = (PFN_CSP_REALLOC)CryptMemRealloc;
+		cData.pfnCspFree = (PFN_CSP_FREE)CryptMemFree;
+	      #elif defined(__linux__)
+		cData.pfnCspAlloc = (PFN_CSP_ALLOC)malloc;	//TODO: use something more secure
+		cData.pfnCspReAlloc = (PFN_CSP_REALLOC)realloc;
+		cData.pfnCspFree = (PFN_CSP_FREE)free;
+	      #endif
 		cData.cbAtr = len;
 		cData.pwszCardName = L"CIE";
 		auto isCIE = CardAcquireContext(&cData, 0)==SCARD_S_SUCCESS;
@@ -220,15 +233,15 @@ DWORD WINAPI _cambioPIN() {
 	return E_UNEXPECTED;
 }
 
-extern "C" int CALLBACK CambioPIN(
-	/*_In_*/ HINSTANCE hInstance,
-	/*_In_*/ HINSTANCE hPrevInstance,
-	/*_In_*/ LPSTR     lpCmdLine,
-	/*_In_*/ int       nCmdShow
+int CALLBACK CambioPIN(
+	_In_ HINSTANCE hInstance,
+	_In_ HINSTANCE hPrevInstance,
+	_In_ LPCSTR     lpCmdLine,
+	_In_ int       nCmdShow
 	)
 {
 	init_CSP_func
-#ifdef WIN32
+      #ifdef _WIN32
 	if (_AtlWinModule.cbSize != sizeof(_ATL_WIN_MODULE)) {
 		_AtlWinModule.cbSize = sizeof(_ATL_WIN_MODULE);
 		AtlWinModuleInit(&_AtlWinModule);
@@ -239,7 +252,7 @@ extern "C" int CALLBACK CambioPIN(
 	wndClass.style |= CS_DROPSHADOW;
 	wndClass.lpszClassName = "CIEDialog";
 	RegisterClass(&wndClass);
-#endif
+      #endif
 	ODS("Start CambioPIN");
 
 	_cambioPIN();

@@ -5,7 +5,7 @@
 static const char *szCompiledFile = __FILE__;
 using std::min;
 
-#ifdef WIN32
+#ifdef _WIN32
 
 class init_3des {
 public:

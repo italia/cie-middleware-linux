@@ -2,13 +2,13 @@
 
 #include "../StdAfx.h"
 #include "PIN.h"
-#ifndef WIN32
+#ifndef _WIN32
         #include "helper.h"
 #endif
 
 CPin::CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title, bool repeat)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 	txtFont2 = CreateFont(15, 0, 0, 0, 400, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 #endif
@@ -18,20 +18,18 @@ CPin::CPin(int PinLen, const char *message, const char *message2, const char *me
 	this->title = title;
 	this->repeat = repeat;
 	this->PinLen = PinLen;
-
-	//std::cout << __FILE__ << ": " << title << std::endl << message << std::endl << message2 << std::endl << message3 << std::endl << "Repeat: " << repeat << std::endl << "PinLen: " << PinLen << std::endl;
 }
 
 CPin::~CPin()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	DeleteObject(txtFont);
 	DeleteObject(txtFont2);
 #endif
 }
 
 LRESULT CPin::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	SetBkMode((HDC)wParam, TRANSPARENT);
 	return (INT_PTR)::GetStockObject(NULL_PEN);
@@ -41,7 +39,7 @@ LRESULT CPin::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled
 }
 
 LRESULT CPin::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	return (LRESULT)HTCAPTION;
 #else 
@@ -50,7 +48,7 @@ LRESULT CPin::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 }
 
 LRESULT CPin::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)  {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	int id = ::GetDlgCtrlID((HWND)lParam);
 	SetBkMode((HDC)wParam, TRANSPARENT);
@@ -62,7 +60,7 @@ LRESULT CPin::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHan
 
 LRESULT CPin::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	CenterWindow();
 	SetIcon(LoadIcon((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(IDI_CIE)));
 
@@ -110,7 +108,7 @@ LRESULT CPin::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandl
 
 LRESULT CPin::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	edit.GetWindowTextA(PIN, 99);
 	if (PIN[0] == 0) {
@@ -150,7 +148,7 @@ LRESULT CPin::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandl
 
 LRESULT CPin::OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	EndDialog(wID);
 	return TRUE;
@@ -161,7 +159,7 @@ LRESULT CPin::OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bH
 
 LRESULT CPin::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	RECT rect;
 	ZeroMem(rect);
 	GetUpdateRect(&rect);
@@ -180,7 +178,7 @@ LRESULT CPin::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandle
 #endif
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 void CPin::ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title) {
 	EDITBALLOONTIP ebt;
 
@@ -190,12 +188,11 @@ void CPin::ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title) {
 	ebt.ttiIcon = TTI_ERROR;    // tooltip icon
 
 	SendMessage(edit.m_hWnd, EM_SHOWBALLOONTIP, 0, (LPARAM)&ebt);
-	return 0;
 }
 #endif
 
 
-#ifndef WIN32
+#ifndef _WIN32
 INT_PTR CPin::DoModal()
 {
 #if 0

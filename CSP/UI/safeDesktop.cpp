@@ -1,6 +1,6 @@
 #include "../StdAfx.h"
 #include "safeDesktop.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <Sddl.h>
 
 BOOL CreateMyDACL(SECURITY_ATTRIBUTES * pSA)
@@ -25,7 +25,7 @@ BOOL CreateMyDACL(SECURITY_ATTRIBUTES * pSA)
 bool switchDesktop = false;
 
 safeDesktop::safeDesktop(const char *name) {
-#ifdef WIN32
+#ifdef _WIN32
 	if (!switchDesktop)
 		return;
 	hDeskCur = GetThreadDesktop(GetCurrentThreadId());
@@ -58,7 +58,7 @@ safeDesktop::operator HDESK() {
 }
 
 safeDesktop::~safeDesktop() {
-#ifdef WIN32
+#ifdef _WIN32
 	if (!switchDesktop)
 		return;
 	auto ris = SwitchDesktop(hDeskCur);

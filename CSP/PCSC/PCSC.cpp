@@ -20,7 +20,7 @@ safeTransaction::safeTransaction(safeConnection &conn, DWORD dwDisposition) {
 	td->started = false;
 	auto thread = std::thread([td]() {
 		for (int i = 0; i < 10; i++) {
-			#ifdef WIN32
+			#ifdef _WIN32
 			Sleep(500);
 			#else
 			usleep(500000);

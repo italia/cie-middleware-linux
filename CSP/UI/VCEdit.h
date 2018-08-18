@@ -1,5 +1,5 @@
 //header file
-#ifdef WIN32
+#ifdef _WIN32
 #pragma once
 #include <atltypes.h>
 #include <atlbase.h>
@@ -33,7 +33,7 @@ public:
 	{
 	}
 
-#ifdef WIN32
+#ifdef _WIN32
 	BEGIN_MSG_MAP(CEditVCT<T>)
 		MESSAGE_HANDLER(WM_NCCALCSIZE, OnNcCalcSize)
 		MESSAGE_HANDLER(WM_NCPAINT, OnNcPaint)

@@ -1,15 +1,23 @@
 #pragma once
 
-//#pragma pack(1)
+#ifdef _WIN32
+#pragma pack(1)
+#endif
 #include "pkcs11.h"
-//#pragma pack()
+#ifdef _WIN32
+#pragma pack()
+#endif
 
 #include <winscard.h>
 
 #define MAXVAL 0xffffff
 #define MAXSESSIONS MAXVAL
 
+#ifdef _WIN32
+#define CK_ENTRY __declspec(dllexport)
+#else
 #define CK_ENTRY __attribute__ ((visibility ("default")))
+#endif
 #define LIBRARY_VERSION_MAJOR 2
 #define LIBRARY_VERSION_MINOR 0
 

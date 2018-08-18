@@ -9,8 +9,9 @@ class CThread
 //public:
 	CThread(void);
 	~CThread(void);
-#ifdef WIN32
+#ifdef _WIN32
 	HANDLE hThread;
+	DWORD dwThreadID;
 #else
 	std::thread hThread;
 #endif
@@ -20,5 +21,9 @@ class CThread
 	void terminateThread();
 	void exitThread(DWORD dwCode);
 	void close();
+#ifdef _WIN32
+	inline static DWORD getID() {return GetCurrentThreadId();}
+#else
 	inline static std::thread::id getID() {return std::this_thread::get_id();}
+#endif
 };

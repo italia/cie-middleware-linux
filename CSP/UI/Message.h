@@ -17,12 +17,12 @@
 extern CModuleInfo moduleInfo;
 
 class CMessage 
-#ifdef WIN32
-: public CDialogImpl<CMessage>
+#ifdef _WIN32
+	: public CDialogImpl<CMessage>
 #endif
 {
 public:
-#ifdef WIN32
+#ifdef _WIN32
 	CStatic tit;
 	CAtlBitmapButton okButton,cancelButton;
 	CBitmap backGround;
@@ -38,7 +38,7 @@ public:
 	CMessage(DWORD tipo, const char *title, const char *riga1, const char *riga2 = NULL, const char *riga3 = NULL, const char *riga4 = NULL);
 
 	~CMessage();
-#ifdef WIN32
+#ifdef _WIN32
 	enum { IDD = IDD_MESSAGE };
 
 	BEGIN_MSG_MAP(CMessage)
@@ -70,10 +70,10 @@ public:
 	LRESULT OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 	
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-#ifndef WIN32
+#ifndef _WIN32
 	INT_PTR DoModal();
-#endif
 	BOOL EndDialog(HWND hDlg, INT_PTR nResult=0){return 1;}
+#endif	
 };
 
 

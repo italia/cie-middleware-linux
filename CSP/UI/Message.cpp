@@ -2,7 +2,7 @@
 
 #include "../StdAfx.h"
 #include "Message.h"
-#ifndef WIN32
+#ifndef _WIN32
 	#include "helper.h"
 #endif
 
@@ -18,7 +18,7 @@ CMessage::CMessage(DWORD tipo, const char *title, const char *riga1, const char 
 		this->riga2 = riga1;
 		this->riga1 = NULL;
 	}
-#ifdef WIN32
+#ifdef _WIN32
 	txtFont = CreateFont(20, 0, 0, 0, 800, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, 5, DEFAULT_PITCH, "Arial");
 #else
 	//std::cout << __FILE__ << ": " << title << std::endl << riga1 << std::endl << riga2 << std::endl << riga3 << std::endl << riga4 << std::endl;
@@ -27,13 +27,13 @@ CMessage::CMessage(DWORD tipo, const char *title, const char *riga1, const char 
 
 CMessage::~CMessage()
 {
-#ifdef WIN32
+#ifdef _WIN32
 	DeleteObject(txtFont);
 #endif
 }
 
 LRESULT CMessage::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	SetBkMode((HDC)wParam, TRANSPARENT);
 	return (INT_PTR)::GetStockObject(NULL_PEN);
@@ -43,7 +43,7 @@ LRESULT CMessage::OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHan
 }
 
 LRESULT CMessage::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled) {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	return (LRESULT)HTCAPTION;
 #else
@@ -52,7 +52,7 @@ LRESULT CMessage::OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHand
 }
 
 LRESULT CMessage::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)  {
-#ifdef WIN32
+#ifdef _WIN32
 	bHandled = TRUE;
 	SetBkMode((HDC)wParam, TRANSPARENT);
 	return (INT_PTR)::GetStockObject(NULL_PEN);
@@ -63,7 +63,7 @@ LRESULT CMessage::OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& 
 
 LRESULT CMessage::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	CenterWindow();
 	SetIcon(LoadIcon((HINSTANCE)moduleInfo.getModule(), MAKEINTRESOURCE(IDI_CIE)));
 
@@ -118,7 +118,7 @@ LRESULT CMessage::OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bH
 
 LRESULT CMessage::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	EndDialog(wID);
 	return 0;
 #else
@@ -128,7 +128,7 @@ LRESULT CMessage::OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bH
 
 LRESULT CMessage::OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	EndDialog(wID);
 	return 0;
 #else
@@ -138,7 +138,7 @@ LRESULT CMessage::OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL
 
 LRESULT CMessage::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	RECT rect;
 	ZeroMem(rect);
 	GetUpdateRect(&rect);
@@ -157,7 +157,7 @@ LRESULT CMessage::OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHa
 #endif
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 INT_PTR CMessage::DoModal()
 {
 	INT_PTR ret = UIhelper::makeMessageDialog(riga1, riga2, riga3, riga4, title, tipo);

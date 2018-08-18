@@ -18,8 +18,7 @@
 //==============================================================;
 #ifndef __CARDMOD__H__
 #define __CARDMOD__H__
-#include "../StdAfx.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <wincrypt.h>
 #pragma warning(push)
@@ -30,12 +29,16 @@
 #pragma warning(pop)
 #include <specstrings.h>
 #include <bcrypt.h>
+typedef uint16_t WCHAR;
+	typedef uint16_t* LPWSTR, *PWSTR;
 #else
 #ifdef __APPLE__
 #include <PCSC/winscard.h>
 #include <PCSC/wintypes.h>
 #else
+#include "defines.h"
 #include <winscard.h>
+#include <stdint.h>
 typedef const wchar_t* LPCWSTR;
 #endif
 typedef ULONG * ULONG_PTR;
@@ -43,8 +46,6 @@ typedef BYTE * PBYTE;
 typedef int ALG_ID;
 typedef void * PVOID;
 typedef size_t SIZE_T;
-//typedef uint16_t WCHAR;
-typedef wchar_t* LPWSTR, *PWSTR;
 #define __deref_opt_out_bcount(x)
 #define __deref_out_bcount_opt(x)
 #define __deref_out_bcount(x)
@@ -1534,7 +1535,7 @@ typedef struct _CARD_DATA
 	DWORD                               dwVersion;
 	PBYTE                               pbAtr;
 	DWORD                               cbAtr;
-	LPWSTR                        	    pwszCardName;
+	LPWSTR                              pwszCardName;
 	PFN_CSP_ALLOC                       pfnCspAlloc;
 	PFN_CSP_REALLOC                     pfnCspReAlloc;
 	PFN_CSP_FREE                        pfnCspFree;

@@ -3,7 +3,7 @@
 
 static const char *szCompiledFile=__FILE__;
 
-#ifdef WIN32
+#ifdef _WIN32
 
 class init_sha1 {
 public:

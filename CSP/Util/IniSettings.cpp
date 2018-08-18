@@ -8,7 +8,7 @@
 
 std::vector<IniSettings*> _iniSettings;
 
-
+#ifndef _WIN32
 #define MAX_LINE_LENGTH    200
 /*****************************************************************
 * Function:     read_line()
@@ -214,6 +214,8 @@ int WritePrivateProfileString(const char *section,
     rename(tmp_name,file_name);
     return(1);
 }
+#endif
+
 void GetIniString(const char *fileName, const char* section, const char* name, std::string &buf) {
 	buf.resize(100);
 	while (true) {
@@ -346,7 +348,7 @@ extern "C" {
 		}
 		std::string res = out + out2;
 		if (data!=NULL) 
-			memcpy(data,res.c_str(),res.size());
+			memcpy_s(data,res.size(),res.c_str(),res.size());
 		return (int)res.size();
 	}
 }

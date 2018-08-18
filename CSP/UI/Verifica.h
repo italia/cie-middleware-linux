@@ -2,7 +2,7 @@
 
 #pragma once
 
-#ifdef WIN32
+#ifdef _WIN32
 #include "../res/resource.h"       // simboli principali
 #include <windows.h>       // simboli principali
 #endif
@@ -16,12 +16,12 @@
 extern CModuleInfo moduleInfo;
 
 class CVerifica
-#ifdef WIN32
-: public CDialogImpl<CVerifica>
+#ifdef _WIN32
+	: public CDialogImpl<CVerifica>
 #endif
 {
 public:
-#ifdef WIN32
+#ifdef _WIN32
 	CAtlBitmapButton okButton,cancelButton;
 	CStatic tit;
 	CBitmap backGround;
@@ -33,7 +33,7 @@ public:
 
 	~CVerifica();
 
-#ifdef WIN32
+#ifdef _WIN32
 	enum { IDD = IDD_VERIFY };
 
 	BEGIN_MSG_MAP(CVerifica)
@@ -62,7 +62,7 @@ public:
 	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
-#ifndef WIN32
+#ifndef _WIN32
 	INT_PTR DoModal();
 #endif
 };

@@ -204,7 +204,11 @@ extern "C" {
  * #endif
  */
 
+#ifdef _WIN32
+#include "win32.h"
+#elif defined(__linux__)
 #include "linux.h"
+#endif
 
 /* All the various Cryptoki types and #define'd values are in the
  * file pkcs11t.h. */

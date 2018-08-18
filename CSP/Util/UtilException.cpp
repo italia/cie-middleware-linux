@@ -1,5 +1,5 @@
 #include "../StdAfx.h"
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <imagehlp.h>
 #endif
@@ -20,7 +20,7 @@ logged_error::logged_error(const char *message) : std::runtime_error(message) {
 scard_error::scard_error(StatusWord sw) : logged_error(stdPrintf("Errore smart card:%04x", sw)) { }
 
 windows_error::windows_error(long ris) : logged_error(stdPrintf("Errore windows:%s (%08x) ", 
-#ifdef WIN32
+#ifdef _WIN32
 			WinErr(ris), 
 #else
 			"",

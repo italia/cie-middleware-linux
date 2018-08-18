@@ -5,7 +5,9 @@
 #include <sstream>
 #include <iomanip>
 #include "log.h"
-//#include "DbgHelp.h"
+#ifdef _WIN32
+#include "DbgHelp.h"
+#endif
 #include "UtilException.h"
 #include "IniSettings.h"
 #include <Thread.h>
@@ -74,7 +76,11 @@ void initLog(const char *iniFile,const char *version) {
 	char SectionName[30];
 	int numMod=1;
 	while (true) {
+	      #ifdef _WIN32
+		sprintf_s(SectionName,30,"%s%i","LogModule",numMod);
+	      #else
 		sprintf(SectionName,"%s%i","LogModule",std::min(30,numMod));
+	      #endif
 		std::string modName;
 
 		(IniSettingsString(SectionName, "Name", "", "Nome della sezione log di log")).GetValue((char*)iniFile, modName);
@@ -129,7 +135,7 @@ void CLog::initParam(CLog &log) {
 
 	ModuleNum=GlobalModuleNum;
 	GlobalModuleNum++;
-#ifdef WIN32
+#ifdef _WIN32
 	SYSTEMTIME  stTime;
 	GetLocalTime(&stTime);
 #else
@@ -142,21 +148,37 @@ void CLog::initParam(CLog &log) {
 
 	switch (LogMode) {
 		case (LM_Single): {
+		      #ifdef _WIN32
+			th << log.logFileName << "_" << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << ".log";
+		      #else
 			th << log.logFileName << "_" << std::setw(4) << (stTime->tm_year+1900) << "-" << std::setw(2) << (stTime->tm_mon+1) << "-" << stTime->tm_mday << ".log";
+		      #endif
 			break;
 		}
 		case (LM_Module): {
+		      #ifdef _WIN32
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << ".log";
+		      #else
 			th << std::setw(4) << (stTime->tm_year+1900) << "-" << std::setw(2) << (stTime->tm_mon+1) << "-" << stTime->tm_mday << "_" << logFileName << ".log";
+		      #endif
 			// log per modulo: il nome del file è yyyy-mm-gg_name.log, senza alcun path assegnato
 			break;
 		}
 		case (LM_Thread): {
+		      #ifdef _WIN32
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_00000000.log";
+		      #else
 			th << std::setw(4) << (stTime->tm_year+1900) << "-" << std::setw(2) << (stTime->tm_mon+1) << "-" << stTime->tm_mday << "_00000000.log";
+		      #endif
 			// log per thread: il nome del file è yyyy-mm-gg_tttttttt.log, senza alcun path assegnato
 			break;
 		}
 		case (LM_Module_Thread): {
+		      #ifdef _WIN32
+			th << std::setw(4) << stTime.wYear << "-" << std::setw(2) << stTime.wMonth << "-" << stTime.wDay << "_" << logFileName << "_00000000.log";
+		      #else
 			th << std::setw(4) << (stTime->tm_year+1900) << "-" << std::setw(2) << (stTime->tm_mon+1) << "-" << stTime->tm_mday << "_" << logFileName << "_00000000.log";
+		      #endif
 			// log per modulo e per thread: il nome del file è yyyy-mm-gg_name_tttttttt.log, senza alcun path assegnato
 			break;
 		}
@@ -228,10 +250,10 @@ DWORD CLog::write(const char *format,...) {
 			case (LM_Single) : Num=&GlobalCount; break;
 		}
 
-#ifdef WIN32
+#ifdef _WIN32
 		SYSTEMTIME  stTime;
 		GetLocalTime(&stTime);
-		sprintf(pbtDate,"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
+		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
 #else
 		time_t tmpTime = time_t(nullptr);
 		struct tm *stTime = localtime( &tmpTime );
@@ -251,9 +273,17 @@ DWORD CLog::write(const char *format,...) {
 			logPath.replace(threadPos, threadPos + 14, th.str());
 		}
 		FILE *lf=nullptr;
+#ifdef _WIN32
+		fopen_s(&lf,logPath.c_str(), "a+t");
+#else
 		lf = fopen(logPath.c_str(), "a+t");
+#endif
 		if (lf) {
+#ifdef _WIN32
+			DWORD tid = GetCurrentProcessId()
+#else
 			size_t tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
+#endif
 			switch(LogMode) {
 				case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, tid, dwThreadID, ModuleNum); break;
 				case (LM_Module) : fprintf(lf,"%s|%04i|%04x|", pbtDate, tid, dwThreadID); break;
@@ -316,7 +346,11 @@ void CLog::writePure(const char *format,...) {
 			logPath.replace(threadPos, threadPos + 14, th.str());
 		}
 		FILE *lf = nullptr;
+#ifdef _WIN32
+		fopen_s(&lf,logPath.c_str(), "a+t");
+#else
 		lf = fopen(logPath.c_str(), "a+t");
+#endif
 		if (lf) {
 			vfprintf(lf, format, params);
 			fprintf(lf, "\n");
@@ -365,7 +399,11 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 	}
 
 	FILE *lf = nullptr;
+#ifdef _WIN32
+	fopen_s(&lf,logPath.c_str(), "a+t");
+#else
 	lf = fopen(logPath.c_str(), "a+t");
+#endif
 	if (lf) {
 		if (datalen>100) datalen=100;
 		for (size_t i=0;i<datalen;i++)
