@@ -1,0 +1,73 @@
+// CodiceBusta.h : Dichiarazione di CCodiceBusta
+
+#pragma once
+
+#include "AtlBitmapSkinButton.h"
+#include "atlcontrols.h"
+#ifdef _WIN32
+#include "../res/resource.h"       // simboli principali
+#include <windows.h>      // simboli principali
+#endif
+#include "../Util/ModuleInfo.h"
+#include "VCEdit.h"
+
+
+// CCodiceBusta
+extern CModuleInfo moduleInfo;
+
+class CPin
+#ifdef _WIN32
+	: public CDialogImpl<CPin>
+#endif
+{
+#ifdef _WIN32
+	CAtlBitmapButton okButton, cancelButton;
+	CBitmap backGround;
+	CEdit edit;
+	CEdit edit2;
+	CStatic tit;
+	HFONT txtFont, txtFont2;
+#endif
+	int PinLen;
+	const char *message, *message2, *message3;
+	const char *title;
+	bool repeat;
+
+public:
+	char PIN[100];
+	CPin(int PinLen, const char *message, const char *message2, const char *message3, const char *title = NULL, bool repeat = false);
+	~CPin();
+
+#ifdef _WIN32
+	enum { IDD = IDD_PIN };
+
+	BEGIN_MSG_MAP(CPin)
+	MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
+	COMMAND_HANDLER(IDOK, BN_CLICKED, OnClickedOK)
+	COMMAND_HANDLER(IDCANCEL, BN_CLICKED, OnClickedCancel)
+	MESSAGE_HANDLER(WM_PAINT, OnPaint)
+	MESSAGE_HANDLER(WM_CTLCOLORSTATIC, OnCtlColor)
+	MESSAGE_HANDLER(WM_CTLCOLORDLG, OnBGnBrush)
+	MESSAGE_HANDLER(WM_NCHITTEST, OnHitTest)
+	REFLECT_NOTIFICATIONS()
+	END_MSG_MAP()
+#endif
+
+// Prototipi di gestori:
+//  LRESULT MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+//  LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+//  LRESULT NotifyHandler(int idCtrl, LPNMHDR pnmh, BOOL& bHandled);
+
+	LRESULT OnBGnBrush(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnHitTest(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnCtlColor(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnInitDialog(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	LRESULT OnClickedOK(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnClickedCancel(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
+	LRESULT OnPaint(UINT /*uMsg*/, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+#ifdef _WIN32
+	void ShowToolTip(CEdit &edit, WCHAR *msg, WCHAR *title);
+#else
+	INT_PTR DoModal();
+#endif
+};
