@@ -1,5 +1,5 @@
-﻿#ifdef _WIN32
-#include "stdafx.h"
+﻿#include "stdafx.h"
+#ifdef _WIN32
 #include "sddl.h"
 #include "Aclapi.h"
 #include <VersionHelpers.h>
@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#define MAX_PATH	256
 #endif
 #include "CacheLib.h"
 #include <stdio.h>
@@ -18,8 +19,6 @@
 #include <fstream>
 
 #include "../CSP/Util/util.h"
-
-#define MAX_PATH	256
 
 /// Questa implementazione della cache del PIN e del certificato è fornita solo a scopo dimostrativo. Questa versione
 /// NON protegge a sufficienza il PIN dell'utente, che potrebbe essere ricavato da un'applicazione malevola. Si raccomanda di

@@ -15,7 +15,6 @@ class CThread
 #else
 	std::thread hThread;
 #endif
-	DWORD dwThreadID;
 	void createThread(void *threadFunc,void *threadData);
 	DWORD joinThread(DWORD timeout);
 	void terminateThread();

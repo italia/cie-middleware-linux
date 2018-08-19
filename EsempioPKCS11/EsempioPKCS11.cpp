@@ -1,6 +1,6 @@
 // EsempioPKCS11.cpp : Defines the entry point for the console application.
 //
-#include <functional>
+#include "stdafx.h"
 #ifndef _WIN32
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
@@ -9,13 +9,13 @@
 #include <dlfcn.h>
 typedef unsigned char BYTE;
 #else
-#include "stdafx.h"
 #include <Windows.h>
 #endif
 #include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 #ifdef _WIN32
 #pragma pack(1)

@@ -1,7 +1,7 @@
 // P11Emissione.cpp : Defines the entry point for the DLL application.
 //
 
-//#include "..\StdAfx.h"
+#include "../StdAfx.h"
 #include "PKCS11Functions.h"
 #include "InitP11.h"
 #include <winscard.h>
@@ -40,7 +40,7 @@ CK_MECHANISM_TYPE P11mechanisms[]= {
 };
 
 const char *getAttributeName(DWORD dwId);
-/*extern*/ CModuleInfo moduleInfo; // informazioni sulla dll (o so)
+extern CModuleInfo moduleInfo; // informazioni sulla dll (o so)
 bool bModuleInit=false;
 
 // funzione DllMain

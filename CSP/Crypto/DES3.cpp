@@ -3,7 +3,6 @@
 #include <algorithm>
 
 static const char *szCompiledFile = __FILE__;
-using std::min;
 
 #ifdef _WIN32
 

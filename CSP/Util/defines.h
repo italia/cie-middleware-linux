@@ -5,6 +5,7 @@
 #ifndef _WIN32
 #include <iostream>
 #include <algorithm>
+using std::min;
 #include "funccallinfo.h"
 
 using PCSTR = const char*;
@@ -46,6 +47,8 @@ using PWSTR = wchar_t*;
 #define DLL_PROCESS_ATTACH	1
 #define DLL_PROCESS_DETACH	0
 
+#define SCARD_PROTOCOL_Tx	SCARD_PROTOCOL_ANY
+
 #define _In_
 #define _Out_
 
@@ -71,6 +74,9 @@ using PWSTR = wchar_t*;
 #else
 	#define OutputDebugString(s)
 #endif
+
+#define init_func_internal 
+#define exit_func_internal
 
 #else
   #define PATH_SEPARATOR	'\\'
@@ -131,8 +137,6 @@ using PWSTR = wchar_t*;
   	CFuncCallInfo info(__FUNCTION__,Log);
 
 #define exit_func
-#define init_func_internal 
-#define exit_func_internal
 
 #define ER_ASSERT(a,b) \
 	if (!(a)) \

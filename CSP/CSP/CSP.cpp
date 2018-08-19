@@ -1,6 +1,4 @@
 #include "../StdAfx.h"
-#include <Thread.h>
-#include <algorithm>
 #ifdef _WIN32
 	#include <windows.h>
 	#include <bcrypt.h>
@@ -54,14 +52,14 @@ int TokenTransmitCallback(PCARD_DATA data, BYTE *apdu, DWORD apduSize, BYTE *res
 		if (code == 0xfffe) {
 			DWORD protocol=0;
 			ODS("UNPOWER CARD");
-			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_ANY, SCARD_UNPOWER_CARD, &protocol);
+			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
 			return 0x9000;
 		}
 		else if (code == 0xffff) {
 			DWORD protocol = 0;
-			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_ANY, SCARD_RESET_CARD, &protocol);
+			auto sw = SCardReconnect(data->hScard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (sw == SCARD_S_SUCCESS)
 				SCardBeginTransaction(data->hScard);
 			ODS("RESET CARD");
@@ -214,7 +212,7 @@ DWORD WINAPI CardReadFile(
 		throw CSP_error(SCARD_E_FILE_NOT_FOUND);
 	size_t dataLen = response.size();
 	if (pcbData != nullptr && *pcbData != 0)
-		dataLen = std::min(dataLen, *pcbData);
+		dataLen = min(dataLen, *pcbData);
 	*ppbData = (PBYTE)pCardData->pfnCspAlloc(dataLen);
 	memcpy_s(*ppbData, dataLen, response.data(), dataLen);
 	if (pcbData != nullptr)
@@ -917,7 +915,7 @@ extern "C" DWORD WINAPI CardAcquireContext(
 
 	ias->ReadDappPubKey(resp);
 
-	pCardData->dwVersion = std::min(pCardData->dwVersion, DWORD(7));
+	pCardData->dwVersion = min(pCardData->dwVersion, DWORD(7));
 	pCardData->pfnCardReadFile = CardReadFile;
 	pCardData->pfnCardDeleteContext = CardDeleteContext;
 	pCardData->pfnCardAuthenticatePin = CardAuthenticatePin;

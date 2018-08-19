@@ -32,7 +32,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 		else if (code == 0xfffe) {
 			DWORD protocol = 0;
 			ODS("UNPOWER CARD");
-			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_ANY, SCARD_UNPOWER_CARD, &protocol);
+			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_UNPOWER_CARD, &protocol);
 			if (ris == SCARD_S_SUCCESS) {
 				SCardBeginTransaction(data->hCard);
 				*respSize = 2;
@@ -43,7 +43,7 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 		}
 		else if (code == 0xffff) {
 			DWORD protocol = 0;
-			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_ANY, SCARD_RESET_CARD, &protocol);
+			auto ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_RESET_CARD, &protocol);
 			if (ris == SCARD_S_SUCCESS) {
 				SCardBeginTransaction(data->hCard);
 				*respSize = 2;

@@ -6,10 +6,6 @@
 #else
 #include <openssl/rand.h>
 #endif
-#include <algorithm>
-
-using std::min;
-
 
 ByteArray::ByteArray() {
 	_data = nullptr;

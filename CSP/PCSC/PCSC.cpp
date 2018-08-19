@@ -1,7 +1,6 @@
 #include "PCSC.h"
 #include "../Util/UtilException.h"
 #include <thread>
-#include <unistd.h>
 
 struct transData {
 	SCARDCONTEXT context;

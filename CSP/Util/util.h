@@ -231,7 +231,9 @@ long ByteArrayToInt(ByteArray &ba);
 const ByteDynArray ISOPad(const ByteArray &data);
 const ByteDynArray ISOPad16(const ByteArray &data);
 
- //std::string WinErr(HRESULT ris);
+#ifdef _WIN32
+std::string WinErr(HRESULT ris);
+#endif
 const char * CardErr(DWORD dwSW);
 const char * SystemErr(DWORD dwExcept);
  

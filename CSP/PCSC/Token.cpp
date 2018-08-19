@@ -4,9 +4,7 @@
 #include "APDU.h"
 #include "../Util/TLV.h"
 #include <vector>
-#include <algorithm>
 
-using std::min;
 static const char *szCompiledFile=__FILE__;
 
 CToken::CToken()

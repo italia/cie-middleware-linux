@@ -10,7 +10,7 @@
 #endif
 #include "UtilException.h"
 #include "IniSettings.h"
-#include <Thread.h>
+#include <thread>
 #include <algorithm>
 
 
@@ -79,7 +79,7 @@ void initLog(const char *iniFile,const char *version) {
 	      #ifdef _WIN32
 		sprintf_s(SectionName,30,"%s%i","LogModule",numMod);
 	      #else
-		sprintf(SectionName,"%s%i","LogModule",std::min(30,numMod));
+		sprintf(SectionName,"%s%i","LogModule", min(30,numMod));
 	      #endif
 		std::string modName;
 
@@ -280,7 +280,7 @@ DWORD CLog::write(const char *format,...) {
 #endif
 		if (lf) {
 #ifdef _WIN32
-			DWORD tid = GetCurrentProcessId()
+			DWORD tid = GetCurrentProcessId();
 #else
 			size_t tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
 #endif

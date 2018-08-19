@@ -3,7 +3,6 @@
 #include "Slot.h"
 #include "PKCS11Functions.h"
 #include "../PCSC/Token.h"
-#include <algorithm>
 #include "CardTemplate.h"
 #include "../Util/util.h"
 #include "../Util/SyncroEvent.h"
@@ -362,12 +361,12 @@ namespace p11 {
 			pInfo->flags |= CKF_TOKEN_PRESENT;
 
 		memset(pInfo->slotDescription, ' ', 64);
-		size_t SDLen = std::min(size_t{64}, szName.size() - 1);
+		size_t SDLen = min(size_t{64}, szName.size() - 1);
 		memcpy_s(pInfo->slotDescription, size_t{64}, szName.c_str(), SDLen);
 
 		memset(pInfo->manufacturerID, ' ', 32);
 		// non so esattamente perchè, ma nella R1 il manufacturerID sono i primi 32 dello slotDescription
-		size_t MIDLen = std::min(size_t{32}, szName.size());
+		size_t MIDLen = min(size_t{32}, szName.size());
 		memcpy_s(pInfo->manufacturerID, size_t{32}, szName.c_str(), MIDLen);
 
 		pInfo->hardwareVersion.major = 0;
@@ -390,7 +389,7 @@ namespace p11 {
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
 		memset(pInfo->label, ' ', sizeof(pInfo->label));
-		memcpy_s((char*)pInfo->label, size_t{32}, pTemplate->szName.c_str(), std::min(pTemplate->szName.length(), sizeof(pInfo->label)));
+		memcpy_s((char*)pInfo->label, size_t{32}, pTemplate->szName.c_str(), min(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
 		std::string manifacturer;
@@ -414,13 +413,13 @@ namespace p11 {
 		pTemplate->FunctionList.templateGetModel(*this, model);
 
 		memset(pInfo->serialNumber, ' ', sizeof(pInfo->serialNumber));
-		size_t UIDsize = std::min(sizeof(pInfo->serialNumber), baSerial.size());
+		size_t UIDsize = min(sizeof(pInfo->serialNumber), baSerial.size());
 		memcpy_s(pInfo->serialNumber, size_t{16}, baSerial.data(), UIDsize);
 
 		memcpy_s((char*)pInfo->label + pTemplate->szName.length() + 1, sizeof(pInfo->label) - pTemplate->szName.length() - 1, baSerial.data(), baSerial.size());
 
 		memset(pInfo->model, ' ', sizeof(pInfo->model));
-		memcpy_s(pInfo->model, size_t{16}, model.c_str(), std::min(model.length(), sizeof(pInfo->model)));
+		memcpy_s(pInfo->model, size_t{16}, model.c_str(), min(model.length(), sizeof(pInfo->model)));
 
 		CK_FLAGS dwFlags;
 		pTemplate->FunctionList.templateGetTokenFlags(*this, dwFlags);

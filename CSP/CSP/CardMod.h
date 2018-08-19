@@ -29,8 +29,6 @@
 #pragma warning(pop)
 #include <specstrings.h>
 #include <bcrypt.h>
-typedef uint16_t WCHAR;
-	typedef uint16_t* LPWSTR, *PWSTR;
 #else
 #ifdef __APPLE__
 #include <PCSC/winscard.h>
@@ -46,6 +44,8 @@ typedef BYTE * PBYTE;
 typedef int ALG_ID;
 typedef void * PVOID;
 typedef size_t SIZE_T;
+typedef uint16_t WCHAR;
+typedef uint16_t* LPWSTR, *PWSTR;
 #define __deref_opt_out_bcount(x)
 #define __deref_out_bcount_opt(x)
 #define __deref_out_bcount(x)

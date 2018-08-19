@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include <winscard.h>
 #include "../PCSC/PCSC.h"
-#include <reader.h>
+//#include <reader.h>
 #include "IAS.h"
 #include "CSP.h"
 #include "../Util/ModuleInfo.h"

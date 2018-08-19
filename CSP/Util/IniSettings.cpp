@@ -4,7 +4,6 @@
 #include <sstream>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 std::vector<IniSettings*> _iniSettings;
 

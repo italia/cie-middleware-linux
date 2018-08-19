@@ -783,7 +783,7 @@ StatusWord IAS::SendAPDU_SM(const ByteArray &head, const ByteArray &data, ByteDy
 		size_t i = 0;
 		uint8_t cla = head[0];
 		while (true) {
-			s = data.mid(i, std::min(size_t(0xE7), data.size() - i));
+			s = data.mid(i, min(size_t(0xE7), data.size() - i));
 			i += s.size();
 			if (i != data.size())
 				head[0] = cla | 0x10;
@@ -821,7 +821,7 @@ StatusWord IAS::SendAPDU(const ByteArray &head, const ByteArray &data, ByteDynAr
 		size_t i = 0;
 		uint8_t cla = head[0];
 		while (true) {
-			auto s = data.mid(i, std::min(data.size()-i, size_t(255)));
+			auto s = data.mid(i, min(data.size()-i, size_t(255)));
 			i += s.size();
 			if (i != data.size())
 				head[0] = (cla | 0x10);
@@ -1040,7 +1040,7 @@ bool IsLowIntegrity()
 		}
 	}
 	return 
-		integrity == 1;a
+		integrity == 1;
 #else
 	return false;	//TODO: implement ACL?
 #endif
@@ -1048,7 +1048,7 @@ bool IsLowIntegrity()
 
 bool IsUserInteractive()
 {
-	BOOL bIsUserInteractive = true;
+	bool bIsUserInteractive = true;
 #ifdef _WIN32
 	HWINSTA hWinStation = GetProcessWindowStation();
 	if (hWinStation != NULL)

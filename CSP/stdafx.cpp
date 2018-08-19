@@ -1,8 +1,10 @@
-#ifdef _WIN32
 #include "stdafx.h"
+
 #include "util/moduleinfo.h"
 
 CModuleInfo moduleInfo;
+
+#ifdef _WIN32
 
 BOOL APIENTRY DllMainP11(HANDLE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved);
 
