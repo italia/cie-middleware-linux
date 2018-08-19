@@ -9,7 +9,7 @@
 
 #ifdef _WIN32
 #include "targetver.h"
-#include <tchr.h>
+#include <tchar.h>
 #endif
 
 

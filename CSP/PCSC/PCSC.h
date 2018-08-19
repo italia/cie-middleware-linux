@@ -1,5 +1,7 @@
 #include <winscard.h>
+#ifndef _WIN32
 #include <reader.h>
+#endif
 #include "../Util/Array.h"
 #include <vector>
 #include <thread>
