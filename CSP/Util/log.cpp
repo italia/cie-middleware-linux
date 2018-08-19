@@ -285,9 +285,9 @@ DWORD CLog::write(const char *format,...) {
 			size_t tid = std::hash<std::thread::id>{}(std::this_thread::get_id());
 #endif
 			switch(LogMode) {
-				case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, tid, dwThreadID, ModuleNum); break;
-				case (LM_Module) : fprintf(lf,"%s|%04i|%04x|", pbtDate, tid, dwThreadID); break;
-				case (LM_Thread) : fprintf(lf,"%s|%04i|%02i|", pbtDate, tid, ModuleNum); break;
+				case (LM_Single) : fprintf(lf,"%s|%04ld|%04ld|%02i|", pbtDate, tid, dwThreadID, ModuleNum); break;
+				case (LM_Module) : fprintf(lf,"%s|%04ld|%04lx|", pbtDate, tid, dwThreadID); break;
+				case (LM_Thread) : fprintf(lf,"%s|%04ld|%02i|", pbtDate, tid, ModuleNum); break;
 				case (LM_Module_Thread) : fprintf(lf,"%s|", pbtDate); break;
 			}
 			vfprintf(lf, format, params);

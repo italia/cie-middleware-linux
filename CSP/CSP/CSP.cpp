@@ -7,6 +7,7 @@
 	#include <openssl/x509v3.h>
 	#include <openssl/bio.h>
 	#include <openssl/err.h>
+	#include <thread>
 #endif
 #include "CardMod.h"
 #include "../PCSC/Token.h"

@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include <winscard.h>
+#include <string>
 #include "../PCSC/PCSC.h"
-//#include <reader.h>
 #include "IAS.h"
 #include "CSP.h"
 #include "../Util/ModuleInfo.h"
@@ -12,12 +12,11 @@
 #include <functional>
 #include "../Crypto/ASNParser.h"
 #include "../UI/safeDesktop.h"
-#include <string>
-#ifdef __linux__
+#ifndef _WIN32
 	#include "../Util/defines.h"
 	#include "../Util/funccallinfo.h"
 	#include "helper.h"	
-#elif defined(_WIN32)
+#else
 	#include <atlbase.h>
 #endif
 #include "abilitaCIE.h"

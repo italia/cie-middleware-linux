@@ -10,8 +10,7 @@
 
 #include <time.h>
 #include <vector>
-using namespace std;
-typedef vector<HICON> ICONVECTOR;
+typedef std::vector<HICON> ICONVECTOR;
 
 class CSystemTray
 {

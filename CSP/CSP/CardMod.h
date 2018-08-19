@@ -44,8 +44,8 @@ typedef BYTE * PBYTE;
 typedef int ALG_ID;
 typedef void * PVOID;
 typedef size_t SIZE_T;
-typedef uint16_t WCHAR;
-typedef uint16_t* LPWSTR, *PWSTR;
+//typedef uint16_t WCHAR;
+//typedef uint16_t* LPWSTR, *PWSTR;
 #define __deref_opt_out_bcount(x)
 #define __deref_out_bcount_opt(x)
 #define __deref_out_bcount(x)
@@ -1535,7 +1535,7 @@ typedef struct _CARD_DATA
 	DWORD                               dwVersion;
 	PBYTE                               pbAtr;
 	DWORD                               cbAtr;
-	LPWSTR                              pwszCardName;
+	LPCWSTR                              pwszCardName;
 	PFN_CSP_ALLOC                       pfnCspAlloc;
 	PFN_CSP_REALLOC                     pfnCspReAlloc;
 	PFN_CSP_FREE                        pfnCspFree;

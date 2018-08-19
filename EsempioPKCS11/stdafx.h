@@ -5,10 +5,12 @@
 
 #pragma once
 
-#include "targetver.h"
-
 #include <stdio.h>
-#include <tchar.h>
+
+#ifdef _WIN32
+#include "targetver.h"
+#include <tchr.h>
+#endif
 
 
 

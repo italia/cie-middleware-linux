@@ -1,6 +1,6 @@
-#include "stdafx.h"
+#include "StdAfx.h"
 
-#include "util/moduleinfo.h"
+#include "Util/ModuleInfo.h"
 
 CModuleInfo moduleInfo;
 

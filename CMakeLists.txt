@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-write-strings -Wno-conversion-null -Wno-pointer-arith")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -Wno-conversion-null -Wno-pointer-arith")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__ -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__ -O0")
 
@@ -38,6 +40,7 @@ include(CacheLib/CMakeLists.txt)
 add_library(ciepki SHARED "")
 target_link_libraries(ciepki ${PCSCLITE_LIBRARY} ${OPENSSL_LIBRARIES} OpenSSL::Crypto)
 
+include(CSP/CMakeLists.txt)
 include(CSP/UI/CMakeLists.txt)
 include(CSP/CSP/CMakeLists.txt)
 include(CSP/PKCS11/CMakeLists.txt)

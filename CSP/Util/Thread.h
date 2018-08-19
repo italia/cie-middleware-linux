@@ -11,10 +11,11 @@ class CThread
 	~CThread(void);
 #ifdef _WIN32
 	HANDLE hThread;
-	DWORD dwThreadID;
 #else
 	std::thread hThread;
 #endif
+	DWORD dwThreadID;
+
 	void createThread(void *threadFunc,void *threadData);
 	DWORD joinThread(DWORD timeout);
 	void terminateThread();

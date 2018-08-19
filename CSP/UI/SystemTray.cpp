@@ -428,7 +428,7 @@ LPTSTR CSystemTray::GetTooltipText() const
 
     return strBuffer;
 #else
-	return "---tooltip---";
+	return (LPSTR)"---tooltip---";
 #endif
 }
 

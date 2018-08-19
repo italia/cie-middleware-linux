@@ -5,6 +5,7 @@
 #ifndef _WIN32
 #include <iostream>
 #include <algorithm>
+#include <unistd.h>
 using std::min;
 #include "funccallinfo.h"
 
@@ -26,6 +27,7 @@ using NOTIFYICONDATA = void*;
 using LPRECT = void*;
 using ATOM = void*;
 using LPWSTR = wchar_t*;
+using LPCWSTR = const wchar_t*;
 using PWSTR = wchar_t*;
 
 #define memcpy_s(A,B,C,D)	memcpy(A,C,std::min(B,D))

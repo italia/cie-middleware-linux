@@ -1,4 +1,5 @@
 #include <winscard.h>
+#include <reader.h>
 #include "../Util/Array.h"
 #include <vector>
 #include <thread>

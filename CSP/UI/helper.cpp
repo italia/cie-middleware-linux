@@ -313,7 +313,7 @@ LRESULT WINAPI SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 					return ret;
 				}
 
-				sprintf(cmd, "qdbus %s setLabelText \"%s\"", hnd, lParam);
+				sprintf(cmd, "qdbus %s setLabelText \"%s\"", hnd, (const char*)lParam);
 				int ret = UIhelper::execute(cmd, dataIn, sizeof(dataIn));
 
 				sprintf(cmd, "qdbus %s Set \"\" value %d", hnd, wParam-100);
@@ -327,7 +327,7 @@ LRESULT WINAPI SendMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			FILE *f = (FILE*)hWnd;
 			if(f)
 			{
-				fprintf(f, "%d\n# %s\n", (wParam-100)*100/7, lParam);
+				fprintf(f, "%d\n# %s\n", (wParam-100)*100/7, (const char*)lParam);
 				fflush(f);
 				if(wParam == 100+7)
 					pclose(f);

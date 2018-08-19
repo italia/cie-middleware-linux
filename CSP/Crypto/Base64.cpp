@@ -50,7 +50,7 @@ std::vector<unsigned char> Base64Decode(const char* encoded)
 }
 
 
-void CryptBinaryToString(const char* binary, size_t binarySize, EncodingType type, char *to, size_t *toSize) 
+void CryptBinaryToString(const BYTE* binary, size_t binarySize, EncodingType type, char *to, size_t *toSize) 
 {
 	switch(type)
 	{
@@ -67,7 +67,7 @@ void CryptBinaryToString(const char* binary, size_t binarySize, EncodingType typ
 	}
 }
 
-void CryptStringToBinary(const char* encoded, size_t encodedSize, EncodingType type, char *to, size_t *toSize, void *unused1, void *unused2)
+void CryptStringToBinary(const char* encoded, size_t encodedSize, EncodingType type, BYTE *to, size_t *toSize, void *unused1, void *unused2)
 {
 	switch(type)
 	{
