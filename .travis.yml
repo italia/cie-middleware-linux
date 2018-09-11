@@ -1,0 +1,24 @@
+language: cpp
+dist: trusty
+
+compiler:
+- gcc
+
+os:
+- linux
+
+addons:
+  apt:
+    packages:
+    - pcscd
+    - libpcsclite-dev
+    - openssl-dev
+
+before_script:
+  - mkdir "${TRAVIS_BUILD_DIR}/build"
+  - cd "${TRAVIS_BUILD_DIR}/build"
+  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCUMENTATION=ON
+
+script:
+  - cd "${TRAVIS_BUILD_DIR}/build"
+  - make all
