@@ -12,7 +12,7 @@ addons:
     packages:
     - pcscd
     - libpcsclite-dev
-    - openssl-dev
+    - libssl-dev
 
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
