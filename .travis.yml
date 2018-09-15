@@ -7,12 +7,16 @@ compiler:
 os:
 - linux
 
+before_install:
+  - sudo add-apt-repository ppa:0k53d-karl-f830m/openssl -y
+  - sudo apt-get update -q
+  - sudo apt-get install openssl -y
+
 addons:
   apt:
     packages:
     - pcscd
     - libpcsclite-dev
-    - libssl-dev
 
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
