@@ -1,3 +1,7 @@
+[![Join the #cie-middleware channel](https://img.shields.io/badge/Slack%20channel-%23cie--middleware-blue.svg?logo=slack)](https://developersitalia.slack.com/messages/C7FPGAG94)
+[![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
+[![CIE on forum.italia.it](https://img.shields.io/badge/Forum-CIE-blue.svg)](https://forum.italia.it/c/cie) [![Build Status](https://travis-ci.com/italia/cie-middleware.svg?branch=master)](https://travis-ci.com/italia/cie-middleware)
+
 Middleware della CIE (Carta di Identità Elettronica) per Windows e Linux
 
 # MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0 [![Build status](https://ci.appveyor.com/api/projects/status/dpc0ditjn04ylw6y?svg=true)](https://ci.appveyor.com/project/italia/cie-middleware)

@@ -1,0 +1,28 @@
+language: cpp
+dist: trusty
+
+compiler:
+- gcc
+
+os:
+- linux
+
+before_install:
+  - sudo add-apt-repository ppa:0k53d-karl-f830m/openssl -y
+  - sudo apt-get update -q
+  - sudo apt-get install openssl -y
+
+addons:
+  apt:
+    packages:
+    - pcscd
+    - libpcsclite-dev
+
+before_script:
+  - mkdir "${TRAVIS_BUILD_DIR}/build"
+  - cd "${TRAVIS_BUILD_DIR}/build"
+  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCUMENTATION=ON
+
+script:
+  - cd "${TRAVIS_BUILD_DIR}/build"
+  - make all
