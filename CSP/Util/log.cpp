@@ -238,7 +238,7 @@ DWORD CLog::write(const char *format,...) {
 		}
 		if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 			FirstLog=true;
-			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
+			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion.c_str());
 			writeModuleInfo();
 		}
 
@@ -330,7 +330,7 @@ void CLog::writePure(const char *format,...) {
 		}
 		if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 			FirstLog=true;
-			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
+			write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion.c_str());
 			writeModuleInfo();
 		}
 
@@ -380,7 +380,7 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
 	}
 	if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 		FirstLog=true;
-		write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion);
+		write("%s - Inizio Sessione - versione file: %s",logName.c_str(),logVersion.c_str());
 		writeModuleInfo();
 	}
 

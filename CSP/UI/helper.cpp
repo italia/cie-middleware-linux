@@ -17,7 +17,8 @@ static int execute(const char *cmdline, char *dataIn, int len, HWND *wnd=nullptr
 	else
 	{
 		fgets(dataIn, len, f);
-		return  WEXITSTATUS(pclose(f));
+		int ex_status = pclose(f);
+		return  WEXITSTATUS(ex_status);
 	}
 
 	return 0;
