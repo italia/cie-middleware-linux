@@ -9,6 +9,8 @@
 #include "CSP.h"
 #include <VersionHelpers.h>
 
+using namespace std;
+
 extern CModuleInfo moduleInfo;
 std::string latestVersionURL = "";
 WNDCLASS wndClass;
@@ -180,7 +182,7 @@ void checkVersion(std::string iniPath,bool alwaysDisplay) {
 	return;
 }
 
-string getRandomPrefix() {
+string getRandomPrefix(void) {
 	// genera un prefisso di 3 caratteri alfanumerici random
 	string prefix;
 	ByteDynArray rand(3);
