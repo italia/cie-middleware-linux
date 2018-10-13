@@ -17,8 +17,6 @@ target_sources(ciepki
 	"${CMAKE_CURRENT_LIST_DIR}/SyncroMutex.h"
 	"${CMAKE_CURRENT_LIST_DIR}/Thread.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/Thread.h"
-	"${CMAKE_CURRENT_LIST_DIR}/tinyxml2.cpp"
-	"${CMAKE_CURRENT_LIST_DIR}/tinyxml2.h"
 	"${CMAKE_CURRENT_LIST_DIR}/TLV.cpp"
 	"${CMAKE_CURRENT_LIST_DIR}/TLV.h"
 	"${CMAKE_CURRENT_LIST_DIR}/util.cpp"

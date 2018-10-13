@@ -151,6 +151,8 @@ void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN) {
 		
 }
 
+
+
 void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, uint8_t *FirstPIN, int FirstPINSize) {
 	if (PAN == nullptr)
 		throw logged_error("Il PAN e' necessario");
@@ -225,7 +227,6 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
 					LocalFree((HLOCAL)pSD);
 				throw logged_error("Impossibile attivare la CIE nel processo corrente");
 			}
-
 		}
 #endif
 	}

@@ -17,15 +17,6 @@
 #include <functional>
 #include <fstream>
 
-#define CIE_KEY_BITLEN 2048
-
-#define CIE_CONTAINER_ID 0
-#define CIE_CONTAINER_NAME L"CIE"
-#define CIE_PIN_ID ROLE_USER
-#define CIE_PUK_ID ROLE_ADMIN
-#define CIE_SUPPORTED_CYPHER_ALGORITHM L"\0"
-#define CIE_SUPPORTED_ASYMMETRIC_ALGORITHM L"RSA\0"
-
 #ifdef _WIN64
 	#pragma comment(linker, "/export:CardAcquireContext")
 #else
@@ -156,7 +147,7 @@ DWORD WINAPI CardReadFile(
 			ias->SetCardContext(pCardData);
 			ByteDynArray cert;
 			ias->GetCertificate(cert, false);
-			DWORD keylen = 2048;
+			DWORD keylen = CIE_KEY_BITLEN;
 			if (!cert.isEmpty()) {
 			      #ifdef __linux__
 				BYTE *p = (BYTE*)cert.data();
@@ -187,17 +178,17 @@ DWORD WINAPI CardReadFile(
 			
 		      #ifdef __linux__
 			std::string emptyStr{};		      
-			swprintf(value.wszGuid, sizeof(value.wszGuid), L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), emptyStr, false).c_str());
+			swprintf(value.wszGuid, sizeof(value.wszGuid), L"%S-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), emptyStr, false).c_str());
 		      #elif defined(_WIN32)
-			swprintf_s(value.wszGuid, L"%s-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), std::string(), false).c_str());
+			swprintf_s(value.wszGuid, L"%S-%S", CIE_CONTAINER_NAME, dumpHexData(ias->PAN.mid(5, 6), std::string(), false).c_str());
 		      #endif
 			value.wSigKeySizeBits = (WORD)keylen;
-			value.wKeyExchangeKeySizeBits = 0;
+			value.wKeyExchangeKeySizeBits = (WORD)keylen;
 			value.bReserved = 0;
 			value.bFlags = CONTAINER_MAP_VALID_CONTAINER | CONTAINER_MAP_DEFAULT_CONTAINER;
 			response = VarToByteArray(value);
 		}
-		else if (lstrcmp(pszFileName, "ksc00") == 0) {
+		else if (lstrcmp(pszFileName, "ksc00") == 0 || lstrcmp(pszFileName, "kxc00") == 0) {
 			auto ias = ((IAS*)pCardData->pvVendorSpecific);
 			if (ias == nullptr)
 				throw logged_error("IAS non inizializzato");
@@ -235,8 +226,8 @@ DWORD WINAPI CardSignData(
       #ifdef _WIN32
 	if (pInfo->bContainerIndex != CIE_CONTAINER_ID)
 		throw CSP_error(SCARD_E_NO_KEY_CONTAINER);
-	if (pInfo->dwKeySpec != AT_SIGNATURE)
-		throw CSP_error(SCARD_E_INVALID_PARAMETER);
+//	if (pInfo->dwKeySpec != AT_SIGNATURE)
+//		throw CSP_error(SCARD_E_INVALID_PARAMETER);
 
 	ByteDynArray resp;
 	ByteDynArray toSign;
@@ -440,10 +431,14 @@ void GetContainerInfo(CONTAINER_INFO &value, PCARD_DATA  pCardData) {
       #endif
 	PubKey->publickeystruc.aiKeyAlg = CALG_RSA_SIGN;
 
-	value.cbKeyExPublicKey = 0;
-	value.pbKeyExPublicKey = NULL;
+	PUBKEYSTRUCT_BASE* PubKey2 = (PUBKEYSTRUCT_BASE*)pCardData->pfnCspAlloc(PubKeyLen);
+	memcpy_s(PubKey2, PubKeyLen, PubKey, PubKeyLen);
+	PubKey->publickeystruc.aiKeyAlg = CALG_RSA_KEYX;
+
+	value.cbKeyExPublicKey = PubKeyLen;
+	value.pbKeyExPublicKey = (PBYTE)PubKey;
 	value.cbSigPublicKey = PubKeyLen;
-	value.pbSigPublicKey = (PBYTE)PubKey;
+	value.pbSigPublicKey = (PBYTE)PubKey2;
 	value.dwVersion = CONTAINER_INFO_CURRENT_VERSION;
       #elif defined(__linux__)
 	std::cout << "Must implements GetContainerInfo" << std::endl;
@@ -530,8 +525,8 @@ __in                                        DWORD       dwFlags)
 		response = VarToByteArray(val);
 	}
 	else if (lstrcmpW(wszProperty, CP_CARD_KEYSIZES) == 0) {
-		if (dwFlags != AT_SIGNATURE)
-			throw CSP_error(SCARD_E_INVALID_PARAMETER);
+//		if (dwFlags != AT_SIGNATURE)
+//			throw CSP_error(SCARD_E_INVALID_PARAMETER);
 		CARD_KEY_SIZES val;
 		val.dwVersion = CARD_KEY_SIZES_CURRENT_VERSION;
 		val.dwDefaultBitlen = CIE_KEY_BITLEN;
@@ -701,13 +696,7 @@ __out_opt                               PDWORD      pcAttemptsRemaining) {
 		if (ias->Callback != nullptr)
 			ias->Callback(3, "Verify PIN", ias->CallbackData);
 
-		if (dwAuthenticatingPinId == ROLE_USER) {
-
-			//ias->GetFirstPIN(PIN);
-			//veriPIN = PIN;
-			//veriPIN.append(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
-			sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
-		}
+		sw = ias->VerifyPIN(ByteArray(pbAuthenticatingPinData, cbAuthenticatingPinData));
 
 		if (sw >= 0x63C0 && sw <= 0x63CF) {
 			ias->attemptsRemaining = sw - 0x63C0;

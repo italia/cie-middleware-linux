@@ -92,6 +92,7 @@ void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, B
 	pubexp.resize(BN_num_bytes(keyPriv->e));
 	BN_bn2bin(keyPriv->e, pubexp.data());
 #endif
+	BN_clear_free(BNpubexp);
 
 	exit_func
 }
