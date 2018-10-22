@@ -11,6 +11,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-write-strings -Wno-conversion-null 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__ -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__ -O0")
 
+find_package(DpkgBuildFlags REQUIRED)
+#dpkg-buildflags options to compile and link a Debian compliant binary
+dpkg_buildflags_get_cflags(DPKG_CFLAGS)
+dpkg_buildflags_get_cxxflags(DPKG_CXXFLAGS)
+dpkg_buildflags_get_ldflags(DPKG_LDFLAGS)
+
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -s ${DPKG_CFLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s ${DPKG_CXXFLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${DPKG_LDFLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${DPKG_LDFLAGS}")
+
 #find PCSClite library
 find_path(PCSCLITE_INCLUDE pcsclite.h WinSCard.h
 	HINTS ${PC_PCSC_INCLUDEDIR} ${PC_PCSC_INCLUDE_DIRS}
@@ -55,13 +66,6 @@ set_target_properties(ciepki PROPERTIES
 	SOVERSION 1
 	PUBLIC_HEADER PKCS11_HEADERS)
 configure_file(ciepki.pc.in ciepki.pc @ONLY)
-install(TARGETS ciepki 
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-install(FILES ${CMAKE_BINARY_DIR}/ciepki.pc
-	DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
-
 
 add_executable(EsempioPKCS11 ${EXAMPLEPKCS11_SOURCES} ${PKCS11_HEADERS})
 add_executable(cieunlockpin ${CIEUNLOCKPIN_SOURCES} ${UTILS_HEADERS})
@@ -72,3 +76,12 @@ target_link_libraries(ciepki ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} OpenSSL::Cryp
 target_link_libraries(EsempioPKCS11 ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} OpenSSL::Crypto Threads::Threads)
 target_link_libraries(cieunlockpin ciepki)
 target_link_libraries(ciechangepin ciepki)
+
+install(TARGETS ciepki cieunlockpin ciechangepin
+	ARCHIVE DESTINATION usr/lib
+	LIBRARY DESTINATION usr/lib
+	RUNTIME DESTINATION usr/bin)
+#install(FILES ${CMAKE_BINARY_DIR}/ciepki.pc
+#	DESTINATION usr/share/pkgconfig)
+
+
