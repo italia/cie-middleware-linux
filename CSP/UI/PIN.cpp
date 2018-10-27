@@ -278,6 +278,47 @@ INT_PTR CPin::DoModal()
 					UIhelper::showPassiveMessage("Il PIN deve essere digitato due volte", "PIN non corrispondente");
                                         again = true;
                                 }
+				else if(!again) {
+					char ref = PIN2[0];
+					char last;
+					for (int i = 1; i < PinLen; i++) {
+						last = PIN2[i];
+						if (last != ref)
+							break;
+					}
+					if (last == ref) {
+						UIhelper::showPassiveMessage("Il nuovo PIN non deve essere composto da cifre uguali", "PIN non valido");
+                                        	again = true;
+					}
+			
+					char prec = PIN2[0];
+					bool isSequence = true;
+					for (int i = 1; i < PinLen; i++) {
+						prec++;
+						if (PIN2[i] != prec) {
+							isSequence = false;
+							break;
+						}
+					}
+					if (isSequence && !again) {
+						UIhelper::showPassiveMessage("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido");
+                                        	again = true;
+					}
+			
+					prec = PIN2[0];
+					isSequence = true;
+					for (int i = 1; i < PinLen; i++) {
+						prec--;
+						if (PIN2[i] != prec) {
+							isSequence = false;
+							break;
+						}
+					}
+					if (isSequence && !again) {
+						UIhelper::showPassiveMessage("Il nuovo PIN non deve essere composto da cifre consecutive", "PIN non valido");
+                                        	again = true;
+					}
+				}
                         }
                 }
         } while(again);

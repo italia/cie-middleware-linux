@@ -1,0 +1,11 @@
+# DEB package
+
+mkdir build && cd build
+cmake -DCMAKE_MODULE_PATH=`pwd`/.. -DCMAKE_INSTALL_PREFIX=`pwd`/install ..
+make && make install/strip
+#see makedist script
+
+# normal/dev build 
+mkdir build && cd build
+cmake -DCMAKE_MODULE_PATH=`pwd`/..
+make && make install

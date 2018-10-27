@@ -1,11 +1,14 @@
 #!/bin/sh
-#create build directory under cie project root, cd into it and:
-#mkdir -p build/install && cd build
+PROJ_ROOT = `pwd`
+BUILD_DIR = $PROJ_ROOT/build
 
-export CMAKE_PREFIX_PATH=`pwd`/..
-cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../dist ..
+pushd $BUILD_DIR
+
+cmake -DCMAKE_PREFIX_PATH=$PROJ_ROOT -DCMAKE_INSTALL_PREFIX=$PROJ_ROOT/dist $PROJ_ROOT
 make && make install/strip
-find `pwd`/../dist/ -type d | xargs chmod 755
-fakeroot dpkg-deb --build `pwd`/../dist
-lintian `pwd`/../dist.deb
-mv `pwd`/../dist.deb `pwd`/../libciepki1.0-1.deb
+find $PROJ_ROOT/dist/ -type d | xargs chmod 755
+fakeroot dpkg-deb --build $PROJ_ROOT/dist
+lintian $PROJ_ROOT/dist.deb
+mv $PROJ_ROOT/dist.deb $PROJ_ROOT/libciepki1.0-1.deb
+
+popd

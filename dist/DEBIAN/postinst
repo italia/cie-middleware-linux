@@ -1,0 +1,11 @@
+#!/bin/sh 
+# libciepki1.postinst, runs ldconfig 
+set -e 
+ 
+case "$1" in 
+       configure) 
+               ldconfig 
+               ;; 
+       abort-upgrade|abort-remove|abort-deconfigure) 
+               ;; 
+esac 
