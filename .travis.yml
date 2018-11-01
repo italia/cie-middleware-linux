@@ -21,7 +21,7 @@ addons:
 before_script:
   - mkdir "${TRAVIS_BUILD_DIR}/build"
   - cd "${TRAVIS_BUILD_DIR}/build"
-  - cmake "${TRAVIS_BUILD_DIR}" -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCUMENTATION=ON
+  - cmake "${TRAVIS_BUILD_DIR}/Build/Linux/GCC" -DCMAKE_MODULE_PATH="${TRAVIS_BUILD_DIR}/Build/Linux/GCC" -DCMAKE_BUILD_TYPE=Debug -DBUILD_DOCUMENTATION=ON
 
 script:
   - cd "${TRAVIS_BUILD_DIR}/build"
