@@ -14,4 +14,4 @@ fakeroot dpkg-deb --build $PROJ_ROOT/dist
 lintian $PROJ_ROOT/dist.deb
 mv $PROJ_ROOT/dist.deb $PROJ_ROOT/libciepki1.0-1.deb
 
-cd $PROJ_DIR
+cd $PROJ_ROOT
