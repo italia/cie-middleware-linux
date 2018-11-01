@@ -204,7 +204,7 @@ DWORD WINAPI CardReadFile(
 		throw CSP_error(SCARD_E_FILE_NOT_FOUND);
 	size_t dataLen = response.size();
 	if (pcbData != nullptr && *pcbData != 0)
-		dataLen = min(dataLen, *pcbData);
+		dataLen = min(dataLen, (size_t)*pcbData);
 	*ppbData = (PBYTE)pCardData->pfnCspAlloc(dataLen);
 	memcpy_s(*ppbData, dataLen, response.data(), dataLen);
 	if (pcbData != nullptr)
@@ -476,7 +476,7 @@ DWORD WINAPI CardGetContainerProperty(
 	*pdwDataLen = (DWORD)response.size();
 	if (cbData < response.size())
 		return ERROR_INSUFFICIENT_BUFFER;
-	memcpy_s(pbData, cbData, response.data(), response.size());
+	memcpy_s(pbData, (size_t)cbData, response.data(), response.size());
 	return SCARD_S_SUCCESS;
 	exit_CSP_func
 	return E_UNEXPECTED;

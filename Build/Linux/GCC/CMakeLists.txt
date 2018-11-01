@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 project(CIEPKI VERSION 1.0.0 LANGUAGES C CXX)
 include(GNUInstallDirs)
 
+set(ROOT_DIR ${CMAKE_SOURCE_DIR}/../../../)
+
+message ("ROOT DIR is now: ${ROOT_DIR}")
+
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -29,11 +33,11 @@ find_path(PCSCLITE_INCLUDE pcsclite.h WinSCard.h
 find_library(PCSCLITE_LIBRARY NAMES PCSC WinSCard pcsclite 
 	HINTS ${PC_PCSC_LIBDIR} ${PC_PCSC_LIBRARY_DIRS})
 
-set( PKCS11_HEADERS PKCS11/linux.h PKCS11/pkcs11f.h PKCS11/pkcs11.h PKCS11/pkcs11t.h )
-set( EXAMPLEPKCS11_SOURCES EsempioPKCS11/EsempioPKCS11.cpp )
-set( CIEUNLOCKPIN_SOURCES Utils/sbloccopin.cpp )
-set( CIECHANGEPIN_SOURCES Utils/cambiopin.cpp )
-set( UTILS_HEADERS CSP/Util CSP/UI CSP/CSP ${PCSCLITE_INCLUDE} )
+set( PKCS11_HEADERS ${ROOT_DIR}/PKCS11/linux.h ${ROOT_DIR}/PKCS11/pkcs11f.h ${ROOT_DIR}/PKCS11/pkcs11.h ${ROOT_DIR}/PKCS11/pkcs11t.h )
+set( EXAMPLEPKCS11_SOURCES ${ROOT_DIR}/EsempioPKCS11/EsempioPKCS11.cpp )
+set( CIEUNLOCKPIN_SOURCES ${ROOT_DIR}/Utils/sbloccopin.cpp )
+set( CIECHANGEPIN_SOURCES ${ROOT_DIR}/Utils/cambiopin.cpp )
+set( UTILS_HEADERS ${ROOT_DIR}/CSP/Util ${ROOT_DIR}/CSP/UI ${ROOT_DIR}/CSP/CSP ${PCSCLITE_INCLUDE} )
 
 #find OpenSSL library
 find_package(OpenSSL REQUIRED)
@@ -43,21 +47,21 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-include_directories(PKCS11 ${OPENSSL_INCLUDE_DIR})
+include_directories(${ROOT_DIR}PKCS11 ${OPENSSL_INCLUDE_DIR})
 
 add_library(ciecache STATIC "")
-include(CacheLib/CMakeLists.txt)
+include(${ROOT_DIR}/CacheLib/CMakeLists.txt)
 
 add_library(ciepki SHARED "")
 target_link_libraries(ciepki ${PCSCLITE_LIBRARY} ${OPENSSL_LIBRARIES} OpenSSL::Crypto)
 
-include(CSP/CMakeLists.txt)
-include(CSP/UI/CMakeLists.txt)
-include(CSP/CSP/CMakeLists.txt)
-include(CSP/PKCS11/CMakeLists.txt)
-include(CSP/Crypto/CMakeLists.txt)
-include(CSP/PCSC/CMakeLists.txt)
-include(CSP/Util/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/UI/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/CSP/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/PKCS11/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/Crypto/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/PCSC/CMakeLists.txt)
+include(${ROOT_DIR}/CSP/Util/CMakeLists.txt)
 
 set_target_properties(ciecache PROPERTIES
 	POSITION_INDEPENDENT_CODE ON)

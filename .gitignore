@@ -1,5 +1,6 @@
 *.VC.db
 *.VC.opendb
+CacheLib/CacheLib.enc
 CacheLib/Debug/
 CacheLib/Release/
 CacheLib/x64/Debug/

@@ -1,0 +1,8 @@
+# DEB package, from the project root
+cd Build/Linux/GCC
+./makedist.sh
+
+# normal/dev build, from the project root 
+mkdir build && cd build
+cmake -DCMAKE_MODULE_PATH=`pwd`/../Build/Linux/GCC ../Build/Linux/GCC/
+make && make install

@@ -1,0 +1,13 @@
+Package: libciepki1
+Version: 1.0-1
+Architecture: amd64
+Maintainer: Andrea della Porta <sfaragnaus@gmail.com>
+Depends: libc6 (>= 2.14), pcscd,  libssl1.0.0 (>= 1.0.2) | libssl1.0.2 | libssl1.1, libstdc++6, zenity | kdialog, libnss3, libnss3-tools
+Section: non-free/utils
+Priority: optional
+Homepage: https://github.com/italia/cie-middleware-linux
+Description: PKCS11 driver for Italian CIE.
+ This package allows any PKCS11 enabled application to leverage
+ the cryptographic and authentication facilities of
+ the Italian CIE. 
+ Binaries to change/unlock PIN are also provided.

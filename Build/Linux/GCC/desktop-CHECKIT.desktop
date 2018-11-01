@@ -1,0 +1,10 @@
+Desktop: /root/Scrivania
+[Desktop Entry]
+Version=4.1.4/users
+Name=ArubaSign
+Comment=Aruba Firma Digitale
+Exec=/root/ArubaSign-4.1.4/users/apps/arubasign.bat
+Icon=/root/ArubaSign-4.1.4/users/apps/ico.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;

@@ -16,9 +16,16 @@ static int execute(const char *cmdline, char *dataIn, int len, HWND *wnd=nullptr
 		*((FILE**)wnd) = f;
 	else
 	{
-		fgets(dataIn, len, f);
+	    if(f)
+	    {
+		do {
+			errno = 0;
+			fgets(dataIn, len, f);
+		} while(errno == EINTR);
+
 		int ex_status = pclose(f);
 		return  WEXITSTATUS(ex_status);
+	    }
 	}
 
 	return 0;
