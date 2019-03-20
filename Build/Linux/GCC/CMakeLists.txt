@@ -82,9 +82,9 @@ target_link_libraries(cieunlockpin ciepki)
 target_link_libraries(ciechangepin ciepki)
 
 install(TARGETS ciepki cieunlockpin ciechangepin
-	ARCHIVE DESTINATION usr/lib
-	LIBRARY DESTINATION usr/lib
-	RUNTIME DESTINATION usr/bin)
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin)
 #install(FILES ${CMAKE_BINARY_DIR}/ciepki.pc
 #	DESTINATION usr/share/pkgconfig)
 
