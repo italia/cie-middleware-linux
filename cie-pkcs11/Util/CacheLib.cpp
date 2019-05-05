@@ -24,6 +24,8 @@
 #include "../keys.h"
 #include "../Cryptopp/sha.h"
 
+#include <pwd.h>
+
 using namespace CryptoPP;
 
 int decrypt(std::string& ciphertext, std::string& message);
@@ -218,13 +220,20 @@ bool file_exists (const char* name) {
 std::string GetCardDir()
 {
     char* home = getenv("HOME");
-    
+    if(home == NULL)
+	{
+		struct passwd *pw = getpwuid(getuid());
+
+		home = pw->pw_dir;
+		printf("home: %s", home);
+	}
+
     std::string path(home);
     
     std::smatch match;
-    std::regex_search(path, match, std::regex("^/Users/"));
+    std::regex_search(path, match, std::regex("^/home/"));
     std::string suffix = match.suffix();
-    if(suffix.find("/") != std::string::npos && suffix.find("Library/Containers/it.ipzs.CIE-ID.CIEToken/Data") == std::string::npos)
+    if(suffix.find("/") != std::string::npos)
         throw 1;
     
     path.append("/.CIEPKI/");
@@ -251,22 +260,7 @@ bool CacheExists(const char *PAN) {
 bool CacheRemove(const char *PAN) {
     std::string sPath;
     GetCardPath(PAN, sPath);
-    remove(sPath.c_str());
-    
-    // remove the cache for CIEToken
-    char* home = getenv("HOME");
-    std::string path(home);
-        std::smatch match;
-        std::regex_search(path, match, std::regex("^/Users/"));
-        std::string suffix = match.suffix();
-        if(suffix.find("/") != std::string::npos)
-            throw 1;
-    
-    path.append("/Library/Containers/it.ipzs.CIE-ID.CIEToken/Data/.CIEPKI/");
-    path.append(PAN);
-    path.append(".cache");
-    
-    return !remove(path.c_str());
+    return remove(sPath.c_str());
 }
 
 void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate)
@@ -382,54 +376,10 @@ void CacheSetData(const char *PAN, uint8_t *certificate, int certificateSize, ui
     
     stfEncryptor.MessageEnd();
     
-    
-    
-    char* home = getenv("HOME");
-    std::string path(home);
-    std::smatch match;
-    std::regex_search(path, match, std::regex("^/Users/"));
-    std::string suffix = match.suffix();
-    if(suffix.find("/") != std::string::npos)
-        throw 1;
-    
-    path.append("/Library/Containers/it.ipzs.CIE-ID.CIEToken/Data/.CIEPKI/");
-    
-    printf("CIETokenDriver Dir: %s\n", path.c_str());
-    
-    if (stat(path.c_str(), &st) == -1) {
-        int r = mkdir(path.c_str(), 0777);
-        printf("mkdir: %d, %x\n", r, errno);
-    }
-    
-    path.append(PAN);
-    path.append(".cache");
             
     std::ofstream file(sPath.c_str(), std::ofstream::out | std::ofstream::binary);
     file.write(ciphertext.c_str(), ciphertext.length());
     file.close();
-    
-    std::ofstream fileForCIEToken(path.c_str(), std::ofstream::out | std::ofstream::binary);
-    fileForCIEToken.write(ciphertext.c_str(), ciphertext.length());
-    fileForCIEToken.close();
-    
-    
-//    
-//    
-//    uint32_t len = (uint32_t)baFirstPIN.size();
-//    file.write((char*)&len, sizeof(len));
-//    file.write((char*)baFirstPIN.data(), len);
-//    len = (uint32_t)baCertificate.size();
-//    file.write((char*)&len, sizeof(len));
-//    file.write((char*)baCertificate.data(), len);
-//    file.close();
-//    
-//    len = (uint32_t)baFirstPIN.size();
-//    fileForCIEToken.write((char*)&len, sizeof(len));
-//    fileForCIEToken.write((char*)baFirstPIN.data(), len);
-//    len = (uint32_t)baCertificate.size();
-//    fileForCIEToken.write((char*)&len, sizeof(len));
-//    fileForCIEToken.write((char*)baCertificate.data(), len);
-//    fileForCIEToken.close();
 }
 
 #endif

@@ -66,7 +66,7 @@ ByteDynArray CSHA512::Digest(ByteArray &data)
 	unsigned int nDataLen = data.size();
 	BYTE abDigest[CryptoPP::SHA512::DIGESTSIZE];
 
-	CryptoPP::SHA256().CalculateDigest(abDigest, pbData, nDataLen);
+	CryptoPP::SHA512().CalculateDigest(abDigest, pbData, nDataLen);
 
 	ByteArray resp(abDigest, CryptoPP::SHA512::DIGESTSIZE);
 

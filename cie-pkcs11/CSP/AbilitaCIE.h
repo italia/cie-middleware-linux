@@ -20,8 +20,8 @@ typedef CK_CALLBACK_FUNCTION(CK_RV, PROGRESS_CALLBACK)(
                                                const char* szMessage);
 
 typedef CK_CALLBACK_FUNCTION(CK_RV, COMPLETED_CALLBACK)(
-                                                        std::string& pan,
-                                                        std::string& name);
+                                                        const char* szPan,
+                                                        const char* szName);
 
 typedef CK_RV (*AbilitaCIEfn)(const char*  szPAN,
                               const char*  szPIN,

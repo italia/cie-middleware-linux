@@ -26,6 +26,16 @@
 #include "../Cryptopp/cryptlib.h"
 #include "../Cryptopp/asn.h"
 #include "../Util/CryptoppUtils.h"
+#include "../Crypto/CryptoUtil.h"
+
+#include <unistd.h>
+#include <sys/socket.h>    //socket
+#include <arpa/inet.h>    //inet_addr
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define ROLE_USER 1
 #define ROLE_ADMIN 2
@@ -56,6 +66,7 @@ DWORD CardAuthenticateEx(IAS*       ias,
                         DWORD       cbPinData,
                         BYTE*       *ppbSessionPin,
                         DWORD*      pcbSessionPin,
+						PROGRESS_CALLBACK progressCallBack,
                         int*        pcAttemptsRemaining);
 
 extern "C" {
@@ -354,7 +365,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             
             progressCallBack(20, "Autenticazione...");
             
-            DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, sizeof(szPIN)), nullptr, 0, attempts);
+            DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, sizeof(szPIN)), nullptr, 0, progressCallBack, attempts);
             if (rs == SCARD_W_WRONG_CHV)
             {
                 free(ATR);
@@ -391,7 +402,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             
             hashSet[0xa3] = sha256.Digest(certCIEData);
             
-            ias.VerificaSOD(SOD, hashSet);
+            //ias.VerificaSOD(SOD, hashSet);
 
             ByteArray pinBa((uint8_t*)szPIN, 4);
             
@@ -453,7 +464,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             subjectEncoder.SkipAll();
             
             std::string fullname = name + " " + surname;
-            completedCallBack(span, fullname);
+            completedCallBack(span.c_str(), fullname.c_str());
 		}
         
 		if (!foundCIE) {
@@ -493,26 +504,38 @@ DWORD CardAuthenticateEx(IAS*       ias,
                          DWORD       cbPinData,
                          BYTE*       *ppbSessionPin,
                          DWORD*      pcbSessionPin,
+						 PROGRESS_CALLBACK progressCallBack,
                          int*      pcAttemptsRemaining) {
     
+	progressCallBack(21, "selected CIE applet");
     ias->SelectAID_IAS();
     ias->SelectAID_CIE();
     
     
+
+    progressCallBack(22, "init DH Param");
     // leggo i parametri di dominio DH e della chiave di extauth
     ias->InitDHParam();
     
+
+    progressCallBack(24, "read DappPubKey");
+
     ByteDynArray dappData;
     ias->ReadDappPubKey(dappData);
     
+    progressCallBack(26, "InitExtAuthKeyParam");
     ias->InitExtAuthKeyParam();
     
-    
+    progressCallBack(28, "DHKeyExchange");
     ias->DHKeyExchange();
-    
+
+    progressCallBack(30, "DAPP");
+
     // DAPP
     ias->DAPP();
     
+    progressCallBack(32, "VerifyPIN");
+
     // verifica PIN
     StatusWord sw;
     if (PinId == ROLE_USER) {
@@ -530,25 +553,38 @@ DWORD CardAuthenticateEx(IAS*       ias,
     else
         return SCARD_E_INVALID_PARAMETER;
     
+    progressCallBack(34, "verifyPIN ok");
+
     if (sw == 0x6983) {
         if (PinId == ROLE_USER)
+            progressCallBack(40, "PIN Bloccato");
+
             ias->IconaSbloccoPIN();
         return SCARD_W_CHV_BLOCKED;
     }
-    if (sw >= 0x63C0 && sw <= 0x63CF) {
+    else if (sw >= 0x63C0 && sw <= 0x63CF) {
+        progressCallBack(40, "PIN Errato");
+
         if (pcAttemptsRemaining!=nullptr)
             *pcAttemptsRemaining = sw - 0x63C0;
         return SCARD_W_WRONG_CHV;
     }
-    if (sw == 0x6700) {
+    else if (sw == 0x6700) {
+    	progressCallBack(40, "PIN Errato");
         return SCARD_W_WRONG_CHV;
     }
-    if (sw == 0x6300)
+    else if (sw == 0x6300)
+    {
+    	progressCallBack(40, "PIN Errato");
         return SCARD_W_WRONG_CHV;
-    if (sw != 0x9000) {
+    }
+    else if (sw != 0x9000) {
+    	progressCallBack(40, "Errore smart card");
         throw scard_error(sw);
     }
     
+    progressCallBack(38, "VerifyPIN OK");
+
     return SCARD_S_SUCCESS;
 }
 
@@ -673,4 +709,86 @@ std::vector<word32> fromObjectIdentifier(std::string sObjId)
     delete[] szOID;
 
     return out;
+}
+
+int sendMessage(const char* szCommand, const char* szParam)
+{
+    int sock;
+    struct sockaddr_in server;
+    char szMessage[100] , szServerReply[1000];
+
+    //Create socket
+    sock = socket(AF_INET , SOCK_STREAM , 0);
+    if (sock == -1)
+    {
+        printf("Could not create socket");
+    }
+    puts("Socket created");
+
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_family = AF_INET;
+    server.sin_port = htons( 8888 );
+
+    //Connect to remote server
+    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
+    {
+        perror("connect failed. Error");
+        return 1;
+    }
+
+    puts("Connected\n");
+
+    if(szParam)
+        sprintf(szMessage, "%s:%s", szCommand, szParam);
+    else
+        sprintf(szMessage, "%s", szCommand);
+
+    std::string sMessage = szMessage;
+    std::string sCipherText;
+
+    encrypt(sMessage, sCipherText);
+
+    int messagelen = (int)sCipherText.size();
+    std::string sHeader((char*)&messagelen, sizeof(messagelen));
+
+    sMessage = sHeader.append(sCipherText);
+
+    //Send some data
+    if( send(sock , sMessage.c_str(), (size_t)sMessage.length() , 0) < 0)
+    {
+        puts("Send failed");
+        return 2;
+    }
+
+    //Receive a reply from the server
+    if( recv(sock , szServerReply , 100 , 0) < 0)
+    {
+        puts("recv failed");
+        return 3;
+    }
+
+    puts("Server reply :");
+    puts(szServerReply);
+
+    close(sock);
+
+    return 0;
+}
+
+void notifyPINLocked()
+{
+    sendMessage("pinlocked", NULL);
+}
+
+void notifyPINWrong(int trials)
+{
+    char szParam[100];
+    sprintf(szParam, "%d", trials);
+
+    sendMessage("pinwrong", szParam);
+}
+
+void notifyCardNotRegistered(const char* szPAN)
+{
+    sendMessage("cardnotregistered", szPAN);
 }

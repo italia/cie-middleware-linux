@@ -1,15 +1,14 @@
 #pragma once
 
 #include "cryptoki.h"
+//#pragma pack(1)
+//#include "pkcs11.h"
+//#pragma pack()
 
 #include "Mechanism.h"
 #include "Slot.h"
 #include "../PCSC/Token.h"
-#ifdef WIN32
 #include <winscard.h>
-#else
-#include <PCSC/winscard.h>
-#endif
 #include "P11Object.h"
 #include <memory>
 
@@ -19,7 +18,7 @@ class p11_error : public logged_error {
 	CK_RV p11ErrorCode;
 public:
 	p11_error(CK_RV p11ErrorCode, const char *message) : p11ErrorCode(p11ErrorCode), logged_error(message) {}
-	p11_error(CK_RV p11ErrorCode) : p11_error(p11ErrorCode,stdPrintf("%08x","Errore PKCS11", p11ErrorCode).c_str()) {}
+	p11_error(CK_RV p11ErrorCode) : p11_error(p11ErrorCode,stdPrintf("%s:%08x","Errore PKCS11", p11ErrorCode).c_str()) {}
 	CK_RV getP11ErrorCode() { return p11ErrorCode; }
 };
 
@@ -78,7 +77,7 @@ public:
 	void SetPIN(ByteArray &OldPin,ByteArray &NewPin);
 
 	void SetAttributeValue(CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount);
-	CK_ULONG GetAttributeValue(CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount);
+	CK_RV GetAttributeValue(CK_OBJECT_HANDLE hObject,CK_ATTRIBUTE_PTR pTemplate,CK_ULONG ulCount);
 	CK_ULONG GetObjectSize(CK_OBJECT_HANDLE hObject);
 	CK_OBJECT_HANDLE CreateObject(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount);
 	void DestroyObject(CK_OBJECT_HANDLE hObject);
@@ -87,9 +86,9 @@ public:
 	void GenerateKeyPair(CK_MECHANISM_PTR pMechanism, CK_ATTRIBUTE_PTR pPublicKeyTemplate, CK_ULONG ulPublicKeyAttributeCount, CK_ATTRIBUTE_PTR pPrivateKeyTemplate, CK_ULONG ulPrivateKeyAttributeCount, CK_OBJECT_HANDLE_PTR phPublicKey, CK_OBJECT_HANDLE_PTR phPrivateKey);
 
 	void DigestInit(CK_MECHANISM_PTR pMechanism);
-	void Digest(ByteArray &Data, ByteDynArray &Digest);
+	void Digest(ByteArray &Data, ByteArray &Digest);
 	void DigestUpdate(ByteArray &Data);
-	void DigestFinal(ByteDynArray &Digest);
+	void DigestFinal(ByteArray &Digest);
 	std::unique_ptr<CDigest> pDigestMechanism;
 
 	void VerifyInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
@@ -112,17 +111,17 @@ public:
 	void SignRecover(ByteArray &Data, ByteArray &Signature);
 	std::unique_ptr<CSignRecover> pSignRecoverMechanism;
 
-//	void EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
-//	void Encrypt(ByteArray &Data, ByteArray &EncryptedData);
-//	void EncryptUpdate(ByteArray &Data,ByteArray &EncryptedData);
-//	void EncryptFinal(ByteArray &EncryptedData);
-	//std::unique_ptr<CEncrypt> pEncryptMechanism;
+	/*void EncryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
+	void Encrypt(ByteArray &Data, ByteArray &EncryptedData);
+	void EncryptUpdate(ByteArray &Data,ByteArray &EncryptedData);
+	void EncryptFinal(ByteArray &EncryptedData);
+	std::unique_ptr<CEncrypt> pEncryptMechanism;
 
-//	void DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
-//	void Decrypt(ByteArray &EncryptedData, ByteArray &DataData);
-//	void DecryptUpdate(ByteArray &EncryptedData,ByteArray &Data);
-//	void DecryptFinal(ByteArray &Data);
-//	std::unique_ptr<CDecrypt> pDecryptMechanism;
+	void DecryptInit(CK_MECHANISM_PTR pMechanism, CK_OBJECT_HANDLE hKey);
+	void Decrypt(ByteArray &EncryptedData, ByteArray &DataData);
+	void DecryptUpdate(ByteArray &EncryptedData,ByteArray &Data);
+	void DecryptFinal(ByteArray &Data);
+	std::unique_ptr<CDecrypt> pDecryptMechanism;*/
 
 	void SetOperationState(ByteArray &OperationState);
 	void GetOperationState(ByteArray &OperationState);

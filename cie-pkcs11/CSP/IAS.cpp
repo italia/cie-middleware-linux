@@ -509,8 +509,17 @@ void IAS::DHKeyExchange() {
 
 	ByteDynArray dh_prKey, secret, resp,d1;
 	do {
+		//Log.write("resize");
 		dh_prKey.resize(dh_q.size());
+		//Log.write("random");
 		dh_prKey.random();
+
+		//Log.write("dh_q: %s", dumpHexData(dh_q).c_str());
+		//Log.write("dh_prKey: %s", dumpHexData(dh_prKey).c_str());
+
+		//printf("dh_q: %s", dumpHexData(dh_q).c_str());
+		//printf("dh_prKey: %s", dumpHexData(dh_prKey).c_str());
+
 	} while (dh_q[0] < dh_prKey[0]);
 
 	// dh_prKey deve essere dispari
@@ -872,7 +881,7 @@ StatusWord IAS::SendAPDU_SM(ByteArray head, ByteArray data, ByteDynArray &resp, 
 		// la get response sembra che faccia saltare il chaining. Forse è una questione di driver del lettore?
 		// Per daesso l'ho osservato solo su una virtual machine Win7 con il lettore in sharing con l'host
 		
-#define min
+//#define min
 //        size_t ds = data.size();
 		size_t i = 0;
 		uint8_t cla = head[0];

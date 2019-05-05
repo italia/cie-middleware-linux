@@ -826,10 +826,15 @@ CK_RV CK_ENTRY C_Digest(CK_SESSION_HANDLE hSession, CK_BYTE_PTR pData, CK_ULONG 
 	if (pSession == nullptr)
 		throw p11_error(CKR_SESSION_HANDLE_INVALID);
 
-	ByteDynArray Digest = ByteArray(pDigest, *pulDigestLen);
-    ByteArray input(pData, ulDataLen);
+	ByteArray Digest(pDigest, *pulDigestLen);
+	ByteArray input(pData, ulDataLen);
 	pSession->Digest(input, Digest);
 	*pulDigestLen = (CK_ULONG)Digest.size();
+
+//	ByteDynArray Digest = ByteArray(pDigest, *pulDigestLen);
+//    ByteArray input(pData, ulDataLen);
+//	pSession->Digest(input, Digest);
+//	*pulDigestLen = (CK_ULONG)Digest.size();
 
 	return CKR_OK;
 	exit_p11_func

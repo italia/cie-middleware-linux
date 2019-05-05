@@ -25,6 +25,8 @@ namespace p11 {
 	class CDigest : public CMechanism
 	{
 	public:
+		ByteDynArray data;
+
 		CDigest(CK_MECHANISM_TYPE type, std::shared_ptr<CSession> Session);
 		virtual ~CDigest();
 
@@ -243,7 +245,6 @@ namespace p11 {
 		CDigestSHA256(std::shared_ptr<CSession> Session);
 		virtual ~CDigestSHA256();
 
-		ByteDynArray data;
 		CSHA256 sha256;
 
 		void DigestInit();

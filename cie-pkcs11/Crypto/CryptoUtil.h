@@ -27,7 +27,7 @@ int encrypt(std::string& message, std::string& ciphertext)
     std::string enckey = ENCRYPTION_KEY;
     
     byte digest[SHA1::DIGESTSIZE];
-    SHA1().CalculateDigest(digest, (byte*)enckey.c_str(), enckey.length());
+    CryptoPP::SHA1().CalculateDigest(digest, (byte*)enckey.c_str(), enckey.length());
     memcpy(key, digest, CryptoPP::AES::DEFAULT_KEYLENGTH );
     //
     // Create Cipher Text
@@ -51,7 +51,7 @@ int decrypt(std::string& ciphertext, std::string& message)
     std::string enckey = ENCRYPTION_KEY;
     
     byte digest[SHA1::DIGESTSIZE];
-    SHA1().CalculateDigest(digest, (byte*)enckey.c_str(), enckey.length());
+    CryptoPP::SHA1().CalculateDigest(digest, (byte*)enckey.c_str(), enckey.length());
     memcpy(key, digest, CryptoPP::AES::DEFAULT_KEYLENGTH );
     
     //

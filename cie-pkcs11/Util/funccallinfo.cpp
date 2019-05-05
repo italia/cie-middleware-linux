@@ -22,26 +22,26 @@ CFuncCallInfo::CFuncCallInfo(const char *name, CLog &logInfo) : log(logInfo) {
 	tlsCallDepth = tlsCallDepth + 1;
 
 
-	auto head = callQueue.release();
-	callQueue = std::unique_ptr<CFuncCallInfoList>(new CFuncCallInfoList(this));
-	callQueue->next = std::unique_ptr<CFuncCallInfoList>(head);
+//	auto head = callQueue.release();
+//	callQueue = std::unique_ptr<CFuncCallInfoList>(new CFuncCallInfoList(this));
+//	callQueue->next = std::unique_ptr<CFuncCallInfoList>(head);
 }
 
 CFuncCallInfo::~CFuncCallInfo() {
 	//OutputDebugString(stdPrintf("OUT %s", fName).c_str());
 	//fName = NULL;
 	tlsCallDepth=tlsCallDepth-1;
-	//if (fName)
-	//	log.write("%*sOUT -> %s (%u)",(DWORD)tlsCallDepth,szEmpty,fName,LogNum-1);
+	if (fName)
+		log.write("%*sOUT -> %s (%u)",(DWORD)tlsCallDepth,szEmpty,fName,LogNum-1);
 
-	if (callQueue!=nullptr && callQueue->info == this) {
-		auto head = callQueue->next.release();
-		callQueue = std::unique_ptr<CFuncCallInfoList>(head);
-	}
-	else {
-		callQueue = nullptr;
-		OutputDebugString("Errore nella sequenza delle funzioni");
-	}
+//	if (callQueue!=nullptr && callQueue->info == this) {
+//		//auto head = callQueue->next.release();
+////		callQueue = std::unique_ptr<CFuncCallInfoList>(head);
+//	}
+//	else {
+//		callQueue = nullptr;
+//		OutputDebugString("Errore nella sequenza delle funzioni");
+//	}
 }
 
 const char *CFuncCallInfo::FunctionName() {

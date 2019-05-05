@@ -4,6 +4,7 @@
 #include "../Cryptopp/misc.h"
 #include "../Cryptopp/secblock.h"
 #include "../Cryptopp/osrng.h"
+#include <openssl/rand.h>
 //#include <windows.h>
 //#include <bcrypt.h>
 
@@ -98,7 +99,7 @@ bool ByteArray::operator!=(const ByteArray &src) const {
 void ByteArray::copy(const ByteArray &src, size_t start) {
 	if (src._size + start>_size)
 		throw logged_error(stdPrintf("Dimensione array da copiare %i troppo grande; dimensione massima %i", src._size + start, _size));
-    if(src._size > 0)
+    if(src._size > 0 && src._data)
         CryptoPP::memcpy_s(_data + start, _size - (start), src._data, src._size);
 }
 
@@ -142,10 +143,13 @@ public:
 } _initRand;
 
 ByteArray &ByteArray::random() {
-    CryptoPP::SecByteBlock key(_size);
-    CryptoPP::OS_GenerateRandomBlock(true, key, key.size());
-    memcpy(_data, key.BytePtr(), _size);
-	
+	RAND_bytes(_data, (int)_size);
+//    CryptoPP::SecByteBlock key(_size);
+//    CryptoPP::OS_GenerateRandomBlock(true, key, key.size());
+//    memcpy(_data, key.BytePtr(), _size);
+//
+//    _data[0] &= 0x7F;
+
 	return *this;
 }
 #endif

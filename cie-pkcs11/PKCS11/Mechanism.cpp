@@ -71,18 +71,21 @@ namespace p11 {
 
 	void CDigestSHA::DigestInit() {
 		init_func
-			sha1.Init();
+			data.clear();
 	}
 
 	void CDigestSHA::DigestUpdate(ByteArray &Part) {
 		init_func
-			sha1.Update(Part);
+			data.append(Part);
 	}
 
 	void CDigestSHA::DigestFinal(ByteArray &Digest) {
 		init_func
-		Digest = sha1.Final();
-//			sha1.Final(Digest);
+
+			//			data.append(Digest);
+			ByteDynArray dataOut(SHA_DIGEST_LENGTH);
+			dataOut = sha1.Digest(data);//, dataOut);
+			Digest.copy(dataOut);
 	}
 
 	CK_ULONG CDigestSHA::DigestLength() {
@@ -162,19 +165,23 @@ namespace p11 {
 
 	void CDigestMD5::DigestInit() {
 		init_func
-			md5.Init();
+			data.clear();
 	}
 
 	void CDigestMD5::DigestUpdate(ByteArray &Part) {
 		init_func
-			md5.Update(Part);
+			data.append(Part);
 	}
 
 	void CDigestMD5::DigestFinal(ByteArray &Digest) {
 		init_func
-		Digest = md5.Final();
-			//md5.Final(Digest);
+
+			//			data.append(Digest);
+			ByteDynArray dataOut(MD5_DIGEST_LENGTH);
+			dataOut = md5.Digest(data);//, dataOut);
+			Digest.copy(dataOut);
 	}
+
 
 	CK_ULONG CDigestMD5::DigestLength() {
 		init_func
@@ -858,14 +865,11 @@ namespace p11 {
 
 		ByteDynArray baExpectedResult(ulVerifyLength);
 		CK_ULONG ulDigestLen = pDigest->DigestLength();
-
 		ByteArray baDigestInfo = pDigest->DigestInfo();
 
-		baExpectedResult = baExpectedResult.right(ulDigestLen);
-		pDigest->DigestFinal(baExpectedResult);
-		
-		//pDigest->DigestFinal(baExpectedResult.right(ulDigestLen));
-		//baExpectedResult.rightcopy(baDigestInfo, ulDigestLen);
+		ByteArray ba1 = baExpectedResult.right(ulDigestLen);
+		pDigest->DigestFinal(ba1);
+		baExpectedResult.rightcopy(baDigestInfo, ulDigestLen);
 		PutPaddingBT1(baExpectedResult, ulDigestLen + baDigestInfo.size());
 
 		if (baPlainSignature == baExpectedResult)

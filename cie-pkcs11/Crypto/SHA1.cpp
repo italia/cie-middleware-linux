@@ -28,7 +28,7 @@ CSHA1::~CSHA1() {
 }
 void CSHA1::Init() {
 	if (hash != nullptr)
-		throw logged_error("Un'operazione di hash è già in corso");
+		throw logged_error("Un'operazione di hash ï¿½ giï¿½ in corso");
 	if (BCryptCreateHash(algo_sha1.algo, &hash, nullptr, 0, nullptr, 0, 0) != 0)
 		throw logged_error("Errore nella creazione dell'hash SHA1");
 }
@@ -61,7 +61,7 @@ CSHA1::~CSHA1() {
 
 void CSHA1::Init() {
 //    if (isInit)
-//        throw logged_error("Un'operazione di hash è già in corso");
+//        throw logged_error("Un'operazione di hash ï¿½ giï¿½ in corso");
 	SHA1_Init(&ctx);
 	isInit = true;
 }

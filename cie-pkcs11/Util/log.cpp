@@ -171,7 +171,7 @@ void CLog::init() {
 DWORD CLog::write(const char *format,...) {
  	va_list params;
 	va_start (params, format);
-	char pbtDate[0x800];
+	char pbtDate[0x2000];
 	unsigned int dummy = 0;
 	unsigned int *Num = &dummy;
 
@@ -203,7 +203,7 @@ DWORD CLog::write(const char *format,...) {
         time_t t = time(NULL);
         tm tm = *localtime(&t);
         
-        snprintf(pbtDate,0x800,"%05u:[%02d:%02d:%02d]", *Num, tm.tm_hour, tm.tm_min, tm.tm_sec);
+        snprintf(pbtDate,0x800,"%05u:[%02d:%02d:0%02d]", *Num, tm.tm_hour, tm.tm_min, tm.tm_sec);
 #endif
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		std::hash<std::thread::id> hasher;

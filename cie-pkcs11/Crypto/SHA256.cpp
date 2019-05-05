@@ -34,6 +34,10 @@ ByteDynArray CSHA256::Digest(ByteArray &data)
 
 #else
 
+#include "../Cryptopp/sha.h"
+#include "../Cryptopp/filters.h"
+#include "../Cryptopp/base64.h"
+
 void CSHA256::Init() {
 //    if (isInit)
 //    throw logged_error("Un'operazione di hash Ë gi‡ in corso");
@@ -56,11 +60,18 @@ ByteDynArray CSHA256::Final() {
 }
 ByteDynArray CSHA256::Digest(ByteArray &data)
 {
-	ByteDynArray resp(SHA256_DIGEST_LENGTH);
-	SHA256_Init(&ctx);
-	SHA256_Update(&ctx, data.data(), data.size());
-	SHA256_Final(resp.data(), &ctx);
-	//ER_ASSERT(SHA256(data.data(), data.size(), resp.data()) != NULL, "Errore nel calcolo dello SHA256")
+	const BYTE* pbData = (BYTE*) data.data();
+	unsigned int nDataLen = data.size();
+	BYTE abDigest[CryptoPP::SHA256::DIGESTSIZE];
+	CryptoPP::SHA256().CalculateDigest(abDigest, pbData, nDataLen);
+	ByteArray resp(abDigest, CryptoPP::SHA256::DIGESTSIZE);
+
+
+//	ByteDynArray resp(SHA256_DIGEST_LENGTH);
+//	SHA256_Init(&ctx);
+//	SHA256_Update(&ctx, data.data(), data.size());
+//	SHA256_Final(resp.data(), &ctx);
+//	//ER_ASSERT(SHA256(data.data(), data.size(), resp.data()) != NULL, "Errore nel calcolo dello SHA256")
 
     return resp;
 }
