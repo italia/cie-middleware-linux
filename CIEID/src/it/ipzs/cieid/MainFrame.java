@@ -1,10 +1,29 @@
 package it.ipzs.cieid;
 
-import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JProgressBar;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -13,35 +32,6 @@ import javax.swing.text.StyledDocument;
 import com.ugos.util.Runner;
 
 import it.ipzs.cieid.util.Utils;
-
-import java.awt.CardLayout;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
-import java.awt.Font;
-import java.awt.Color;
-
-import javax.imageio.ImageIO;
-import javax.swing.BoxLayout;
-import javax.swing.SwingConstants;
-import java.awt.FlowLayout;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.awt.event.ActionEvent;
-import javax.swing.JTabbedPane;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import java.awt.SystemColor;
-import java.awt.TrayIcon.MessageType;
-
-import javax.swing.JTextField;
-import javax.swing.JPasswordField;
-import javax.swing.JProgressBar;
 
 public class MainFrame extends JFrame {
 
@@ -62,7 +52,7 @@ public class MainFrame extends JFrame {
 	private JPanel contentPane;
 	private CardLayout cardLayout;
 	private JTabbedPane tabbedPane;
-	private JButton btnNewButton;
+	private JButton btnHome;
 	private JButton btnCambiaPin;
 	private JButton btnSbloccaCarta;
 	private JButton btnTutorial;
@@ -153,7 +143,7 @@ public class MainFrame extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					MainFrame frame = new MainFrame();
+					MainFrame frame = new MainFrame(args);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -165,7 +155,7 @@ public class MainFrame extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MainFrame() {
+	public MainFrame(String[] args) {
 		setResizable(false);
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -193,19 +183,19 @@ public class MainFrame extends JFrame {
 		label_2.setBounds(60, 30, 80, 80);
 		leftPanel.add(label_2);
 		
-		btnNewButton = new JButton("   Home");
-		btnNewButton.addActionListener(new ActionListener() {
+		btnHome = new JButton("   Home");
+		btnHome.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selectButton(btnNewButton);
+				selectButton(btnHome);
 				selectHome();
 			}
 		});
-		btnNewButton.setBackground(SystemColor.LIGHT_GRAY);
-		btnNewButton.setHorizontalAlignment(SwingConstants.LEFT);
-		btnNewButton.setIcon(new ImageIcon(MainFrame.class.getResource("/it/ipzs/cieid/res/Risorsa 25.png")));
-		btnNewButton.setBounds(0, 130, 200, 45);
-		btnNewButton.setBorderPainted(false);
-		leftPanel.add(btnNewButton);
+		btnHome.setBackground(SystemColor.LIGHT_GRAY);
+		btnHome.setHorizontalAlignment(SwingConstants.LEFT);
+		btnHome.setIcon(new ImageIcon(MainFrame.class.getResource("/it/ipzs/cieid/res/Risorsa 25.png")));
+		btnHome.setBounds(0, 130, 200, 45);
+		btnHome.setBorderPainted(false);
+		leftPanel.add(btnHome);
 		
 		btnCambiaPin = new JButton("   Cambia PIN");
 		btnCambiaPin.addActionListener(new ActionListener() {
@@ -902,8 +892,15 @@ public class MainFrame extends JFrame {
 		center = new SimpleAttributeSet();
 		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
 		doc.setParagraphAttributes(0, doc.getLength(), center, false);
-										
-		selectHome();
+							
+		if(args.length > 0 && args[0].equals("unlock"))
+		{
+			selectUnlock();
+		}
+		else 
+		{
+			selectHome();
+		}
 	}
 	
 	private void selectButton(JButton button)
@@ -911,7 +908,7 @@ public class MainFrame extends JFrame {
 		btnCambiaPin.setBackground(SystemColor.control);
 		btnAiuto.setBackground(SystemColor.control);
 		btnInformazioni.setBackground(SystemColor.control);
-		btnNewButton.setBackground(SystemColor.control);
+		btnHome.setBackground(SystemColor.control);
 		btnSbloccaCarta.setBackground(SystemColor.control);
 		btnTutorial.setBackground(SystemColor.control);
 		
@@ -1471,12 +1468,18 @@ public class MainFrame extends JFrame {
 	        });
 		}
 		
-		selectButton(btnNewButton);
+		selectButton(btnHome);
 	}
 	
 	private void selectCardholder()
 	{
 		tabbedPane.setSelectedIndex(2);
-		selectButton(btnNewButton);
+		selectButton(btnHome);
+	}
+	
+	private void selectUnlock()
+	{
+		tabbedPane.setSelectedIndex(5);
+		selectButton(btnSbloccaCarta);
 	}
 }

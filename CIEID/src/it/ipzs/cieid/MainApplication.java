@@ -27,20 +27,20 @@ public class MainApplication {
 
 	public static void showUI(String[] args)
 	{
-		MainApplication window = new MainApplication();
+		MainApplication window = new MainApplication(args);
 		window.frame.setVisible(true);
 	}
 	/**
 	 * Create the application.
 	 */
-	public MainApplication() {
-		initialize();
+	public MainApplication(String[] args) {
+		initialize(args);
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize(String[] args) {
 		
 		if("false".equals(Utils.getProperty("nomore", "false")))
 		{
@@ -48,7 +48,7 @@ public class MainApplication {
 		}
 		else 
 		{
-			frame = new MainFrame();
+			frame = new MainFrame(args);
 		}
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

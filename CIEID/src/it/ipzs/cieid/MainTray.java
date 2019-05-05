@@ -23,7 +23,6 @@ import ch.swingfx.twinkle.style.theme.LightDefaultNotification;
 import ch.swingfx.twinkle.window.Positions;
 import dorkbox.systemTray.MenuItem;
 import dorkbox.systemTray.SystemTray;
-import dorkbox.util.CacheUtil;
 import dorkbox.util.SwingUtil;
 
 
@@ -114,14 +113,12 @@ public class MainTray {
 	                }
 	                else if(clientMessage.startsWith("pinwrong"))
 	                {
-	                	writer.println(clientMessage);
-	                    
+	                	writer.println(clientMessage);	                    
 	                	notifyPinWrong();
 	                }
 	                else if(clientMessage.startsWith("cardnotregistered"))
 	                {
-	                	writer.println(clientMessage);
-	                    
+	                	writer.println(clientMessage);	                    
 	                	notifyCardNotRegistered();
 	                }
 	                else
@@ -146,20 +143,23 @@ public class MainTray {
 
 	private static void notifyPinWrong()
 	{
-//		Notify.create()
-//	      .title("CIE ID")
-//	      .text("PIN errato")
-//	      .position(Pos.TOP_RIGHT)
-//	      .darkStyle()
-//	      .onAction(new ActionHandler<Notify>() {
-//			
+		NotificationBuilder nb = createNotificationBuilder();
+		nb.withTitle("CIE ID");
+		nb.withMessage("PIN errato");		
+		//nb.withIcon(CrmIcons.CALL);
+		nb.withDisplayTime(10000000);
+
+//		nb.withListener(new NotificationEventAdapter() {		
 //			@Override
-//			public void handle(Notify arg0) {
-//				// TODO Auto-generated method stub
-//				
+//			public void clicked(NotificationEvent event)
+//			{
+//				// do nothing
+//				setLookAndFeel();
+//				MainApplication.showUI(new String[] {});
 //			}
-//		})
-//	    .showError();
+//		});
+
+		nb.showNotification();				
 	}
 	
 	private static void notifyCardNotRegistered()
@@ -168,41 +168,18 @@ public class MainTray {
 		nb.withTitle("CIE ID");
 		nb.withMessage("Carta non abbinata, premere qui per abbinare la CIE");		
 		//nb.withIcon(CrmIcons.CALL);
-		nb.withDisplayTime(10000000);
+		nb.withDisplayTime(300000);
 
 		nb.withListener(new NotificationEventAdapter() {		
 			@Override
 			public void clicked(NotificationEvent event)
 			{
 				setLookAndFeel();
-//				new Thread(new Runnable() {
-//				
-//					@Override
-//					public void run() {
-						// TODO Auto-generated method stub
-						MainApplication.showUI(new String[] {});
-//					}
-//				}).start();
+				MainApplication.showUI(new String[] {});
 			}
 		});
 
-		nb.showNotification();
-		
-//		Notify.create()
-//	      .title("CIE ID")
-//	      .text("Carta non abbinata, premere qui per abbinare la CIE")
-//	      .position(Pos.TOP_RIGHT)
-//	      .darkStyle()
-//	      .onAction(new ActionHandler<Notify>() {
-//			
-//			@Override
-//			public void handle(Notify arg0) {
-//				
-//				
-//				MainApplication.showUI(new String[] {});				
-//			}
-//		})
-//	    .showWarning();
+		nb.showNotification();		
 	}
 	
 	private static void notifyPinLocked()
@@ -211,46 +188,17 @@ public class MainTray {
 		nb.withTitle("CIE ID");
 		nb.withMessage("Carta bloccata, premere qui per sbloccarla con il PUK");		
 		//nb.withIcon(CrmIcons.CALL);
-		//nb.withDisplayTime(30000);
+		nb.withDisplayTime(300000);
 
 		nb.withListener(new NotificationEventAdapter() {		
 			@Override
 			public void clicked(NotificationEvent event)
 			{
-//				new Thread(new Runnable() {
-//				
-//					@Override
-//					public void run() {
-						// TODO Auto-generated method stub
-						MainApplication.showUI(new String[] {"unlock"});
-//					}
-//				}).start();
+				MainApplication.showUI(new String[] {"unlock"});
 			}
 		});
 
-		nb.showNotification();
-		
-//		Notify.create()
-//	      .title("CIE ID")
-//	      .text("Carta bloccata, premere qui per sbloccarla con il PUK")
-//	      .position(Pos.TOP_RIGHT)
-//	      .darkStyle()
-//	      .onAction(new ActionHandler<Notify>() {
-//			
-//			@Override
-//			public void handle(Notify arg0) {
-////				new Thread(new Runnable() {
-////					
-////					@Override
-////					public void run() {
-////						// TODO Auto-generated method stub
-////						MainApplication.main(new String[] {"unlock"});
-////					}
-////				}).start();
-//								
-//			}
-//		})
-//	    .showWarning();
+		nb.showNotification();		
 	}
 	
 	public static NotificationBuilder createNotificationBuilder()

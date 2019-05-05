@@ -152,7 +152,7 @@ public class IntroFrame extends JFrame {
 					Utils.setProperty("nomore", "true");
 				
 				// TODO open main frame
-				JFrame frame = new MainFrame();			
+				JFrame frame = new MainFrame(new String[] { });			
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				
 				setVisible(false);
