@@ -56,7 +56,7 @@ public class MainTray {
 			SwingUtil.setLookAndFeel(null); // set Native L&F (this is the System L&F instead of CrossPlatform L&F)
 			SystemTray.SWING_UI = new CustomSwingUI();
 			
-			SystemTray systemTray = SystemTray.get();
+			final SystemTray systemTray = SystemTray.get();
 			if (systemTray == null) {
 			    throw new RuntimeException("Unable to load SystemTray!");
 			}

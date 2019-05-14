@@ -139,7 +139,7 @@ public class MainFrame extends JFrame {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -970,12 +970,12 @@ public class MainFrame extends JFrame {
 				
 				try
 	            {
-	                int[] attempts = new int[1];
+	                final int[] attempts = new int[1];
 
 	                Middleware.ProgressCallBack progressCallBack = new Middleware.ProgressCallBack() {
 						
 						@Override
-						public void invoke(int progress, String message) {
+						public void invoke(final int progress, final String message) {
 							EventQueue.invokeLater(new Runnable() {
 								public void run() {
 									try {
@@ -1065,9 +1065,9 @@ public class MainFrame extends JFrame {
 
 	private void cambiaPIN()
 	{
-		String pin = oldpin.getText();
-        String pin1 = newpin1.getText();
-        String pin2 = newpin2.getText();
+		final String pin = oldpin.getText();
+        final String pin1 = newpin1.getText();
+        final String pin2 = newpin2.getText();
 
         int i;
 
@@ -1170,12 +1170,12 @@ public class MainFrame extends JFrame {
         btnDoCambiaPin.setEnabled(false);
         tabbedPane.setSelectedIndex(4);
           
-        int[] attempts = new int[1];
+        final int[] attempts = new int[1];
 
-        Middleware.ProgressCallBack progressCallBack = new Middleware.ProgressCallBack() {
+        final Middleware.ProgressCallBack progressCallBack = new Middleware.ProgressCallBack() {
 			
 			@Override
-			public void invoke(int progress, String message) {
+			public void invoke(final int progress, final String message) {
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {
@@ -1245,9 +1245,9 @@ public class MainFrame extends JFrame {
 	
 	private void sbloccaPIN()
 	{
-		String puk = puk01.getText();
-        String pin1 = pin01.getText();
-        String pin2 = pin02.getText();
+		final String puk = puk01.getText();
+		final String pin1 = pin01.getText();
+		final String pin2 = pin02.getText();
 
         int i;
 
@@ -1350,12 +1350,12 @@ public class MainFrame extends JFrame {
         btnDoCambiaPin.setEnabled(false);
         tabbedPane.setSelectedIndex(6);
           
-        int[] attempts = new int[1];
+        final int[] attempts = new int[1];
 
-        Middleware.ProgressCallBack progressCallBack = new Middleware.ProgressCallBack() {
+        final Middleware.ProgressCallBack progressCallBack = new Middleware.ProgressCallBack() {
 			
 			@Override
-			public void invoke(int progress, String message) {
+			public void invoke(final int progress, final String message) {
 				EventQueue.invokeLater(new Runnable() {
 					public void run() {
 						try {

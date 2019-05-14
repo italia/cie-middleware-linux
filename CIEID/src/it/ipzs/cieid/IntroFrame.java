@@ -10,7 +10,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import it.ipzs.cieid.util.Utils;
+import it.ipzs.cieid.util.*;
 
 import java.awt.CardLayout;
 import javax.swing.JLabel;
@@ -103,7 +103,7 @@ public class IntroFrame extends JFrame {
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		try {
-			lblNewLabel.setIcon(new ImageIcon(Utils.scaleimage(400, 300, ImageIO.read(IntroFrame.class.getResource("/it/ipzs/cie/res/flusso_intro_01.png")))));
+			lblNewLabel.setIcon(new ImageIcon(Utils.scaleimage(400, 300, ImageIO.read(IntroFrame.class.getResource("/it/ipzs/cieid/res/flusso_intro_01.png")))));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -131,7 +131,7 @@ public class IntroFrame extends JFrame {
 		JLabel lblNewLabel1 = new JLabel("");
 		lblNewLabel1.setHorizontalAlignment(SwingConstants.CENTER);
 		try {
-			lblNewLabel1.setIcon(new ImageIcon(Utils.scaleimage(400, 300, ImageIO.read(IntroFrame.class.getResource("/it/ipzs/cie/res/flusso_intro_02.png")))));
+			lblNewLabel1.setIcon(new ImageIcon(Utils.scaleimage(400, 300, ImageIO.read(IntroFrame.class.getResource("/it/ipzs/cieid/res/flusso_intro_02.png")))));
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -140,7 +140,7 @@ public class IntroFrame extends JFrame {
 		lblNewLabel1.setBounds(111, 152, 563, 335);
 		panel_1.add(lblNewLabel1);
 		
-		JCheckBox chckbxNoMore = new JCheckBox("Non mostrare più");
+		final JCheckBox chckbxNoMore = new JCheckBox("Non mostrare più");
 		chckbxNoMore.setBackground(Color.WHITE);
 		chckbxNoMore.setBounds(591, 508, 157, 23);
 		panel_1.add(chckbxNoMore);

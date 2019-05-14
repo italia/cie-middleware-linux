@@ -37,19 +37,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: TestCIE2
+all: TestCIE
 
 # Tool invocations
-TestCIE2: $(OBJS) $(USER_OBJS)
+TestCIE: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -pthread -o "TestCIE2" $(OBJS) $(USER_OBJS) $(LIBS) -ldl
+	g++ -pthread -o "TestCIE" $(OBJS) $(USER_OBJS) $(LIBS) -ldl
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) TestCIE2
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(EXECUTABLES)$(C_UPPER_DEPS)$(CXX_DEPS)$(OBJS)$(CPP_DEPS)$(C_DEPS) TestCIE
 	-@echo ' '
 
 .PHONY: all clean dependents
