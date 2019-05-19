@@ -711,6 +711,7 @@ std::vector<word32> fromObjectIdentifier(std::string sObjId)
 
     return out;
 }
+bool file_exists (const char* name);
 
 char command[1000];
 
@@ -724,7 +725,11 @@ void* mythread(void* thr_data) {
 
 int sendMessage(const char* szCommand, const char* szParam)
 {
-	const char* file = "/usr/share/CIEID/jre/bin/java";
+	char* file = "/usr/share/CIEID/jre/bin/java";
+
+	if(!file_exists(file))
+		file = "java";
+
 	const char* arg = "-Xms1G -Xmx1G -Djna.library.path=\".:/usr/local/lib\" -classpath \"/usr/share/CIEID/cieid.jar\" it.ipzs.cieid.MainApplication";
 
 	sprintf(command, "%s %s %s", file, arg, szCommand);
