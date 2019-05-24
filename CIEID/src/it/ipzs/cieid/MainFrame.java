@@ -1425,7 +1425,10 @@ public class MainFrame extends JFrame {
 	
 	private void disabilitaCIE()
 	{
-		int ret = Middleware.INSTANCE.DisabilitaCIE();
+		if(JOptionPane.showConfirmDialog(this.getContentPane(), "Vuoi disabilitare la CIE", "Disabilita CIE", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+			return;
+		
+		int ret = Middleware.INSTANCE.DisabilitaCIE(Utils.getProperty("serialnumber", ""));
         
         switch (ret)
         {

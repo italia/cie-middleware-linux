@@ -16,8 +16,8 @@ public interface Middleware extends Library {
     }
 
 	public int AbilitaCIE(String szPAN, String szPIN, int[] attempts, ProgressCallBack progressCallBack, CompletedCallBack completedCallBack);
-	public int VerificaCIEAbilitata();
-	public int DisabilitaCIE();
+	public int VerificaCIEAbilitata(String szPAN);
+	public int DisabilitaCIE(String szPAN);
 	public int CambioPIN(String  currentPIN, String nuovoPIN, int[] attempts, ProgressCallBack progressCallBack);
 	public int SbloccoPIN(String puk, String nuovoPIN, int[] attempts, ProgressCallBack progressCallBack);
 	
