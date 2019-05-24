@@ -665,6 +665,13 @@ public class MainFrame extends JFrame {
 		panel_4.add(lblRipetiIlNuovo);
 		
 		newpin2 = new JPasswordField();
+		newpin2.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					cambiaPIN();
+			}
+		});
 		newpin2.setBounds(252, 361, 234, 25);
 		panel_4.add(newpin2);
 		
@@ -780,6 +787,13 @@ public class MainFrame extends JFrame {
 		panel_6.add(label_10);
 		
 		pin02 = new JPasswordField();
+		pin02.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					sbloccaPIN();
+			}
+		});
 		pin02.setBounds(252, 361, 234, 25);
 		panel_6.add(pin02);
 		
