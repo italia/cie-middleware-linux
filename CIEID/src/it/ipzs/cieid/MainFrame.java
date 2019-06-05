@@ -646,6 +646,13 @@ public class MainFrame extends JFrame {
 		
 		oldpin = new JPasswordField();
 		oldpin.setBounds(252, 230, 234, 25);
+		oldpin.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					cambiaPIN();
+			}
+		});
 		panel_4.add(oldpin);
 		
 		lblInserisciIlNuovo = new JLabel("Inserisci il nuovo PIN");
@@ -656,6 +663,13 @@ public class MainFrame extends JFrame {
 		
 		newpin1 = new JPasswordField();
 		newpin1.setBounds(252, 295, 234, 25);
+		newpin1.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					cambiaPIN();
+			}
+		});
 		panel_4.add(newpin1);
 		
 		lblRipetiIlNuovo = new JLabel("Ripeti il nuovo PIN");
@@ -679,6 +693,8 @@ public class MainFrame extends JFrame {
 		txtpnIlPinDella_2.setFont(new Font("Dialog", Font.PLAIN, 10));
 		txtpnIlPinDella_2.setText("Il PIN della CIE deve essere composto da 8 cifre numeriche, non sono ammessi altri tipi di caratteri. Non sono ammessi PIN composti da tutti i numeri uguali (es: 11111111) o da numeri consecutivi (es: 12345678).");
 		txtpnIlPinDella_2.setBounds(262, 398, 234, 76);
+		txtpnIlPinDella_2.setEditable(false);
+
 		panel_4.add(txtpnIlPinDella_2);
 		
 		panel_5 = new JPanel();
@@ -768,6 +784,13 @@ public class MainFrame extends JFrame {
 		
 		puk01 = new JPasswordField();
 		puk01.setBounds(252, 230, 234, 25);
+		puk01.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					sbloccaPIN();
+			}
+		});
 		panel_6.add(puk01);
 		
 		label_9 = new JLabel("Inserisci il nuovo PIN");
@@ -778,6 +801,13 @@ public class MainFrame extends JFrame {
 		
 		pin01 = new JPasswordField();
 		pin01.setBounds(252, 295, 234, 25);
+		pin01.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER)
+					sbloccaPIN();
+			}
+		});
 		panel_6.add(pin01);
 		
 		label_10 = new JLabel("Ripeti il nuovo PIN");
@@ -800,6 +830,7 @@ public class MainFrame extends JFrame {
 		textPane_2 = new JTextPane();
 		textPane_2.setText("Il PIN della CIE deve essere composto da 8 cifre numeriche, non sono ammessi altri tipi di caratteri. Non sono ammessi PIN composti da tutti i numeri uguali (es: 11111111) o da numeri consecutivi (es: 12345678).");
 		textPane_2.setFont(new Font("Dialog", Font.PLAIN, 10));
+		textPane_2.setEditable(false);		
 		textPane_2.setBounds(262, 398, 234, 76);
 		panel_6.add(textPane_2);
 		
