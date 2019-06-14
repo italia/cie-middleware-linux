@@ -383,7 +383,7 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 		CCardContext *tc = CSlot::ThreadContext;
 		if (tc != nullptr) {
 			SCARDCONTEXT hC = tc->hContext;
-			if (hC != NULL)
+			if (hC)
 				SCardCancel(hC);
 		}
 		p11Mutex.unlock();
@@ -474,13 +474,13 @@ CK_RV CK_ENTRY C_GetTokenInfo(CK_SLOT_ID slotID, CK_TOKEN_INFO_PTR pInfo)
 		if (!bP11Initialized)
 			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-			std::shared_ptr<CSlot> pSlot = CSlot::GetSlotFromID(slotID);
+		std::shared_ptr<CSlot> pSlot = CSlot::GetSlotFromID(slotID);
 
-			if (pSlot == nullptr)
-				throw p11_error(CKR_SLOT_ID_INVALID);
+		if (pSlot == nullptr)
+			throw p11_error(CKR_SLOT_ID_INVALID);
 
-			if (pInfo == nullptr)
-				throw p11_error(CKR_ARGUMENTS_BAD);
+		if (pInfo == nullptr)
+			throw p11_error(CKR_ARGUMENTS_BAD);
 
 	if (!pSlot->IsTokenPresent())
 		throw p11_error(CKR_TOKEN_NOT_PRESENT);
@@ -499,10 +499,10 @@ CK_RV CK_ENTRY C_CloseSession(CK_SESSION_HANDLE hSession)
 
 	logParam(hSession)
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 
 	if (pSession==nullptr)
 		throw p11_error(CKR_SESSION_HANDLE_INVALID);
@@ -768,16 +768,16 @@ CK_RV CK_ENTRY C_DestroyObject(CK_SESSION_HANDLE hSession,CK_OBJECT_HANDLE hObje
 		if (!bP11Initialized)
 			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+		std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 
-			if (pSession == nullptr)
-				throw p11_error(CKR_SESSION_HANDLE_INVALID);
+		if (pSession == nullptr)
+			throw p11_error(CKR_SESSION_HANDLE_INVALID);
 
-			pSession->DestroyObject(hObject);
-			return CKR_OK;
+		pSession->DestroyObject(hObject);
+		return CKR_OK;
 
-			exit_p11_func
-				return CKR_GENERAL_ERROR;
+		exit_p11_func
+			return CKR_GENERAL_ERROR;
 }
 
 CK_RV CK_ENTRY C_DigestInit(CK_SESSION_HANDLE hSession, CK_MECHANISM_PTR pMechanism) 
@@ -1129,12 +1129,12 @@ CK_RV CK_ENTRY C_GetSessionInfo(CK_SESSION_HANDLE hSession, CK_SESSION_INFO_PTR 
 		logParam(hSession)
 		logParam(pInfo)
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
-			if (pSession == nullptr)
-				throw p11_error(CKR_SESSION_HANDLE_INVALID);
+	std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+	if (pSession == nullptr)
+		throw p11_error(CKR_SESSION_HANDLE_INVALID);
 
 	pInfo->slotID = pSession->pSlot->hSlot;
 
@@ -1204,10 +1204,10 @@ CK_RV CK_ENTRY C_Logout(CK_SESSION_HANDLE hSession)
 
 	logParam(hSession)
 
-		if (!bP11Initialized)
-			throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
+	if (!bP11Initialized)
+		throw p11_error(CKR_CRYPTOKI_NOT_INITIALIZED);
 
-			std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
+std::shared_ptr<CSession> pSession = CSession::GetSessionFromID(hSession);
 	if (pSession == nullptr)
 		throw p11_error(CKR_SESSION_HANDLE_INVALID);
 

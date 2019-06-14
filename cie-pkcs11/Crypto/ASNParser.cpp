@@ -147,6 +147,8 @@ void CASNTag::Verify(ByteArray checkContent) {
 CASNTag::CASNTag(void)
 {
 	forcedSequence=false;
+	startPos = -1;
+	endPos = -1;
 }
 
 CASNParser::CASNParser(void)

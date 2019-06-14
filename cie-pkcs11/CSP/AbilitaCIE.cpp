@@ -5,7 +5,7 @@
 //  Created by ugo chirico on 06/10/18. http://www.ugochirico.com
 //  Copyright © 2018 IPZS. All rights reserved.
 //
-
+#include <string.h>
 #include "IAS.h"
 #include "../PKCS11/wintypes.h"
 #include "../PKCS11/PKCS11Functions.h"
@@ -101,6 +101,13 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
 {
     char* readers = NULL;
     char* ATR = NULL;
+
+    // verifica bontà PIN
+    if(szPIN == NULL || strnlen(szPIN, 9) != 8)
+    {
+    	return CKR_PIN_LEN_RANGE;
+    }
+
 	try
     {
 		CSHA256 sha256;
@@ -404,9 +411,11 @@ DWORD CardAuthenticateEx(IAS*       ias,
 
     if (sw == 0x6983) {
         if (PinId == ROLE_USER)
+        {
             progressCallBack(40, "PIN Bloccato");
-
             ias->IconaSbloccoPIN();
+        }
+
         return SCARD_W_CHV_BLOCKED;
     }
     else if (sw >= 0x63C0 && sw <= 0x63CF) {
@@ -506,12 +515,12 @@ std::vector<word32> fromObjectIdentifier(std::string sObjId)
     int nVal;
     int nAux;
     char* szTok;
-    char* szOID = new char[sObjId.size()];
-    strcpy(szOID, sObjId.c_str());
-    
-    szTok = strtok(szOID, ".");
-    
-    UINT nFirst = 40 * atoi(szTok) + atoi(strtok(NULL, "."));
+    char* szOID = new char[sObjId.size() + 1];
+    strncpy(szOID, sObjId.c_str(), sObjId.size());
+    char *next = NULL;
+    szTok = strtok_r(szOID, ".", &next);
+
+    UINT nFirst = 40 * strtol(szTok, NULL, 10) + strtol(strtok_r(NULL, ".", &next), NULL, 10);
     if(nFirst > 0xff)
     {
         delete[] szOID;
@@ -522,9 +531,9 @@ std::vector<word32> fromObjectIdentifier(std::string sObjId)
     
     int i = 0;
     
-    while ((szTok = strtok(NULL, ".")) != NULL)
+    while ((szTok = strtok_r(NULL, ".", &next)) != NULL)
     {
-        nVal = atoi(szTok);
+        nVal = strtol(szTok, NULL, 10);
         if(nVal == 0)
         {
             out.push_back(0x00);
@@ -578,7 +587,7 @@ int sendMessage(const char* szCommand, const char* szParam)
 
 	const char* arg = "-Xms1G -Xmx1G -Djna.library.path=\".:/usr/local/lib\" -classpath \"/usr/share/CIEID/cieid.jar\" it.ipzs.cieid.MainApplication";
 
-	sprintf(command, "%s %s %s", file, arg, szCommand);
+	snprintf(command, 1000, "%s %s %s", file, arg, szCommand);
 
 	pthread_t thr;
 	pthread_create(&thr, NULL, mythread, (void*)command);
@@ -586,69 +595,69 @@ int sendMessage(const char* szCommand, const char* szParam)
 	return 0;
 }
 
-int sendMessageOld(const char* szCommand, const char* szParam)
-{
-    int sock;
-    struct sockaddr_in server;
-    char szMessage[100] , szServerReply[1000];
-
-    //Create socket
-    sock = socket(AF_INET , SOCK_STREAM , 0);
-    if (sock == -1)
-    {
-        printf("Could not create socket");
-    }
-    puts("Socket created");
-
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server.sin_family = AF_INET;
-    server.sin_port = htons( 8888 );
-
-    //Connect to remote server
-    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
-    {
-        perror("connect failed. Error");
-        return 1;
-    }
-
-    puts("Connected\n");
-
-    if(szParam)
-        sprintf(szMessage, "%s:%s", szCommand, szParam);
-    else
-        sprintf(szMessage, "%s", szCommand);
-
-    std::string sMessage = szMessage;
-    std::string sCipherText;
-
-    encrypt(sMessage, sCipherText);
-
-    int messagelen = (int)sCipherText.size();
-    std::string sHeader((char*)&messagelen, sizeof(messagelen));
-
-    sMessage = sHeader.append(sCipherText);
-
-    //Send some data
-    if( send(sock , sMessage.c_str(), (size_t)sMessage.length() , 0) < 0)
-    {
-        puts("Send failed");
-        return 2;
-    }
-
-    //Receive a reply from the server
-    if( recv(sock , szServerReply , 100 , 0) < 0)
-    {
-        puts("recv failed");
-        return 3;
-    }
-
-    puts("Server reply :");
-    puts(szServerReply);
-
-    close(sock);
-
-    return 0;
-}
+//int sendMessageOld(const char* szCommand, const char* szParam)
+//{
+//    int sock;
+//    struct sockaddr_in server;
+//    char szMessage[100] , szServerReply[1000];
+//
+//    //Create socket
+//    sock = socket(AF_INET , SOCK_STREAM , 0);
+//    if (sock == -1)
+//    {
+//        printf("Could not create socket");
+//    }
+//    puts("Socket created");
+//
+//    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+//    server.sin_family = AF_INET;
+//    server.sin_port = htons( 8888 );
+//
+//    //Connect to remote server
+//    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
+//    {
+//        perror("connect failed. Error");
+//        return 1;
+//    }
+//
+//    puts("Connected\n");
+//
+//    if(szParam)
+//        sprintf(szMessage, "%s:%s", szCommand, szParam);
+//    else
+//        sprintf(szMessage, "%s", szCommand);
+//
+//    std::string sMessage = szMessage;
+//    std::string sCipherText;
+//
+//    encrypt(sMessage, sCipherText);
+//
+//    int messagelen = (int)sCipherText.size();
+//    std::string sHeader((char*)&messagelen, sizeof(messagelen));
+//
+//    sMessage = sHeader.append(sCipherText);
+//
+//    //Send some data
+//    if( send(sock , sMessage.c_str(), (size_t)sMessage.length() , 0) < 0)
+//    {
+//        puts("Send failed");
+//        return 2;
+//    }
+//
+//    //Receive a reply from the server
+//    if( recv(sock , szServerReply , 100 , 0) < 0)
+//    {
+//        puts("recv failed");
+//        return 3;
+//    }
+//
+//    puts("Server reply :");
+//    puts(szServerReply);
+//
+//    close(sock);
+//
+//    return 0;
+//}
 
 void notifyPINLocked()
 {
@@ -658,7 +667,7 @@ void notifyPINLocked()
 void notifyPINWrong(int trials)
 {
     char szParam[100];
-    sprintf(szParam, "%d", trials);
+    snprintf(szParam, 100, "%d", trials);
 
     sendMessage("pinwrong", szParam);
 }

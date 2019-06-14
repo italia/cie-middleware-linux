@@ -5,7 +5,7 @@
 #include <openssl/bn.h>
 #endif
 
-static const char *szCompiledFile=__FILE__;
+//static const char *szCompiledFile=__FILE__;
 
 #ifdef _WIN32
 
@@ -72,7 +72,7 @@ void CRSA::GenerateKey(DWORD size, ByteDynArray &module, ByteDynArray &pubexp, B
 {
 	//init_func
 	keyPriv = RSA_new();
-	auto BNpubexp = BN_new();
+	auto BNpubexp = BN_secure_new();
 	BN_set_word(BNpubexp, 65537);
 	RSA_generate_key_ex(keyPriv, size, BNpubexp, nullptr);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L

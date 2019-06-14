@@ -35,6 +35,13 @@ CK_RV CK_ENTRY CambioPIN(const char*  szCurrentPIN, const char*  szNewPIN, int* 
     char* readers = NULL;
     char* ATR = NULL;
     
+    // verifica bontà PIN
+	if(szCurrentPIN == NULL || strnlen(szCurrentPIN, 9) != 8)
+		return CKR_PIN_LEN_RANGE;
+
+	if(szNewPIN == NULL || strnlen(szNewPIN, 9) != 8)
+		return CKR_PIN_LEN_RANGE;
+
     try
     {
         DWORD len = 0;
@@ -208,6 +215,13 @@ CK_RV CK_ENTRY SbloccoPIN(const char*  szPUK, const char*  szNewPIN, int* pAttem
     char* readers = NULL;
     char* ATR = NULL;
     
+    // verifica bontà PIN
+	if(szPUK == NULL || strnlen(szPUK, 9) != 8)
+		return CKR_PIN_LEN_RANGE;
+
+	if(szNewPIN == NULL || strnlen(szNewPIN, 9) != 8)
+		return CKR_PIN_LEN_RANGE;
+
     try
     {
         DWORD len = 0;

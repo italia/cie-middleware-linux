@@ -1,7 +1,7 @@
 
 #include "sha256.h"
 
-static char *szCompiledFile=__FILE__;
+//static char *szCompiledFile=__FILE__;
 
 #ifdef WIN32
 

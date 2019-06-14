@@ -5,8 +5,6 @@
 #include "../Crypto/RSA.h"
 #include "../Util/TLV.h"
 
-static char *szCompiledFile = __FILE__;
-
 extern CLog Log;
 
 namespace {
@@ -679,13 +677,13 @@ namespace p11 {
 		if (pSignKey->IsPrivate() && pSlot->User != CKU_USER)
 			throw p11_error(CKR_USER_NOT_LOGGED_IN);
 
-			ByteArray *baAttrVal = pSignKey->getAttribute(CKA_SIGN);
-			if (baAttrVal==nullptr)
+		ByteArray *baAttrVal = pSignKey->getAttribute(CKA_SIGN);
+		if (baAttrVal==nullptr)
+			throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
+		else {
+			if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
 				throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-			else {
-				if (ByteArrayToVar(*baAttrVal, CK_BBOOL) == FALSE)
-					throw p11_error(CKR_KEY_FUNCTION_NOT_PERMITTED);
-			}
+		}
 
 		switch (pMechanism->mechanism) {
 		case CKM_SHA1_RSA_PKCS:
@@ -764,8 +762,6 @@ namespace p11 {
 			throw p11_error(CKR_KEY_HANDLE_INVALID);
 
 		auto pSignKey = std::static_pointer_cast<CP11PrivateKey>(pObject);
-
-		bool bPrivate = false;
 
 		if (pSignKey->IsPrivate() && pSlot->User != CKU_USER)
 			throw p11_error(CKR_USER_NOT_LOGGED_IN);

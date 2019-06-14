@@ -11,8 +11,6 @@
 
 extern CLog Log;
 
-static char *szCompiledFile = __FILE__;
-//extern CSyncroMutex p11EventMutex;
 extern std::mutex p11Mutex;
 extern auto_reset_event p11slotEvent;
 extern bool bP11Terminate;
@@ -279,7 +277,8 @@ namespace p11 {
 			std::shared_ptr<CSlot> pSlot = GetSlotFromReaderName(szReaderName);
 			if (pSlot == nullptr) {
 				auto pSlot = std::make_shared<CSlot>(szReaderName);
-				CK_SLOT_ID hSlotID = AddSlot(pSlot);
+//				CK_SLOT_ID hSlotID =
+				AddSlot(pSlot);
 				bMapChanged = true;
 			}
 			szReaderName = szReaderName + strnlen(szReaderName, readersLen) + 1;

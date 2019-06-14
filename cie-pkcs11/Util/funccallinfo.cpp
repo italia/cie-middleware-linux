@@ -7,7 +7,7 @@ thread_local std::unique_ptr<CFuncCallInfoList> callQueue = nullptr;
 extern bool FunctionLog;
 extern unsigned int GlobalDepth;
 extern bool GlobalParam;
-char szEmpty[]={NULL};
+char szEmpty[]={'\0'};
 
 CFuncCallInfo::CFuncCallInfo(const char *name, CLog &logInfo) : log(logInfo) {
 	fName = name;

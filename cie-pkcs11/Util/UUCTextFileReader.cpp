@@ -19,6 +19,8 @@
  */
 
 #include "UUCTextFileReader.h"
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 
@@ -36,6 +38,38 @@ UUCTextFileReader::UUCTextFileReader(const char* szFilePath)
 		throw (long)ERROR_FILE_NOT_FOUND;
 	}
 
+	struct stat	lstat_buf;
+	struct stat	fstat_buf;
+
+	int r = lstat(szFilePath, &lstat_buf);
+
+	/* handle the case of the lstat failing first */
+	if (r == -1)
+	{
+		fclose(m_pf);
+		throw (long)ERROR_FILE_NOT_FOUND;
+	}
+
+	if (S_ISLNK(lstat_buf.st_mode))  {
+		fclose(m_pf);
+		throw (long)ERROR_FILE_NOT_FOUND;
+	}
+
+	/* Get the properties of the opened file descriptor */
+	r = stat(szFilePath, &fstat_buf);
+	if (r == -1)
+	{
+		fclose(m_pf);
+		throw (long)ERROR_FILE_NOT_FOUND;
+	}
+
+	if (lstat_buf.st_dev != fstat_buf.st_dev
+		 || lstat_buf.st_ino != fstat_buf.st_ino
+		 || (S_IFMT & lstat_buf.st_mode) != (S_IFMT & fstat_buf.st_mode))
+	{
+		fclose(m_pf);
+		throw (long)ERROR_FILE_NOT_FOUND;
+	}
 	//LOG_DBG((0, "UUCTextFileReader", "read OK %s", szFilePath));
 }
 

@@ -1,4 +1,7 @@
 
+#define __STDC_WANT_LIB_EXT1__ 1
+
+#include <time.h>
 #include "util.h"
 #include "ModuleInfo.h"
 #include <vector>
@@ -84,6 +87,13 @@ void initLog(const char *moduleName, const char *iniFile,const char *version)
     }
 
     std::string path(home);
+
+	std::smatch match;
+	std::regex_search(path, match, std::regex("^/(home|root)/"));
+	std::string suffix = match.suffix();
+	if(suffix.find("/") != std::string::npos)
+		throw 1;
+
 //    std::smatch match;
 //    std::regex_search(path, match, std::regex("^/Users/"));
 //    std::string suffix = match.suffix();
@@ -95,8 +105,7 @@ void initLog(const char *moduleName, const char *iniFile,const char *version)
     struct stat st = {0};
     
     if (stat(path.c_str(), &st) == -1) {
-        int r = mkdir(path.c_str(), 0700);
-        //        printf("mkdir: %d", r);
+        mkdir(path.c_str(), 0700);
     }
     
     globalLogDir = settings.getProperty("LogDir", path.c_str()); //"Definisce il path in cui salvare il file di log (con / finale)"))
@@ -125,7 +134,8 @@ void CLog::init() {
     th << std::setw(8) << std::setfill('0');
     
     time_t T= time(NULL);
-    struct  tm tm = *localtime(&T);
+    struct tm t;
+    struct  tm tm = *localtime_r(&T, &t);
 
     switch (LogMode) {
         case (LM_Single): {
@@ -192,7 +202,7 @@ DWORD CLog::write(const char *format,...) {
 		switch(LogMode) {
 			case (LM_Module) : Num=&LogCount; break;
 			case (LM_Module_Thread) :
-			//case (LM_Thread) : thNum=dwThreadCount;dwNum=&thNum; break;
+			case (LM_Thread) : /*thNum=dwThreadCount;dwNum=&thNum;0*/ break;
 			case (LM_Single) : Num=&GlobalCount; break;
 		}
 #ifdef WIN32
@@ -235,7 +245,7 @@ DWORD CLog::write(const char *format,...) {
         if (lf) {
             switch(LogMode) {
                 case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, getpid(), dwThreadID, ModuleNum); break;
-                case (LM_Module) : fprintf(lf,"%s|%04i|%04x|", pbtDate, getpid(), dwThreadID); break;
+                case (LM_Module) : fprintf(lf,"%s|%04i|%04lx|", pbtDate, getpid(), dwThreadID); break;
                 case (LM_Thread) : fprintf(lf,"%s|%04i|%02i|", pbtDate, getpid(), ModuleNum); break;
                 case (LM_Module_Thread) : fprintf(lf,"%s|", pbtDate); break;
             }
@@ -266,7 +276,7 @@ DWORD CLog::write(const char *format,...) {
 	switch(LogMode) {
 		case (LM_Module) : LogCount++; break;
 		case (LM_Module_Thread) :
-		//case (LM_Thread) : dwThreadCount=thNum+1; break;
+		case (LM_Thread) : /*dwThreadCount=thNum+1;*/ break;
 		case (LM_Single) : GlobalCount++; break;
 	}
 	return(*Num);

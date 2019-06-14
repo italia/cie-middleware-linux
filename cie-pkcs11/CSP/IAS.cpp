@@ -46,6 +46,8 @@ IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 	init_func
 
 	Callback = nullptr;
+	CallbackData = nullptr;
+
 	this->ATR = ATR;
 	uint8_t gemaltoAID[] = { 0xA0, 0x00, 0x00, 0x00, 0x30, 0x80, 0x00, 0x00, 0x00, 0x09, 0x81, 0x60, 0x01 };
 	IAS_AID = VarToByteArray(gemaltoAID);

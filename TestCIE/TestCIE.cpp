@@ -556,7 +556,7 @@ bool signVerify(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	rv = g_pFuncList->C_Sign(hSession, (BYTE*)dataVal.getContent(), dataVal.getLength(), pOutput, &outputLen);
 	if (rv != CKR_OK)
 	{
-		delete pOutput;
+		free(pOutput);
 		error(rv);
 		return false;
 	}
@@ -571,7 +571,7 @@ bool signVerify(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	rv = g_pFuncList->C_VerifyInit(hSession, pMechanism, hObjectPubKey);
 	if (rv != CKR_OK)
 	{
-		delete pOutput;
+		free(pOutput);
 		error(rv);
 		return false;
 	}
@@ -579,7 +579,7 @@ bool signVerify(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	rv = g_pFuncList->C_Verify(hSession, (BYTE*)dataVal.getContent(), dataVal.getLength(), pOutput, outputLen);
 	if (rv != CKR_OK)
 	{
-		delete pOutput;
+		free(pOutput);
 		error(rv);
 		return false;
 	}
@@ -587,7 +587,7 @@ bool signVerify(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	if (g_nLogLevel > 1)
 		std::cout << "  -- Verifica completata: " << std::endl << "     " << output.toHexString() << std::endl;
 
-	delete pOutput;
+	free(pOutput);
 
 	return true;
 }
@@ -634,7 +634,7 @@ bool digest(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	rv = g_pFuncList->C_Digest(hSession, (BYTE*)dataVal.getContent(), dataVal.getLength(), pOutput, &outputLen);
 	if (rv != CKR_OK)
 	{
-		delete pOutput;
+		free(pOutput);
 		error(rv);
 		return false;
 	}
@@ -644,7 +644,7 @@ bool digest(CK_SESSION_HANDLE hSession, CK_MECHANISM_TYPE mechanism)
 	if (g_nLogLevel > 2)
 		std::cout << "  -- Hash calcolato: " << std::endl << "     " << output.toHexString() << std::endl;
 
-	delete pOutput;
+	free(pOutput);
 
 	return true;
 }

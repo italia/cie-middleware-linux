@@ -20,7 +20,6 @@
 
 #include "UUCProperties.h"
 #include "UUCTextFileReader.h"
-#include "UUCTextFileWriter.h"
 #include <stdlib.h>
 
 #include <time.h>
@@ -75,7 +74,6 @@ long UUCProperties::load(const char* szFilePath)
 
 		char* szLine	= (char*)line.getContent();
         char* szSavePtr;
-		size_t dwLineLen = line.getLength();
 
 		while(nRes != nEOF)
 		{
@@ -89,8 +87,7 @@ long UUCProperties::load(const char* szFilePath)
 			line.removeAll();
 			nRes	  = textFileReader.readLine(line);
 			szLine	  = (char*)line.getContent();
-			dwLineLen = line.getLength();
-	}
+		}
 	}
 	catch(long nErr)
 	{
@@ -138,128 +135,14 @@ long UUCProperties::load(const UUCByteArray& props)
 	return 0;
 }
 	
-long UUCProperties::save(const char* szFilePath, const char* szHeader) const
-{
-	char* szLine;
 
-	try
-	{
-		UUCTextFileWriter textFileWriter(szFilePath);
-
-		if (szHeader != NULL) 
-		{
-            size_t l = strlen(szHeader) + 3;
-			szLine = new char[l];
-			snprintf(szLine, l, "#%s", szHeader);
-			textFileWriter.writeLine(szLine);
-			delete[] szLine;
-		}
-
-		time_t ltime;
-		TZSET();
-		time( &ltime );
-		
-		szLine = new char[255];
-		snprintf(szLine, 255, "#%s", ctime( &ltime ) );
-		textFileWriter.writeLine(szLine);
-		delete[] szLine;
-
-		// iterate in the hashtable
-		char* szName;
-		char* szValue;
-
-		POS p = m_pStringTable->getFirstPosition();
-		
-		while(p != NULL)
-		{
-			p = m_pStringTable->getNextEntry(p, szName, szValue);		
-				
-            size_t l  = strlen(szName) + strlen(szValue) + 2;
-			szLine = new char[l];
-			snprintf(szLine, l, "%s=%s", szName, szValue);
-			textFileWriter.writeLine(szLine);
-			delete[] szLine;
-		}				
-	}
-	catch(long nErr)
-	{
-		return nErr;
-	}
-	catch(...)
-	{
-		#ifdef WIN32
-		return GetLastError();
-#else
-		return -1;
-#endif
-	}
-
-	return 0;
-}
-
-long UUCProperties::save(UUCByteArray& props, const char* szHeader) const
-{
-	char* szLine;
-
-	try
-	{
-		if (szHeader != NULL) 
-		{
-            size_t l = strlen(szHeader) + 4;
-			szLine = new char[l];
-			snprintf(szLine, l, "#%s\r\n", szHeader);
-			props.append((BYTE*)szLine, (int)strlen(szLine));
-			delete[] szLine;
-		}
-
-		time_t ltime;
-		TZSET();
-		time( &ltime );
-		
-		szLine = new char[255];
-		snprintf(szLine, 255, "#%s\r\n", ctime( &ltime ) );
-		props.append((BYTE*)szLine, (int)strlen(szLine));
-		delete[] szLine;
-
-		// iterate in the hashtable
-		char* szName;
-		char* szValue;
-
-		POS p = m_pStringTable->getFirstPosition();
-		
-		while(p != NULL)
-		{
-			p = m_pStringTable->getNextEntry(p, szName, szValue);		
-				
-            size_t l = strlen(szName) + strlen(szValue) + 2 + 3;
-			szLine = new char[l];
-			snprintf(szLine, l, "%s=%s\r\n", szName, szValue);
-			props.append((BYTE*)szLine, (int)strlen(szLine));
-			delete[] szLine;
-		}				
-	}
-	catch(long nErr)
-	{
-		return nErr;
-	}
-	catch(...)
-	{
-		#ifdef WIN32
-		return GetLastError();
-#else
-		return -1;
-#endif
-	}
-
-	return 0;
-}
 
 int UUCProperties::getIntProperty(const char* szName, int nDefaultValue /*= NULL*/) const
 {
     
     const char* szVal = getProperty(szName, NULL);
     if(szVal)
-        return atoi(szVal);
+        return strtol(szVal, NULL, 10);
     else
         return nDefaultValue;
 }

@@ -19,14 +19,13 @@
  
 #pragma once
 
-#define ERROR_INDEX_OUT_OF_BOUND    0xC0001001L
-#define ERROR_UNABLE_TO_ALLOCATE  0xC0001002L
 
+#define ERR_INDEX_OUT_OF_BOUND    0xC0001001L
+#define ERROR_UNABLE_TO_ALLOCATE  0xC0001002L
+#define S_OK    0
 #ifndef BYTE
 #define BYTE unsigned char
 #endif
-
-int atox(const char* szVal);
 
 class UUCByteArray  
 {

@@ -2,8 +2,6 @@
 #include "ModuleInfo.h"
 #include "UtilException.h"
 
-static char *szCompiledFile=__FILE__;
-
 CModuleInfo::CModuleInfo()
 {
 }

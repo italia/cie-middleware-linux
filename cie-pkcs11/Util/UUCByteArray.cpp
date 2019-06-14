@@ -278,7 +278,7 @@ void UUCByteArray::toHexString(char* szHexString) const
 long UUCByteArray::reverse()
 {
 	BYTE* pbtContent = (BYTE*)malloc(m_unLen);
-    if(m_pbtContent == NULL)
+    if(pbtContent == NULL)
         return ERROR_UNABLE_TO_ALLOCATE;
     
 	for(int i = 0; i < m_unLen; i++)
@@ -320,8 +320,7 @@ const char* UUCByteArray::toHexString(int nSize)
 		for(unsigned int i = 0; i < nSize; i++)
 		{
 			snprintf(szDigit, 3, "%02X", m_pbtContent[i]);
-			strcat(m_szHex, szDigit);
-			//strlcat(m_szHex, szDigit, 2);
+			strncat(m_szHex, szDigit, 2);
 		}	
 
 		return m_szHex;

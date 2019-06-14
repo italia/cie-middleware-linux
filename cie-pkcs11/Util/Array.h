@@ -136,13 +136,13 @@ public:
 		size_t totSize = internalSet((ByteArray*)nullptr, std::forward<Arg0>(arg0));
 
 		size_t totSize2 = 0;
-		int dummy[] = { 0, ((void)(totSize2 += internalSet((ByteArray*)nullptr, std::forward<Args>(args))), 0) ... };
+		//int dummy[] = { 0, ((void)(totSize2 += internalSet((ByteArray*)nullptr, std::forward<Args>(args))), 0) ... };
 
 		resize(totSize + totSize2);
 
 		ByteArray buffer(*this);
 		buffer = buffer.mid(internalSet(&buffer, std::forward<Arg0>(arg0)));
-		int dummy2[] = { 0, ((void)(buffer = buffer.mid(internalSet(&buffer, std::forward<Args>(args)))), 0) ... };
+		//int dummy2[] = { 0, ((void)(buffer = buffer.mid(internalSet(&buffer, std::forward<Args>(args)))), 0) ... };
 
 		return *this;
 	}

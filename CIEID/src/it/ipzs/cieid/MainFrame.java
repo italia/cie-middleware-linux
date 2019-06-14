@@ -1486,9 +1486,9 @@ public class MainFrame extends JFrame {
                 Utils.setProperty("cardholder", "");                
                 break;
 
-            case CKR_TOKEN_NOT_PRESENT:
-            	JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "CIE non presente sul lettore", "Disabilitazione CIE", JOptionPane.ERROR_MESSAGE);
-                break;
+//            case CKR_TOKEN_NOT_PRESENT:
+//            	JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "CIE non presente sul lettore", "Disabilitazione CIE", JOptionPane.ERROR_MESSAGE);
+//                break;
 
             default:
             	JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "Impossibile disabilitare la CIE", "CIE non disabilitata", JOptionPane.ERROR_MESSAGE);

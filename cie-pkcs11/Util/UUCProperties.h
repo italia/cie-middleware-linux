@@ -38,12 +38,10 @@ public:
 
 	long load(const char* szFilePath);
 	long load(const UUCByteArray& props);
-	long save(const char* szFilePath, const char* szHeader) const;
-	long save(UUCByteArray& props, const char* szHeader) const;
 	void putProperty(const char* szName, const char* szValue);
 	//void putProperty(char* szName, char* szValue);
 	const char* getProperty(const char* szName, const char* szDefaultValue = NULL) const;
-    int getIntProperty(const char* szName, int nDefaultValue = NULL) const;
+    int getIntProperty(const char* szName, int nDefaultValue = 0) const;
 
     void remove(const char* szName);
 	void removeAll();
