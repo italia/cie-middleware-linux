@@ -752,7 +752,7 @@ public class MainFrame extends JFrame {
 		txtpnUtilizzaIlCodice.setFont(new Font("Dialog", Font.PLAIN, 16));
 		txtpnUtilizzaIlCodice.setEditable(false);
 		txtpnUtilizzaIlCodice.setBounds(63, 84, 492, 46);
-		panel_6.add(txtpnUtilizzaIlCodice);
+		
 		
 		label_7 = new JLabel("");
 		label_7.setIcon(new ImageIcon(MainFrame.class.getResource("/it/ipzs/cieid/res/icona_lettore_card_white.png")));
@@ -938,6 +938,12 @@ public class MainFrame extends JFrame {
 		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
 		doc.setParagraphAttributes(0, doc.getLength(), center, false);
 							
+		doc = txtpnUtilizzaIlCodice.getStyledDocument();
+		center = new SimpleAttributeSet();		
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
+		panel_6.add(txtpnUtilizzaIlCodice);
+		
 		if(args.length > 0 && args[0].equals("unlock"))
 		{
 			selectUnlock();
@@ -1277,6 +1283,9 @@ public class MainFrame extends JFrame {
 			                case CKR_OK:
 			                    JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "Il PIN è stato modificato con successo", "Operazione completata", JOptionPane.INFORMATION_MESSAGE);
 			                    selectHome();
+			                    PINNoticeDialog pindlg = new PINNoticeDialog();
+			                    pindlg.setLocationRelativeTo(MainFrame.this);
+			                    pindlg.setVisible(true);
 			                    break;
 			            }
 					}
@@ -1457,6 +1466,9 @@ public class MainFrame extends JFrame {
 			                case CKR_OK:
 			                    JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "La CIE è stata sbloccata con successo", "Operazione completata", JOptionPane.INFORMATION_MESSAGE);
 			                    selectHome();
+			                    PINNoticeDialog pindlg = new PINNoticeDialog();
+			                    pindlg.setLocationRelativeTo(MainFrame.this);
+			                    pindlg.setVisible(true);
 			                    break;
 			            }
 					}
