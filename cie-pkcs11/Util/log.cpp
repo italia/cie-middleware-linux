@@ -181,7 +181,7 @@ void CLog::init() {
 DWORD CLog::write(const char *format,...) {
  	va_list params;
 	va_start (params, format);
-	char pbtDate[0x2000];
+	char pbtDate[20];
 	unsigned int dummy = 0;
 	unsigned int *Num = &dummy;
 
@@ -210,10 +210,11 @@ DWORD CLog::write(const char *format,...) {
 		GetLocalTime(&stTime);
 		sprintf_s(pbtDate,sizeof(pbtDate),"%05u:[%02d:%02d:%02d.%03d]", *Num, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);	
 #else
-        time_t t = time(NULL);
-        tm tm = *localtime(&t);
-        
-        snprintf(pbtDate,0x800,"%05u:[%02d:%02d:0%02d]", *Num, tm.tm_hour, tm.tm_min, tm.tm_sec);
+		time_t T= time(NULL);
+		struct tm t;
+		struct  tm tm = *localtime_r(&T, &t);
+
+        snprintf(pbtDate,20,"%05u:[%02d:%02d:0%02d]", *Num, tm.tm_hour, tm.tm_min, tm.tm_sec);
 #endif
 		// se siamo in LM_thread devo scrivere il thread nel nome del file
 		std::hash<std::thread::id> hasher;
@@ -243,6 +244,40 @@ DWORD CLog::write(const char *format,...) {
 #else
         lf = fopen(logPath.c_str(), "a+t");
         if (lf) {
+
+        	struct stat	lstat_buf;
+			struct stat	fstat_buf;
+
+			int r = lstat(logPath.c_str(), &lstat_buf);
+
+			/* handle the case of the lstat failing first */
+			if (r == -1)
+			{
+				fclose(lf);
+				return ERROR_FILE_NOT_FOUND;
+			}
+
+			if (S_ISLNK(lstat_buf.st_mode))  {
+				fclose(lf);
+				return (long)ERROR_FILE_NOT_FOUND;
+			}
+
+			/* Get the properties of the opened file descriptor */
+			r = stat(logPath.c_str(), &fstat_buf);
+			if (r == -1)
+			{
+				fclose(lf);
+				return (long)ERROR_FILE_NOT_FOUND;
+			}
+
+			if (lstat_buf.st_dev != fstat_buf.st_dev
+				 || lstat_buf.st_ino != fstat_buf.st_ino
+				 || (S_IFMT & lstat_buf.st_mode) != (S_IFMT & fstat_buf.st_mode))
+			{
+				fclose(lf);
+				return (long)ERROR_FILE_NOT_FOUND;
+			}
+
             switch(LogMode) {
                 case (LM_Single) : fprintf(lf,"%s|%04i|%04i|%02i|", pbtDate, getpid(), dwThreadID, ModuleNum); break;
                 case (LM_Module) : fprintf(lf,"%s|%04i|%04lx|", pbtDate, getpid(), dwThreadID); break;
@@ -316,6 +351,40 @@ void CLog::writePure(const char *format,...) {
         lf = fopen(logPath.c_str(), "a+t");
 #endif
 		if (lf) {
+
+			struct stat	lstat_buf;
+			struct stat	fstat_buf;
+
+			int r = lstat(logPath.c_str(), &lstat_buf);
+
+			/* handle the case of the lstat failing first */
+			if (r == -1)
+			{
+				fclose(lf);
+				return;
+			}
+
+			if (S_ISLNK(lstat_buf.st_mode))  {
+				fclose(lf);
+				return;
+			}
+
+			/* Get the properties of the opened file descriptor */
+			r = stat(logPath.c_str(), &fstat_buf);
+			if (r == -1)
+			{
+				fclose(lf);
+				return;
+			}
+
+			if (lstat_buf.st_dev != fstat_buf.st_dev
+				 || lstat_buf.st_ino != fstat_buf.st_ino
+				 || (S_IFMT & lstat_buf.st_mode) != (S_IFMT & fstat_buf.st_mode))
+			{
+				fclose(lf);
+				return;
+			}
+
 			vfprintf(lf, format, params);
 			fprintf(lf, "\n");
 			fclose(lf);
@@ -372,6 +441,41 @@ void CLog::writeBinData(BYTE *data, size_t datalen) {
     lf = fopen(logPath.c_str(), "a+t");
 #endif
 	if (lf) {
+
+		struct stat	lstat_buf;
+		struct stat	fstat_buf;
+
+		int r = lstat(logPath.c_str(), &lstat_buf);
+
+		/* handle the case of the lstat failing first */
+		if (r == -1)
+		{
+			fclose(lf);
+			return;
+		}
+
+		if (S_ISLNK(lstat_buf.st_mode))  {
+			fclose(lf);
+			return;
+		}
+
+		/* Get the properties of the opened file descriptor */
+		r = stat(logPath.c_str(), &fstat_buf);
+		if (r == -1)
+		{
+			fclose(lf);
+			return;
+		}
+
+		if (lstat_buf.st_dev != fstat_buf.st_dev
+			 || lstat_buf.st_ino != fstat_buf.st_ino
+			 || (S_IFMT & lstat_buf.st_mode) != (S_IFMT & fstat_buf.st_mode))
+		{
+			fclose(lf);
+			return;
+		}
+
+
 		if (datalen>100) datalen=100;
 		for (size_t i=0;i<datalen;i++)
 			fprintf(lf, "%02x ", data[i]);

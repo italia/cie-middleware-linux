@@ -105,11 +105,19 @@ CRSA::CRSA(ByteArray &mod,ByteArray &exp)
 	const BIGNUM *n_; const BIGNUM *e_; const BIGNUM *d_;
 	RSA_get0_key(keyPriv, &n_, &e_, &d_);
 	BIGNUM *n__ = BN_dup(n_);
-	BIGNUM *d__ = BN_new();
+	BIGNUM *d__ = BN_secure_new();
 	BIGNUM *e__ = BN_dup(e_);
 	n__ = BN_bin2bn(mod.data(), (int)mod.size(), n__);
 	e__ = BN_bin2bn(exp.data(), (int)exp.size(), e__);
 	RSA_set0_key(keyPriv, n__, e__, d__);
+
+	// i valoru n__, e__, d__ sono stati impostati nella chiave private (riga sopra) e non possono essere librati qui.
+	// saranno liberati nel distruttore (in basso) insieme alla chiave privata
+
+//	BN_free(n__);
+//	BN_free(e__);
+//	BN_clear_free(d__);
+
 #else
 	keyPriv->n = BN_bin2bn(mod.data(), (int)mod.size(), keyPriv->n);
 	keyPriv->d = BN_new(); 

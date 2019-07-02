@@ -83,7 +83,8 @@ void CMAC::Init(const ByteArray &key, const ByteArray &iv)
 
 	switch (KeySize) {
 	case 8:
-		keyVal1 = keyVal2 = keyVal3 = (DES_cblock *)key.data();
+		throw logged_error("Errore nella cifratura DES");
+		//keyVal1 = keyVal2 = keyVal3 = (DES_cblock *)key.data();
 		break;
 	case 16:
 		keyVal1 = keyVal3 = (DES_cblock *)key.data();

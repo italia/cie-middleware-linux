@@ -324,8 +324,6 @@ void IAS::SelectAID_IAS(bool SM) {
     {
         throw logged_error("Tipo CIE sconosciuto");
     }
-    
-    SM = false;
 
     ActiveDF = DF_IAS;
     ActiveSM = false;

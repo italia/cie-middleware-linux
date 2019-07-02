@@ -131,29 +131,26 @@ CK_RV CK_ENTRY CambioPIN(const char*  szCurrentPIN, const char*  szNewPIN, int* 
             
             StatusWord sw = ias.VerifyPIN(oldPINBa);
             
+            free(readers);
+            readers = NULL;
+            free(ATR);
+            ATR = NULL;
+
             if (sw == 0x6983) {
-                free(readers);
-                free(ATR);
                 return CKR_PIN_LOCKED;
             }
             if (sw >= 0x63C0 && sw <= 0x63CF) {
                 if (pAttempts!=nullptr)
                     *pAttempts = sw - 0x63C0;
                 
-                free(readers);
-                free(ATR);
                 return CKR_PIN_INCORRECT;
             }
             
             if (sw == 0x6700) {
-                free(readers);
-                free(ATR);
                 return CKR_PIN_INCORRECT;
             }
             if (sw == 0x6300)
             {
-                free(readers);
-                free(ATR);
                 return CKR_PIN_INCORRECT;
             }
             if (sw != 0x9000) {
@@ -186,9 +183,7 @@ CK_RV CK_ENTRY CambioPIN(const char*  szCurrentPIN, const char*  szNewPIN, int* 
         }
         
         if (!foundCIE) {
-            free(readers);
-            free(ATR);
-            return CKR_TOKEN_NOT_RECOGNIZED;
+           return CKR_TOKEN_NOT_RECOGNIZED;
             
         }
     }

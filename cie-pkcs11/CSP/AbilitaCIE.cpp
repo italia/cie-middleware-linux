@@ -108,6 +108,13 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
     	return CKR_PIN_LEN_RANGE;
     }
 
+	size_t i = 0;
+	while (i < 8 && (szPIN[i] >= '0' && szPIN[i] <= '9'))
+		i++;
+
+	if (i != 8)
+		return CKR_PIN_INVALID;
+
 	try
     {
 		CSHA256 sha256;
@@ -129,9 +136,6 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
         if (SCardListReaders(hSC, nullptr, NULL, &len) != SCARD_S_SUCCESS) {
             return CKR_TOKEN_NOT_PRESENT;
         }
-        
-        if(len == 1)
-            return CKR_TOKEN_NOT_PRESENT;
         
         readers = (char*)malloc(len);
         
@@ -210,30 +214,30 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             
             hashSet[0x1b] = sha256.Digest(dhData);
 
-            if (szPAN && IdServizi != ByteArray((uint8_t*)szPAN, strnlen(szPAN, 20)))
-                continue;
+            // poichè la CIE abilitata sul desktop può essere solo una, szPAN passato da CIEID è sempre null
+//            if (szPAN && IdServizi != ByteArray((uint8_t*)szPAN, strnlen(szPAN, 20)))
+//                continue;
 
             foundCIE = true;
             
             progressCallBack(20, "Autenticazione...");
             
+            free(readers);
+            readers = NULL;
+            free(ATR);
+            ATR = NULL;
+
             DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, sizeof(szPIN)), nullptr, 0, progressCallBack, attempts);
             if (rs == SCARD_W_WRONG_CHV)
             {
-                free(ATR);
-                free(readers);
                 return CKR_PIN_INCORRECT;
             }
             else if (rs == SCARD_W_CHV_BLOCKED)
             {
-                free(ATR);
-                free(readers);
                 return CKR_PIN_LOCKED;
             }
             else if (rs != SCARD_S_SUCCESS)
             {
-                free(ATR);
-                free(readers);
                 return CKR_GENERAL_ERROR;
             }
             
@@ -322,8 +326,6 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
 		}
         
 		if (!foundCIE) {
-            free(ATR);
-            free(readers);
             return CKR_TOKEN_NOT_RECOGNIZED;
             
 		}
@@ -341,8 +343,8 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
 
     if(ATR)
         free(ATR);
-    
-    free(readers);
+    if(readers)
+    	free(readers);
     
     progressCallBack(100, "");
     
@@ -666,8 +668,8 @@ void notifyPINLocked()
 
 void notifyPINWrong(int trials)
 {
-    char szParam[100];
-    snprintf(szParam, 100, "%d", trials);
+    char szParam[3];
+    snprintf(szParam, 3, "%d", trials);
 
     sendMessage("pinwrong", szParam);
 }

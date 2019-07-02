@@ -118,11 +118,11 @@ readerMonitor::readerMonitor(void(*eventHandler)(std::string &reader, bool inser
 			readerList.clear();
 			for (; curReader[0] != 0; curReader += strnlen(curReader, len) + 1)
 				readerList.push_back(std::string(curReader));
-#ifdef SCARD_AUTOALLOCATE
-			SCardFreeMemory(rm->hContext, readers);
-#else
+//#ifdef SCARD_AUTOALLOCATE
+//			SCardFreeMemory(rm->hContext, readers);
+//#else
             free(readers);
-#endif
+//#endif
 			states.resize((DWORD)readerList.size() + 1);
 			for (DWORD i = 0; i < readerList.size(); i++) {
 				states[i].szReader = readerList[i].c_str();

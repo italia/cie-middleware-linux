@@ -327,8 +327,9 @@ const char* UUCByteArray::toHexString(int nSize)
 	}
 	catch(...)
 	{
-		//SetLastError(-3);
-		throw -3L;//new UUCException("UUCByteArray:toHexString:Access Violation");
+		delete m_szHex;
+		m_szHex = NULL;
+		throw -3L;
 	}
 
 	
