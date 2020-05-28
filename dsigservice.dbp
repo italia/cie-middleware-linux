@@ -1,0 +1,51 @@
+[DEBREATE-0.7.13]
+<<CTRL>>
+Package: dsigservice
+Version: 1.0.11.11
+Maintainer: ugo chirico <me@ugochirico.com>
+Architecture: all
+Priority: optional
+Description: dsigservice
+ dsigservice
+
+<</CTRL>>
+<<FILES>>
+1
+/home/ugos/Projects/DSigServer-x.x.x.x/dsigservice* -> dsigservice -> /etc/init.d
+/home/ugos/Projects/DSigServer-x.x.x.x/DSigService -> DSigService -> /opt
+/home/ugos/Projects/DSigServer-x.x.x.x/libbit4xpki.so.conf -> libbit4xpki.so.conf -> /usr/local/lib
+/home/ugos/Projects/DSigServer-x.x.x.x/libbit4xpki.so -> libbit4xpki.so -> /usr/local/lib
+<</FILES>>
+<<SCRIPTS>>
+<<PREINST>>
+0
+<</PREINST>>
+<<POSTINST>>
+1
+update-rc.d dsigservice defaults
+update-rc.d dsigservice enable
+service dsigservice start
+<</POSTINST>>
+<<PRERM>>
+0
+<</PRERM>>
+<<POSTRM>>
+0
+<</POSTRM>>
+<</SCRIPTS>>
+<<CHANGELOG>>
+<<DEST>>DEFAULT<</DEST>>
+
+<</CHANGELOG>>
+<<COPYRIGHT>>
+
+<</COPYRIGHT>>
+<<MENU>>
+0
+<</MENU>>
+<<BUILD>>
+1
+1
+0
+strip
+<</BUILD>>
