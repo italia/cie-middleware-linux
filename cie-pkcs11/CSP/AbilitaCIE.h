@@ -21,7 +21,8 @@ typedef CK_CALLBACK_FUNCTION(CK_RV, PROGRESS_CALLBACK)(
 
 typedef CK_CALLBACK_FUNCTION(CK_RV, COMPLETED_CALLBACK)(
                                                         const char* szPan,
-                                                        const char* szName);
+                                                        const char* szName,
+														const char* ef_seriale);
 
 typedef CK_RV (*AbilitaCIEfn)(const char*  szPAN,
                               const char*  szPIN,

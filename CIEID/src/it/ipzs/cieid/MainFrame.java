@@ -87,6 +87,7 @@ public class MainFrame extends JFrame {
 	
 	private String serialNumber;
 	private String cardHolder;
+	private String ef_seriale;
 	private JProgressBar progressBar;
 	private JLabel lblProgress;
 	private JPanel panel_4;
@@ -571,7 +572,7 @@ public class MainFrame extends JFrame {
 		});
 		buttonRemove.setForeground(Color.WHITE);
 		buttonRemove.setBackground(new Color(30, 144, 255));
-		buttonRemove.setBounds(206, 507, 130, 25);
+		buttonRemove.setBounds(206, 507, 150, 25);
 		panel_3.add(buttonRemove);
 		
 		lblNumeroCarta = new JLabel("Numero Carta");
@@ -887,7 +888,7 @@ public class MainFrame extends JFrame {
 		MiniWebView webView = new MiniWebView();
 		webView.setBounds(12, 99, 571, 362);
 		panel_8.add(webView);
-		webView.showPage("https://idserver.servizicie.interno.gov.it/idp/tutorial_win.jsp");
+		webView.showPage("https://idserver.servizicie.interno.gov.it/idp/tutorial/computer/lettoreusb/linux/tutorial_linux_firefox.jsp");
 
 		panel_9 = new JPanel();
 		panel_9.setLayout(null);
@@ -1044,10 +1045,11 @@ public class MainFrame extends JFrame {
 					 Middleware.CompletedCallBack completedCallBack = new Middleware.CompletedCallBack() {
 							
 							@Override
-							public void invoke(String pan, String cardholder) {
+							public void invoke(String pan, String cardholder, String ef_seriale) {
 								// TODO Auto-generated method stub
 								MainFrame.this.serialNumber = pan;
 								MainFrame.this.cardHolder = cardholder;
+								MainFrame.this.ef_seriale = ef_seriale;
 							}
 						};
 					
@@ -1090,11 +1092,12 @@ public class MainFrame extends JFrame {
 
 			                        case CKR_OK:
 			                        	JOptionPane.showMessageDialog(MainFrame.this.getContentPane(), "L'abilitazione della CIE è avvennuta con successo", "CIE abilitata", JOptionPane.INFORMATION_MESSAGE);                        	
-			                            labelSerial.setText(serialNumber);
+			                            labelSerial.setText(MainFrame.this.ef_seriale);
 			                            labelCardholder.setText(cardHolder);
 			                            
 			                            Utils.setProperty("serialnumber", serialNumber);
 			                            Utils.setProperty("cardholder", cardHolder);
+			                            Utils.setProperty("ef_seriale", ef_seriale);
 			                            
 			                            selectCardholder();	                            
 			                            break;
@@ -1495,7 +1498,8 @@ public class MainFrame extends JFrame {
                 labelSerial.setText("");                
                 labelCardholder.setText("");
                 Utils.setProperty("serialnumber", "");
-                Utils.setProperty("cardholder", "");                
+                Utils.setProperty("cardholder", "");  
+                Utils.setProperty("ef_seriale", "");
                 break;
 
 //            case CKR_TOKEN_NOT_PRESENT:
@@ -1509,9 +1513,26 @@ public class MainFrame extends JFrame {
 	}
 	private void selectHome()
 	{
-		if(!Utils.getProperty("serialnumber", "").equals(""))
+		
+		if(Utils.getProperty("ef_seriale", "").equals("") && !Utils.getProperty("cardholder", "").equals("") )
 		{
-			labelSerial.setText(Utils.getProperty("serialnumber", ""));
+			
+			labelSerial.setText("<html>Per visualizzarlo<br/>occorre riabilitare la CIE<html>");
+			labelCardholder.setText(Utils.getProperty("cardholder", ""));
+			
+			if(JOptionPane.showConfirmDialog(this.getContentPane(), "E' necessario effettuare un nuovo abbinamento. Procedere?", "Abbinare nuovamente la CIE", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+			{
+				tabbedPane.setSelectedIndex(2);
+			}
+			else 
+			{
+				tabbedPane.setSelectedIndex(0);
+				
+			}
+		}
+		else if(!Utils.getProperty("ef_seriale", "").equals(""))
+		{
+			labelSerial.setText(Utils.getProperty("ef_seriale", ""));
 			labelCardholder.setText(Utils.getProperty("cardholder", ""));
 			
 			tabbedPane.setSelectedIndex(2);

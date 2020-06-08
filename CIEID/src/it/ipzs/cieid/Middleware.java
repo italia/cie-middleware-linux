@@ -12,7 +12,7 @@ public interface Middleware extends Library {
     }
 	
 	interface CompletedCallBack extends Callback {
-        void invoke(String pan, String name);
+        void invoke(String pan, String name, String ef_seriale);
     }
 
 	public int AbilitaCIE(String szPAN, String szPIN, int[] attempts, ProgressCallBack progressCallBack, CompletedCallBack completedCallBack);
