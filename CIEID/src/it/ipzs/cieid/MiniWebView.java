@@ -3,6 +3,7 @@ package it.ipzs.cieid;
 import java.awt.BorderLayout;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.BrokenBarrierException;
 
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;

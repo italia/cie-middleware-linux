@@ -202,8 +202,10 @@ public class MainFrame extends JFrame {
 		btnCambiaPin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectButton(btnCambiaPin);
+				oldpin.setText("");
+			    newpin1.setText("");
+			    newpin2.setText("");
 				tabbedPane.setSelectedIndex(3);
-				
 			}
 		});
 		btnCambiaPin.setIcon(new ImageIcon(MainFrame.class.getResource("/it/ipzs/cieid/res/Risorsa 24.png")));
@@ -217,6 +219,9 @@ public class MainFrame extends JFrame {
 		btnSbloccaCarta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectButton(btnSbloccaCarta);
+				pin01.setText("");
+				pin02.setText("");
+				puk01.setText("");
 				tabbedPane.setSelectedIndex(5);
 			}
 		});

@@ -22,7 +22,8 @@ extern ByteArray baExtAuth_PrivExp;
 enum CIE_Type {
 	CIE_Unknown,
 	CIE_Gemalto,
-	CIE_NXP
+	CIE_NXP,
+	CIE_STM
 };
 
 enum CIE_DF {
@@ -108,6 +109,8 @@ public:
     static bool Unenroll(const char *szPAN);
 	void IconaSbloccoPIN();
 
+    uint8_t GetSODDigestAlg(ByteArray &SOD);
+    void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 
 	void(*Callback)(int progress, char *desc,void *data);

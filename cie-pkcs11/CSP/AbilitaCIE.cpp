@@ -12,6 +12,7 @@
 #include "../PKCS11/Slot.h"
 #include "../Util/ModuleInfo.h"
 #include "../Crypto/sha256.h"
+#include "../Crypto/sha512.h"
 #include <functional>
 #include "../Crypto/ASNParser.h"
 #include "../PCSC/PCSC.h"
@@ -117,7 +118,6 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
 
 	try
     {
-		CSHA256 sha256;
 		std::map<uint8_t, ByteDynArray> hashSet;
 		
 		DWORD len = 0;
@@ -192,27 +192,20 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
         
             ByteArray serviziData(IdServizi.left(12));
 
-            hashSet[0xa1] = sha256.Digest(serviziData);
-
             ByteDynArray SOD;
             ias.ReadSOD(SOD);
+            uint8_t digest = ias.GetSODDigestAlg(SOD);
                         
             ByteArray intAuthData(IntAuth.left(GetASN1DataLenght(IntAuth)));
-            
-            hashSet[0xa4] = sha256.Digest(intAuthData);
             
 			ByteDynArray IntAuthServizi;
             ias.ReadServiziPubKey(IntAuthServizi);
             ByteArray intAuthServiziData(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)));
-            
-			hashSet[0xa5] = sha256.Digest(intAuthServiziData);
 
             ias.SelectAID_IAS();
             ByteDynArray DH;
             ias.ReadDH(DH);
             ByteArray dhData(DH.left(GetASN1DataLenght(DH)));
-            
-            hashSet[0x1b] = sha256.Digest(dhData);
 
             // poichè la CIE abilitata sul desktop può essere solo una, szPAN passato da CIEID è sempre null
 //            if (szPAN && IdServizi != ByteArray((uint8_t*)szPAN, strnlen(szPAN, 20)))
@@ -249,8 +242,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ByteArray serialData = Serial.left(9);
             std::string st_serial((char*)serialData.data(), serialData.size());
             printf("\nserial data: %s\n", st_serial.c_str());
-            
-            hashSet[0xa2] = sha256.Digest(serialData);
+
             
             progressCallBack(55, "Lettura certificato");
             
@@ -258,9 +250,29 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ias.ReadCertCIE(CertCIE);
             ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
             
-            hashSet[0xa3] = sha256.Digest(certCIEData);
-            
-            //ias.VerificaSOD(SOD, hashSet);
+            if (digest == 1)
+            {
+                CSHA256 sha256;
+                hashSet[0xa1] = sha256.Digest(serviziData);
+                hashSet[0xa4] = sha256.Digest(intAuthData);
+                hashSet[0xa5] = sha256.Digest(intAuthServiziData);
+                hashSet[0x1b] = sha256.Digest(dhData);
+                hashSet[0xa2] = sha256.Digest(serialData);
+                hashSet[0xa3] = sha256.Digest(certCIEData);
+                ias.VerificaSOD(SOD, hashSet);
+
+            }
+            else
+            {
+                CSHA512 sha512;
+                hashSet[0xa1] = sha512.Digest(serviziData);
+                hashSet[0xa4] = sha512.Digest(intAuthData);
+                hashSet[0xa5] = sha512.Digest(intAuthServiziData);
+                hashSet[0x1b] = sha512.Digest(dhData);
+                hashSet[0xa2] = sha512.Digest(serialData);
+                hashSet[0xa3] = sha512.Digest(certCIEData);
+                ias.VerificaSODPSS(SOD, hashSet);
+            }
 
             ByteArray pinBa((uint8_t*)szPIN, 4);
             
