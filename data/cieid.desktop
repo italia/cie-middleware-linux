@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=Cie ID
+Comment=Middleware for electronic Italian Identity Card
+Name[it]=Cie ID
+Comment[it]=Middleware della CIE (Carta di Identità Elettronica)
+Exec=cieid
+Icon=cieid
+Type=Application
+Terminal=false
+StartupNotify=false
+Encoding=UTF-8
+Categories=Application;
+StartupWMClass=it-ipzs-cieid-MainApplication

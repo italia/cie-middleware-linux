@@ -1,0 +1,139 @@
+targets=(
+    "archlinux"
+    "fedora"
+    "opensuse"
+    "ubuntu"
+)
+pkgname="cie-middleware"
+pkgver="1.2.2"
+pkgrel="1"
+pkgdesc="Middleware della CIE (Carta di Identità Elettronica) per Linux"
+pkgdesclong=("Middleware della CIE (Carta di Identità Elettronica) per Linux")
+maintainer="boiano.gianluca@gmail.com"
+url="https://github.com/italia/cie-middleware-linux"
+arch="all"
+license=("BSD-3")
+section="utils"
+priority="optional"
+sources=(
+    "https://github.com/M0Rf30/cie-middleware-linux/archive/master.tar.gz"
+    "https://downloads.gradle-dn.com/distributions/gradle-6.6.1-bin.zip"
+)
+sources:archlinux=("https://github.com/M0Rf30/cie-middleware-linux/archive/master.tar.gz")
+
+hashsums=(
+    "skip"
+    "7873ed5287f47ca03549ab8dcb6dc877ac7f0e3d7b1eb12685161d10080910ac"
+)
+hashsums:archlinux=(
+    "skip"
+)
+depends:apt=(
+    "libcrypto++"
+    "libpcsclite"
+    "libssl"
+    "openjdk-11-jre-headless"
+    "pcscd"
+)
+makedepends:apt=(
+    "g++"  
+    "libpcsclite-dev"
+    "openjdk-11-jre-headless"
+    "libcrypto++-dev"
+    "libssl-dev"
+    "make"
+)
+
+depends:pacman=(
+    "java-runtime"
+    "crypto++"
+    "openssl"
+    "pcsclite"
+)
+makedepends:pacman=(
+    "crypto++"
+    "gradle"
+    "pcsclite"
+    "openssl"
+    "unzip"
+)
+
+depends:yum=(
+    "java-11-openjdk-headless"
+    "cryptopp"
+    "openssl"
+    "pcsc-lite"
+)
+makedepends:yum=(
+    "cryptopp-devel"
+    "gcc-c++"
+    "java-11-openjdk-devel"
+    "make"
+    "openssl-devel"
+    "pcsc-lite-devel"
+)
+
+depends:zypper=(
+    "java-11-openjdk-headless"
+    "libcryptopp8_2_0"
+    "libopenssl"
+    "pcsc-lite"
+)
+makedepends:zypper=(
+    "libcryptopp-devel" 
+    "gcc-c++"
+    "java-11-openjdk-devel"
+    "libopenssl-devel"
+    "make"
+    "pcsc-lite-devel"
+)
+
+build:archlinux() {
+    export JAVA_HOME=/usr/lib/jvm/default/
+    cd "${srcdir}/${pkgname}-linux-master"
+    gradle -b cie-java/build.gradle standalone
+    cd libcie-pkcs11/Release
+    make
+}
+
+build:fedora() {
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk/
+    cd "${srcdir}/${pkgname}-linux-master"
+    ../gradle-6.6.1/bin/gradle -b cie-java/build.gradle standalone
+    cd libcie-pkcs11/Release
+    make
+}
+
+build:opensuse() {
+    export JAVA_HOME=/usr/lib64/jvm/java-11-openjdk/
+    cd "${srcdir}/${pkgname}-linux-master"
+    ../gradle-6.6.1/bin/gradle -b cie-java/build.gradle standalone
+    cd libcie-pkcs11/Release
+    make
+}
+
+build:ubuntu() {
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    cd "${srcdir}/${pkgname}-linux-master"
+    ../gradle-6.6.1/bin/gradle -b cie-java/build.gradle standalone
+    cd libcie-pkcs11/Release
+    make
+}
+
+package() {
+    cd "${srcdir}/${pkgname}-linux-master"
+    
+    install -Dm755 cie-java/bin/libs/CIEID-standalone.jar \
+    "${pkgdir}/usr/share/cieid/cieid.jar"
+
+    install -Dm755 libcie-pkcs11/Release/libcie-pkcs11.so \
+    "${pkgdir}/usr/lib/libcie-pkcs11.so"
+    install -Dm644 "data/cieid.desktop" \
+    "${pkgdir}/usr/share/applications/cieid.desktop"
+    install -Dm755 data/logo.png \
+    "${pkgdir}/usr/share/pixmaps/cieid.png"    
+    install -Dm755 "data/cieid.sh" \
+    "${pkgdir}/usr/bin/cieid"
+    install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/cieid/LICENSE"
+}

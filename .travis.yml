@@ -1,0 +1,47 @@
+os: linux
+dist: focal
+language: java
+env:
+  global:
+  - PACUR_TAG=0.6
+services:
+- docker
+jdk:
+- openjdk11
+- oraclejdk11
+before_cache:
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+before_install:
+  - docker pull m0rf30/pacur-archlinux:$PACUR_TAG
+  - docker pull m0rf30/pacur-fedora-31:$PACUR_TAG
+  - docker pull m0rf30/pacur-opensuse-tumbleweed:$PACUR_TAG
+  - docker pull m0rf30/pacur-ubuntu-bionic:$PACUR_TAG
+  - docker pull m0rf30/pacur-ubuntu-focal:$PACUR_TAG
+script:
+  - cd pacur
+  - docker run -v $(pwd):/pacur -ti m0rf30/pacur-archlinux:$PACUR_TAG
+  - docker run -v $(pwd):/pacur -ti m0rf30/pacur-fedora-31:$PACUR_TAG
+  - docker run -v $(pwd):/pacur -ti m0rf30/pacur-opensuse-tumbleweed:$PACUR_TAG
+  - docker run -v $(pwd):/pacur -ti m0rf30/pacur-ubuntu-bionic:$PACUR_TAG
+  - docker run -v $(pwd):/pacur -ti m0rf30/pacur-ubuntu-focal:$PACUR_TAG
+  - for i in $(ls); do sha256sum $i >> SHA256SUMS; done
+deploy:
+  provider: releases
+  token:
+    secure: Lh07PKZQck5GGu/EB6aXxR17MB9jD1O9tHhP8DWF9rSXdNcj0HVIRF+fOnAqJFhG8clPH2BM9tytNUCdcw38WPT/6km8yA99yWYuugxYiyUQd6DSjzOZjh66TO5M9iMuknQ43V5+q75vdCm4gw4mfAVJs9iBFk91UmkVr6wUVGNM0ZAxaHpuO1+7HBMOra3fnFPcEiR5+q/RnoGTZMMRggSxASixtJWFCr5A07EW9tEYBvlLta+EU0Djtiehn4+PuCU2G49A/rf9jG7Y1AKfdk0E95w+zcnpJ7rVAfT78Hh16O8jGWLF8v30U8kqbLCbF4Mx6mX/dslHZ3XLBkkBv4aem0mIKf3CFhpYfhSXO2k81I/yUx3J4+qiywVi5NRt3+WCL61wUyOyEdIT/LztrIoVsvy/AVZF0YPCcw44jHTRXNXSHpEdNTCHxSmI4I6oSYK8V1uvTc4jLb2aMflZ5oVE9w5Ua9LYkYs4Vl6u2pb6opx3RZXvC9ol+STBB3z3U+h5Dp1tHTntyEkA9Q158yCcoPdglVufkKjf31Br7he8KBkEe7s03ND41PoKIEl5C18vRUR0y0B3ITeC0UoR7OAgRWnvqfnMYDbvOnJzYCeOTno86SqfwVXmNmvIN773Fc+cVd1gWhaH8ebmRG9D1pt2xEbMKiHmUfYXuuzG+hQ=
+  file_glob: true
+  file: 
+    - ./*.deb
+    - ./*.rpm
+    - ./*.tar.zst
+    - ./SHA256SUMS
+  skip_cleanup: true
+  on:
+    repo: M0Rf30/cie-middleware-linux
+    branch: master
+    tags: true

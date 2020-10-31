@@ -38,6 +38,17 @@ java {
 dependencies {
 	// This dependency is used by the application.
 	implementation fileTree(dir: 'lib', include: ['*.jar'])
+	implementation 'com.dorkbox:ObjectPool:2.9'
+	implementation 'com.dorkbox:Notify:3.7'
+	implementation 'com.dorkbox:ShellExecutor:1.1'
+	implementation 'com.dorkbox:SystemTray:3.17'
+	implementation 'com.dorkbox:TweenEngine:8.3'
+	implementation 'com.google.code.gson:gson:2.8.6'
+	implementation 'com.jgoodies:jgoodies-forms:1.9.0'
+	implementation 'net.java.dev.jna:jna:4.5.2'
+	implementation 'net.java.dev.jna:jna-platform:4.5.2'
+	implementation 'org.javassist:javassist:3.27.0-GA'
+	implementation 'org.slf4j:slf4j-api:1.7.30'
 }
 
 compileJava   {

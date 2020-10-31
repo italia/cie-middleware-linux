@@ -1,0 +1,5 @@
+*.VC.db
+*.VC.opendb
+/libcie-pkcs11/Release/libcie-pkcs11.so
+/cie-java/.gradle
+/cie-java/bin
