@@ -20,11 +20,13 @@ extern uint8_t NXP_ATR[];
 extern uint8_t Gemalto_ATR[];
 extern uint8_t Gemalto2_ATR[];
 extern uint8_t STM_ATR[];
+extern uint8_t STM2_ATR[];
 
 extern ByteArray baNXP_ATR;
 extern ByteArray baGemalto_ATR;
 extern ByteArray baGemalto2_ATR;
 extern ByteArray baSTM_ATR;
+extern ByteArray baSTM2_ATR;
 
 namespace p11 {
 
@@ -405,6 +407,8 @@ namespace p11 {
 			manifacturer = "Gemalto";
         else if ((baATR.indexOf(baSTM_ATR, position)))
             manifacturer = "STM";
+        else if ((baATR.indexOf(baSTM2_ATR, position)))
+            manifacturer = "STM2";
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 
