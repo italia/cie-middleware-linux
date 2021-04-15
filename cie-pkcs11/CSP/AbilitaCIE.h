@@ -7,6 +7,7 @@
 //
 #include "../PKCS11/cryptoki.h"
 #include <string>
+#include "../PCSC/PCSC.h"
 
 #define SCARD_ATTR_VALUE(Class, Tag) ((((uint32_t)(Class)) << 16) | ((uint32_t)(Tag)))
 #define SCARD_CLASS_ICC_STATE       9   /**< ICC State specific definitions */
@@ -32,5 +33,7 @@ typedef CK_RV (*AbilitaCIEfn)(const char*  szPAN,
 
 typedef CK_RV (*VerificaCIEAbilitatafn)();
 typedef CK_RV (*DisabilitaCIEfn)();
+
+int TokenTransmitCallback(safeConnection *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize);
 
 

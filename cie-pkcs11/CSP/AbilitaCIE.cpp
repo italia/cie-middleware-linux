@@ -15,7 +15,6 @@
 #include "../Crypto/sha512.h"
 #include <functional>
 #include "../Crypto/ASNParser.h"
-#include "../PCSC/PCSC.h"
 #include <string>
 #include "AbilitaCIE.h"
 #include <string>
@@ -28,6 +27,8 @@
 #include "../Cryptopp/asn.h"
 #include "../Util/CryptoppUtils.h"
 #include "../Crypto/CryptoUtil.h"
+#include "../Sign/CIESign.h"
+#include "../Sign/CIEVerify.h"
 
 #include <unistd.h>
 #include <sys/socket.h>    //socket
@@ -60,7 +61,7 @@ void GetCertInfo(CryptoPP::BufferedTransformation & certin,
 
 std::vector<word32> fromObjectIdentifier(std::string sObjId);
 
-int TokenTransmitCallback(safeConnection *data, uint8_t *apdu, DWORD apduSize, uint8_t *resp, DWORD *respSize);
+
 
 DWORD CardAuthenticateEx(IAS*       ias,
                         DWORD       PinId,

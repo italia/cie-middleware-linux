@@ -235,7 +235,7 @@ std::string GetCardDir()
     std::string suffix = match.suffix();
     if(suffix.find("/") != std::string::npos)
         throw 1;
-    
+
     path.append("/.CIEPKI/");
 
     printf("Card Dir: %s\n", path.c_str());

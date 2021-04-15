@@ -11,7 +11,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/javassist-3.23.0-GA.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jna-4.5.2.jar"/>
+	<classpathentry kind="lib" path="lib/jna-4.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jna-platform-4.5.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ShellExecutor-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.25.jar"/>
@@ -20,7 +20,16 @@
 	<classpathentry exported="true" kind="lib" path="lib/TweenEngine-8.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/twinkle-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/core-1.0.0.jar"/>
-	<classpathentry kind="lib" path="jgoodies-forms-1.8.0.jar" sourcepath="jgoodies-forms-1.8.0-sources.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/jgoodies-forms-1.8.0-sources.jar" sourcepath="jgoodies-forms-1.8.0-sources.jar"/>
 	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/gson-2.6.2.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/ghost4j-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/jgoodies-forms-1.8.0.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/commons-beanutils-1.9.2.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/commons-io-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/itext-2.1.7.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/xmlgraphics-commons-1.4.jar"/>
+	<classpathentry kind="lib" path="/home/piero/Desktop/IPZS/cie-middleware-linux/CIEID/lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

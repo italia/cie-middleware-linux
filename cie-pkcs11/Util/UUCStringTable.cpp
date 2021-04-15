@@ -99,7 +99,7 @@ unsigned long UUCStringTable::getHash(const char* szKey)
 	{
  	    // only sample some characters
  	    unsigned long skip = len / 8;
- 	    for (unsigned long i = len ; i > 0; i -= skip, off += skip)
+ 	    for (int i = len ; i > 0; i -= skip, off += skip)
 		{
  			h = (h * 39) + val[off];
  	    }

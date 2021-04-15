@@ -27,6 +27,7 @@ extern ByteArray baGemalto_ATR;
 extern ByteArray baGemalto2_ATR;
 extern ByteArray baSTM_ATR;
 extern ByteArray baSTM2_ATR;
+extern ByteArray baSTM3_ATR;
 
 namespace p11 {
 
@@ -409,6 +410,8 @@ namespace p11 {
             manifacturer = "STM";
         else if ((baATR.indexOf(baSTM2_ATR, position)))
             manifacturer = "STM2";
+        else if ((baATR.indexOf(baSTM3_ATR, position)))
+            manifacturer = "STM3";
 		else
 			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED);
 

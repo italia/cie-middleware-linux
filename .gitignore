@@ -47,3 +47,5 @@ x64/Release/
 /Setup/Release
 /Release
 /build
+cie_sign_sdk/build
+cie_sign_sdk/Dependencies

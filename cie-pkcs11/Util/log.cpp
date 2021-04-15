@@ -109,7 +109,7 @@ void initLog(const char *moduleName, const char *iniFile,const char *version)
     }
     
     globalLogDir = settings.getProperty("LogDir", path.c_str()); //"Definisce il path in cui salvare il file di log (con / finale)"))
-    
+
 }
 
 CLog::CLog() {
@@ -324,12 +324,14 @@ void CLog::writePure(const char *format,...) {
 	if (Enabled && Initialized && mainEnable) {
 		if (!firstGlobal && LogMode==LM_Single) {
 			firstGlobal =true;
-			write("Inizio Sessione - versione: %s",logGlobalVersion);
+			//write("Inizio Sessione - versione: %s",logGlobalVersion);
+			printf("Inizio Sessione - versione: %s",logGlobalVersion);
 			writeModuleInfo();
 		}
 		if (!FirstLog && (LogMode==LM_Module || LogMode==LM_Module_Thread)) {
 			FirstLog=true;
-			write("%s - Inizio Sessione - versione file: %s",logName.c_str(), logVersion.c_str());
+			//write("%s - Inizio Sessione - versione file: %s",logName.c_str(), logVersion.c_str());
+			printf("%s - Inizio Sessione - versione file: %s",logName.c_str(), logVersion.c_str());
 			writeModuleInfo();
 		}
 
