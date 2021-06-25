@@ -305,6 +305,7 @@ public class MainFrame extends JFrame {
 	private JButton btnImpostazioni;
 	private JButton btnModificaProxy;
 	private JCheckBox chckbxMostraPassword;
+	private JButton btnEstrai;
 	
 	private enum SignOp
 	{
@@ -961,9 +962,9 @@ public class MainFrame extends JFrame {
 		panel_3.add(lblCieId);
 		
 		txtpnCieAbbinataCon = new JTextPane();
-		txtpnCieAbbinataCon.setFont(new Font("Dialog", Font.PLAIN, 16));
-		txtpnCieAbbinataCon.setText("Carta di identità elettronica abbinata correttamente");
 		txtpnCieAbbinataCon.setEditable(false);
+		txtpnCieAbbinataCon.setFont(new Font("Dialog", Font.PLAIN, 16));
+		txtpnCieAbbinataCon.setText("Carta di Identità Elettronica abbinata correttamente");
 		txtpnCieAbbinataCon.setBounds(63, 84, 492, 46);
 		panel_3.add(txtpnCieAbbinataCon);
 		
@@ -979,7 +980,7 @@ public class MainFrame extends JFrame {
 		panel_4.add(lblCambiaPin);
 		
 		txtpnIlPinDella = new JTextPane();
-		txtpnIlPinDella.setText("IL PIN della tua CIE è un dato sensibile,\ntrattalo con cautela.");
+		txtpnIlPinDella.setText("Il PIN della tua CIE è un dato sensibile,\ntrattalo con cautela.");
 		txtpnIlPinDella.setFont(new Font("Dialog", Font.PLAIN, 16));
 		txtpnIlPinDella.setEditable(false);
 		txtpnIlPinDella.setBounds(147, 84, 316, 46);
@@ -1591,6 +1592,13 @@ public class MainFrame extends JFrame {
 							}
 
 							verificaScrollPane.repaint();
+							
+							if(FilenameUtils.getExtension(filePath).equals("p7m")) {
+								btnEstrai.setEnabled(true);
+							}else {
+								btnEstrai.setEnabled(false);
+							}
+							
 							tabbedPane.setSelectedIndex(16);
 						}
 					}else if(ret == (long)INVALID_FILE_TYPE)
@@ -2131,18 +2139,19 @@ public class MainFrame extends JFrame {
 			        JFileChooser fileChooser = new JFileChooser();
 			        fileChooser.setAcceptAllFileFilterUsed(false);
 
-			        String fileName = FilenameUtils.getBaseName(filePath);
+			        String fileName = "";
 			        
 				    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
 				    fileChooser.setDialogTitle("Seleziona il percorso in cui salvare il file");
 			        FileNameExtensionFilter filter; 
 			        if(signOperation == signOperation.PADES)
 			        {
-			        	fileName = fileName + "_signed.pdf";
+			        	fileName = FilenameUtils.getBaseName(filePath) + "_signed.pdf";
 				        filter = new FileNameExtensionFilter("File pdf",".pdf");
 			        }else
 			        {
-			        	fileName = fileName + "_signed.p7m";
+			        	fileName = FilenameUtils.getName(filePath).replace(".p7m", "") + "_signed.p7m";
+			        	System.out.println("File name p7m: " + fileName);
 			        	filter = new FileNameExtensionFilter("File p7m",".p7m");
 			        }
 
@@ -2564,8 +2573,65 @@ public class MainFrame extends JFrame {
 		});
 		btnConcludiVerifica.setForeground(Color.WHITE);
 		btnConcludiVerifica.setBackground(new Color(30, 144, 255));
-		btnConcludiVerifica.setBounds(153, 392, 136, 23);
+		btnConcludiVerifica.setBounds(257, 392, 136, 23);
 		panel_32.add(btnConcludiVerifica);
+		
+		btnEstrai = new JButton("Estrai");
+		btnEstrai.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String outfilePath = null;
+		        JFrame frame = new JFrame();
+		        frame.setAlwaysOnTop(true);
+		        
+		        JFileChooser fileChooser = new JFileChooser();
+		        fileChooser.setAcceptAllFileFilterUsed(false);
+
+		        String fileName = FilenameUtils.getBaseName(filePath).replace("_signed", "");
+		        
+			    fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+			    fileChooser.setDialogTitle("Seleziona il percorso in cui salvare il file");
+		        
+			    String fileExtension = null;
+			    
+			    try {
+			    	 fileExtension = FilenameUtils.getExtension(fileName);
+				} catch (Exception e) {
+					 fileExtension = "";
+				}
+			    
+			    
+			    FileNameExtensionFilter filter = null;
+			 
+			    if(!fileExtension.isEmpty()) {
+			    	filter = new FileNameExtensionFilter("File " + fileExtension,fileExtension);
+			        fileChooser.addChoosableFileFilter(filter);
+			    }
+
+			    fileChooser.setSelectedFile(new File(fileName));
+		        int returnVal = fileChooser.showSaveDialog(frame);
+		        
+		        if (returnVal == JFileChooser.APPROVE_OPTION)
+		        {
+		        	outfilePath = fileChooser.getSelectedFile().getPath();
+					
+					long ret = Middleware.INSTANCE.estraiP7m(filePath, outfilePath);
+					
+					if(ret != 0) {
+						
+				       	 JOptionPane.showMessageDialog(btnEstrai.getParent(), "Impossibile estrarre il file", "Estrazione completata", JOptionPane.ERROR_MESSAGE);
+				         return;
+					}else {
+				       	 JOptionPane.showMessageDialog(btnEstrai.getParent(), "File estratto correttamente", "Estrazione completata", JOptionPane.INFORMATION_MESSAGE);
+				         return;
+					}
+		        }
+				
+			}
+		});
+		btnEstrai.setForeground(Color.WHITE);
+		btnEstrai.setBackground(new Color(30, 144, 255));
+		btnEstrai.setBounds(57, 391, 136, 23);
+		panel_32.add(btnEstrai);
 		
 		JLabel lblNewLabel_13 = new JLabel("Verifica firma elettronica");
 		lblNewLabel_13.setFont(new Font("Dialog", Font.BOLD, 17));
@@ -3739,7 +3805,7 @@ public class MainFrame extends JFrame {
 		//Utils.setProperty("cieDictionary", "");
 		
 
-		txtpnCieAbbinataCon.setText("Carta di identità elettronica abbinata correttamente");
+		txtpnCieAbbinataCon.setText("Carta di Identità Elettronica abbinata correttamente");
 		txtpnCieAbbinataCon.setHighlighter(null);
 		lblCieId.setText("CIE ID");
 		

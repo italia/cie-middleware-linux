@@ -31,14 +31,14 @@ public interface Middleware extends Library {
 
 	public static class verifyInfo extends Structure{
 		public static class ByReference extends verifyInfo implements Structure.ByReference { };
-		
+
 
 		public byte[] name = new byte[Middleware.MAX_LEN * 2];
 		public byte[] surname = new byte[Middleware.MAX_LEN * 2];
 		public byte[] cn = new byte[Middleware.MAX_LEN * 2];
 		public byte[] signingTime = new byte[Middleware.MAX_LEN * 2];
 		public byte[] cadn = new byte[Middleware.MAX_LEN * 2];
-		public int CertRevocStatus;
+		public int CertRevocStatus;		
 		public byte isSignValid;
 		public byte isCertValid;
 		
@@ -112,5 +112,6 @@ public interface Middleware extends Library {
     public int verificaConCIE(String inFilePath, String proxyAddress, int proxyPort, String usrPass);
     public int getNumberOfSign();
     public int getVerifyInfo(int index, verifyInfo vInfo);
+    public int estraiP7m(String inFilePath, String outFilePath);
 }
 
