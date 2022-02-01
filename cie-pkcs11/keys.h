@@ -2,8 +2,9 @@
 //  keys.h
 //  cie-pkcs11
 //
-//  Created by ugo chirico on 07/01/2019.
-//  Copyright © 2019 IPZS. All rights reserved.
+// SPDX-FileCopyrightText: the respective contributors, as shown by the AUTHORS file.
+//
+// SPDX-License-Identifier: BSD-3-Clause
 //
 
 #ifndef keys_h
