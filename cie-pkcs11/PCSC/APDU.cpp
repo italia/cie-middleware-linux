@@ -6,7 +6,7 @@
 #include "../Crypto/MAC.h"
 #include "Token.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 APDU::APDU()  {
 }

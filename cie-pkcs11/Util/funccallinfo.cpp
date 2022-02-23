@@ -9,6 +9,7 @@ extern unsigned int GlobalDepth;
 extern bool GlobalParam;
 char szEmpty[]={'\0'};
 
+#if 0 
 CFuncCallInfo::CFuncCallInfo(const char *name, CLog &logInfo) : log(logInfo) {
 	fName = name;
 	//OutputDebugString(fName);
@@ -43,6 +44,7 @@ CFuncCallInfo::~CFuncCallInfo() {
 //		OutputDebugString("Errore nella sequenza delle funzioni");
 //	}
 }
+#endif
 
 const char *CFuncCallInfo::FunctionName() {
 	return fName;

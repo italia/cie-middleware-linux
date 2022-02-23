@@ -44,8 +44,10 @@ x64/Release/
 /Setup/setup.vcxproj.user
 /Setup/Debug/setup.log
 /Setup/Debug/CIE-Middleware.exe
-/Setup/Release
-/Release
-/build
-cie_sign_sdk/build
-cie_sign_sdk/Dependencies
+Release/
+build/
+dist/
+cie-pkcs11/dependencies/*.a
+*.gz
+*.so
+libcie_sign_sdk.a

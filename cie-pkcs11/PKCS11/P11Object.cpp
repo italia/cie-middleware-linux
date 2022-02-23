@@ -2,7 +2,7 @@
 #include "P11Object.h"
 #include "CardTemplate.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 
 namespace p11 {

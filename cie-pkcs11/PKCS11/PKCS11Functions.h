@@ -44,30 +44,32 @@
 catch (...) { return CKR_GENERAL_ERROR; }
         
 #else
-        
+
+#include "../LOGGER/Logger.h"
+
+using namespace CieIDLogger;
+
 #define init_p11_func \
-    CFuncCallInfo info(__FUNCTION__, Log); \
+    LOG_INFO("[PKCS11] %s", __FUNCTION__); \
     try {
-        
+
+
 #define exit_p11_func } \
 catch (p11_error &p11Err) { \
-Log.write(p11Err.what()); \
-OutputDebugString("EXCLOG->"); \
-OutputDebugString("EXC: %s", p11Err.what()); \
-OutputDebugString("<-EXCLOG");\
-Log.writePure("P11Error: %x", p11Err.getP11ErrorCode()); \
+LOG_ERROR("[PKCS11] EXC: %s", p11Err.what()); \
+LOG_ERROR("[PKCS11] P11Error: %x", p11Err.getP11ErrorCode()); \
 return p11Err.getP11ErrorCode(); \
 } \
 catch (std::exception &err) { \
-Log.write(err.what()); \
-OutputDebugString("EXCLOG->"); \
-OutputDebugString("EXC: %s", err.what()); \
-OutputDebugString("<-EXCLOG");\
+LOG_ERROR("EXCLOG->"); \
+LOG_ERROR("EXC: %s", err.what()); \
+LOG_ERROR("<-EXCLOG");\
 return CKR_GENERAL_ERROR; \
 } \
-catch (...) { Log.writePure("%s, CKR_GENERAL_ERROR", __FUNCTION__); return CKR_GENERAL_ERROR; }
+catch (...) { LOG_ERROR("%s, CKR_GENERAL_ERROR", __FUNCTION__); return CKR_GENERAL_ERROR; }
 
 #endif
+
         
 extern "C" {
 	CK_RV CK_ENTRY C_UpdateSlotList();

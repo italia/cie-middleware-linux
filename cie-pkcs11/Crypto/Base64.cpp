@@ -4,7 +4,7 @@
 #include "../Cryptopp/cryptlib.h"
 #include "../Cryptopp/base64.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 //#include <Wincrypt.h>
 

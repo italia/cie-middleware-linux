@@ -4,7 +4,7 @@
 #include <winscard.h>
 #else
 #include <PCSC/winscard.h>
-#include "wintypes.h"
+#include <PCSC/wintypes.h>
 #endif
 #include "../Util/Array.h"
 #include <vector>

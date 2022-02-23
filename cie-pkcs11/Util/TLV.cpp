@@ -1,7 +1,7 @@
 
 #include "TLV.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 CTLV::CTLV(ByteArray &data)
 {

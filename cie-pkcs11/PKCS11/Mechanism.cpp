@@ -4,7 +4,7 @@
 #include "P11Object.h"
 #include "../Util/util.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 //static char *szCompiledFile=__FILE__;
 

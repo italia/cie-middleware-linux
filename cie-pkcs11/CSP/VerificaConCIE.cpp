@@ -8,6 +8,9 @@
 
 #include "VerificaConCIE.h"
 #include "../PKCS11/PKCS11Functions.h"
+#include "../LOGGER/Logger.h"
+
+using namespace CieIDLogger;
 
 VERIFY_RESULT verifyResult;
 
@@ -31,7 +34,7 @@ CK_RV CK_ENTRY verificaConCIE( const char* inFilePath, const char* proxyAddress,
     }
     else
     {
-        printf("Errore nella verifica: %lu\n", verifyResult.nErrorCode);
+        LOG_ERROR("verificaConCIE - Errore nella verifica: %lu\n", verifyResult.nErrorCode);
         return verifyResult.nErrorCode;
     }
 }

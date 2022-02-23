@@ -1,5 +1,7 @@
 #include "CIEVerify.h"
-#include "log.h"
+#include "../LOGGER/Logger.h"
+
+using namespace CieIDLogger;
 
 CIEVerify::CIEVerify()
 {
@@ -16,7 +18,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 			long ret;
 			ctx = disigon_verify_init();
 
-#if 0
+#if 1
 
 			ret = disigon_set(DISIGON_OPT_LOG_LEVEL, (void*)LOG_TYPE_DEBUG);
 #endif
@@ -54,7 +56,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 
 				if (proxy_port == 0)
 				{
-					OutputDebugString("CIEVerify::invalid proxy port");
+					LOG_ERROR("CIEVerify::invalid proxy port");
 					return DISIGON_ERROR_INVALID_SIGOPT;
 				}
 				else
@@ -95,7 +97,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 
 	}
 	catch (long err) {
-		OutputDebugString("CIEVerify::verify error: %lx", err);
+		LOG_ERROR("CIEVerify::verify error: %lx", err);
 	}
 }
 
@@ -140,7 +142,7 @@ long CIEVerify::get_file_from_p7m(const char* input_file, const char* output_fil
 		return ret;
 	}
 	catch (long err) {
-		OutputDebugString("CIEVerify::verify error: %lx", err);
+		LOG_ERROR("CIEVerify::verify error: %lx", err);
 		return err;
 	}
 

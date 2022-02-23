@@ -4,7 +4,7 @@
 #include "../Util/util.h"
 
 
-extern CLog Log;
+//extern CLog Log;
 
 #ifdef WIN32
 

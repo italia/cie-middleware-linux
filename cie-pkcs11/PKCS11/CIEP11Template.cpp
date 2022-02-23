@@ -9,11 +9,11 @@
 #include "../Cryptopp/cryptlib.h"
 #include "../Cryptopp/asn.h"
 #include "../Util/CryptoppUtils.h"
-
-extern CLog Log;
+#include "../LOGGER/Logger.h"
 
 using namespace CryptoPP;
 using namespace lcp;
+using namespace CieIDLogger;
 
 void notifyPINLocked();
 void notifyPINWrong(int trials);
@@ -67,28 +67,26 @@ int TokenTransmitCallback(CSlot *data, BYTE *apdu, DWORD apduSize, BYTE *resp, D
 		}
 	}
     
-    Log.writePure("APDU: %s", dumpHexData(ByteArray(apdu, apduSize)).c_str());
+    //Log.writePure("APDU: %s", dumpHexData(ByteArray(apdu, apduSize)).c_str());
                   
 	//ODS(String().printf("APDU: %s\n", dumpHexData(ByteArray(apdu, apduSize), String()).lock()).lock());
 	auto ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
     if(ris == SCARD_W_RESET_CARD || ris == SCARD_W_UNPOWERED_CARD)
     {
-        Log.writePure("Errore card reset: %x", ris);
-        ODS("card resetted");
+        LOG_ERROR("TokenTransmitCallback - Card reset error: %x", ris);
+        
         DWORD protocol = 0;
         ris = SCardReconnect(data->hCard, SCARD_SHARE_SHARED, SCARD_PROTOCOL_Tx, SCARD_LEAVE_CARD, &protocol);
         if (ris != SCARD_S_SUCCESS)
         {
-            ODS("Errore reconnect");
-            Log.writePure("Errore reconnect: %x", ris);
+            LOG_ERROR("TokenTransmitCallback - Errore reconnect %d", ris);
         }
         else
             ris = SCardTransmit(data->hCard, SCARD_PCI_T1, apdu, apduSize, NULL, resp, respSize);
     }
     
     if (ris != SCARD_S_SUCCESS) {
-        Log.writePure("Errore trasmissione APDU: %x", ris);
-		ODS("Errore trasmissione APDU");
+        LOG_ERROR("TokenTransmitCallback - APDU transmission error: %x", ris);
 	}
 	//else 
 		//ODS(String().printf("RESP: %s\n", dumpHexData(ByteArray(resp, *respSize), String()).lock()).lock());
@@ -192,7 +190,7 @@ void CIEtemplateInitSession(void *pTemplateData){
         CK_CERTIFICATE_TYPE certx509 = CKC_X_509;
         cie->cert->addAttribute(CKA_CERTIFICATE_TYPE, VarToByteArray(certx509));
         
-        Log.write(dumpHexData(certRaw).c_str());
+        //LOG_DEBUG("CIEtemplateInitSession - certRaw: %s", dumpHexData(certRaw).c_str());
 
 #ifdef WIN32
 		PCCERT_CONTEXT certDS = CertCreateCertificateContext(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, certRaw.data(), (DWORD)certRaw.size());

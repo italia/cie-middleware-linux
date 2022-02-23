@@ -1,6 +1,9 @@
 package it.ipzs.cieid;
 
 import java.awt.EventQueue;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 
@@ -12,6 +15,7 @@ import ch.swingfx.twinkle.style.theme.LightDefaultNotification;
 import ch.swingfx.twinkle.window.Positions;
 import it.ipzs.cieid.util.Utils;
 
+
 public class MainApplication {
 
 	private JFrame frame;
@@ -22,7 +26,7 @@ public class MainApplication {
 	public static void main(final String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				
+
 				if(args.length > 0 && args[0].equals("pinwrong"))
 				{
 					notifyPinWrong();
@@ -35,8 +39,8 @@ public class MainApplication {
 				{
 					notifyPinLocked();
 				}
-				else 
-				{				
+				else
+				{
 					try {
 						showUI(args);
 					} catch (Exception e) {
@@ -63,28 +67,28 @@ public class MainApplication {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize(String[] args) {
-		
+
 		if("false".equals(Utils.getProperty("nomore", "false")))
 		{
-			frame = new IntroFrame();			
+			frame = new IntroFrame();
 		}
-		else 
+		else
 		{
 			frame = new MainFrame(args);
 		}
-		
+
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
+
 	private static void notifyPinWrong()
 	{
 		NotificationBuilder nb = createNotificationBuilder();
 		nb.withTitle("CIE ID");
-		nb.withMessage("PIN errato");		
+		nb.withMessage("PIN errato");
 		//nb.withIcon(CrmIcons.CALL);
 		nb.withDisplayTime(1000 * 5);
 
-//		nb.withListener(new NotificationEventAdapter() {		
+//		nb.withListener(new NotificationEventAdapter() {
 //			@Override
 //			public void clicked(NotificationEvent event)
 //			{
@@ -94,18 +98,18 @@ public class MainApplication {
 //			}
 //		});
 
-		nb.showNotification();				
+		nb.showNotification();
 	}
-	
+
 	private static void notifyCardNotRegistered()
-	{		
+	{
 		NotificationBuilder nb = createNotificationBuilder();
 		nb.withTitle("CIE ID");
-		nb.withMessage("Carta non abbinata, premere qui per abbinare la CIE");		
+		nb.withMessage("Carta non abbinata, premere qui per abbinare la CIE");
 		//nb.withIcon(CrmIcons.CALL);
 		nb.withDisplayTime(1000 * 10);
 
-		nb.withListener(new NotificationEventAdapter() {		
+		nb.withListener(new NotificationEventAdapter() {
 			@Override
 			public void clicked(NotificationEvent event)
 			{
@@ -114,18 +118,18 @@ public class MainApplication {
 			}
 		});
 
-		nb.showNotification();		
+		nb.showNotification();
 	}
-	
+
 	private static void notifyPinLocked()
 	{
 		NotificationBuilder nb = createNotificationBuilder();
 		nb.withTitle("CIE ID");
-		nb.withMessage("Carta bloccata, premere qui per sbloccarla con il PUK");		
+		nb.withMessage("Carta bloccata, premere qui per sbloccarla con il PUK");
 		//nb.withIcon(CrmIcons.CALL);
 		nb.withDisplayTime(1000 * 10);
 
-		nb.withListener(new NotificationEventAdapter() {		
+		nb.withListener(new NotificationEventAdapter() {
 			@Override
 			public void clicked(NotificationEvent event)
 			{
@@ -133,9 +137,9 @@ public class MainApplication {
 			}
 		});
 
-		nb.showNotification();		
+		nb.showNotification();
 	}
-	
+
 	public static NotificationBuilder createNotificationBuilder()
 	{
 		NotificationBuilder nb = new NotificationBuilder();

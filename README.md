@@ -2,34 +2,77 @@
 [![Get invited](https://slack.developers.italia.it/badge.svg)](https://slack.developers.italia.it/)
 [![CIE on forum.italia.it](https://img.shields.io/badge/Forum-CIE-blue.svg)](https://forum.italia.it/c/cie) [![Build Status](https://travis-ci.com/italia/cie-middleware-linux.svg?branch=master)](https://travis-ci.com/italia/cie-middleware-linux)
 
-Middleware della CIE (Carta di Identità Elettronica) per Windows e Linux
+CIE (Carta di Identità Elettronica) Linux middleware
 
-# MIDDLEWARE CSP-PKCS11 PER LA CIE 3.0 [![Build status](https://ci.appveyor.com/api/projects/status/dpc0ditjn04ylw6y?svg=true)](https://ci.appveyor.com/project/italia/cie-middleware)
+#  CIE 3.0 PKCS11 MIDDLEWARE [![Build status](https://ci.appveyor.com/api/projects/status/dpc0ditjn04ylw6y?svg=true)](https://ci.appveyor.com/project/italia/cie-middleware)
 
-## VERSIONE BETA
+## Disclaimer
 
-Il middleware qui presente è in fase di sviluppo, ed è da considerarsi in **versione beta**. È possibile effettuare tutti gli sviluppi e i test, ma è per ora questa base di codice **non è consigliabile per l'uso in produzione**. 
+This product is **beta software**. Use it in production at your own judgment.
 
-## CASO D’USO
+## Requirements
 
-Il middleware CIE è una libreria software che implementa le interfacce crittografiche standard **PKCS#11** e **CSP**. Esso consente agli applicativi integranti di utilizzare il certificato di autenticazione e la relativa chiave privata memorizzati sul chip della CIE astraendo dalle modalità di comunicazione di basso livello. 
+- running pcscd
+- cmake >=3.15
 
-## ARCHITETTURA
-La libreria è sviluppata in C++ e supporta i sistemi oprativi Windows e Linux. 
+- pcsclite library (for SC communication )
+- ssl library
 
-# LINUX
-### Prerequisiti
-Fare riferimento al packet manager della propria distribuzione:
-- demone pcscd. Di solito è già presente e viene lanciato come servizio automaticamente
-- pcsclite-dev per la comunicazione con la smartcard
-- per l'interfaccia grafica uno dei seguenti programmi eseguibili: zenity oppure kdialog (quest'ultimo con qdbus)
-- openssl-dev (contenente libcrypto)
-- cmake
+On Debian and derivatives the lib requirements can be installed with the
+packages `libpcsclite-dev libssl-dev`.
+Library versions as of Ubuntu 18.04 are reported to work.
 
-### Build
-da terminale, spostarsi nella root del progetto e digitare:
-```
-mkdir build && cd build
-cmake .. && make
-```
-alla fine della build saranno presenti i file libciepki.so e gli eseguibili di test e sblocco/cambio PIN.
+
+The official building approach is using Eclipse, for historical reasons.
+Versions from 4.18 onward are working, this is due to JDT version being tied
+to the IDE's one.
+For a more up-to-date approach using gradle check the user fork mentioned in
+the comments at [1].
+
+
+[1]: https://github.com/italia/cie-middleware-linux/issues/6
+
+
+## Build
+
+Build happens in three steps:
+
+1. build signing library `cie_sign_sdk` using cmake
+1. build C++ middleware project `cie-pkcs11` using Eclipse
+1. compile Java application `CIEID` using Eclipse
+
+
+### cie_sign_sdk
+
+This will build a static library and copy it into `cie-pkcs11/Sign`
+
+    cd cie_sign_sdk
+    cmake -B build/
+    cmake --build build/
+    cmake --install build/
+
+### cie-pkcs11
+
+Open the repository root directory with Eclipse, its auto-discovery tool should
+find at least two projects:
+
+- cie-pkcs11, a C++ project
+- CIEID, a Java project
+
+In *Project Explorer* view, select the project root, then select menu item
+`Project > Build project`.
+This should leave a `libcie-pkcs11.so` object in Debug (the default target).
+
+### CIEID
+
+These steps can be performed with or without Eclipse.
+
+If using Eclipse install the *JDT* plugin, switch to "Java" *perspective*,
+select CIEID in the *Package Explorer* view, add a Debug or Run configuration
+starting `it.ipzs.cieid.MainApplication` as main class.
+
+Add `-Djna.library.path=".:../Debug"` to VM arguments.
+
+When directly calling the JVM be sure to make the `libcie-pkcs11.so` available
+to JNA either using the `jna.library.path` property or installing the library
+in a path searched by default, e.g. `/usr/local/lib`.

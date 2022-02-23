@@ -4,7 +4,7 @@
 #include "../Util/ModuleInfo.h"
 #include "CIEP11Template.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 #ifdef WIN32
 static char *szCompiledFile=__FILE__;
@@ -54,7 +54,7 @@ void CCardTemplate::InitTemplateList()
 	init_func
 
 	auto pTemplate = std::unique_ptr<CCardTemplate>(new CCardTemplate());
-	pTemplate->szName = "CIE";// "Carta d'Identità Elettronica";
+	pTemplate->szName = "CIE";// "Carta d'Identitï¿½ Elettronica";
 	pTemplate->szManifacturer = "";
 	pTemplate->FunctionList.templateInitLibrary = CIEtemplateInitLibrary;
 	pTemplate->FunctionList.templateInitCard = CIEtemplateInitCard;

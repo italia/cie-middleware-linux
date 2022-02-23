@@ -242,7 +242,7 @@ DWORD CLog::write(const char *format,...) {
             fclose(lf);
         }
 #else
-        lf = fopen(logPath.c_str(), "a+t");
+        //lf = fopen(logPath.c_str(), "a+t");
         if (lf) {
 
         	struct stat	lstat_buf;
@@ -350,7 +350,8 @@ void CLog::writePure(const char *format,...) {
 #ifdef WIN32
 		fopen_s(&lf,logPath.c_str(), "a+t");
 #else
-        lf = fopen(logPath.c_str(), "a+t");
+        //lf = fopen(logPath.c_str(), "a+t");
+		lf = 0;
 #endif
 		if (lf) {
 

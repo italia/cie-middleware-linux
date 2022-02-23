@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include "UtilException.h"
 #include "util.h"
+#include "../LOGGER/Logger.h"
+
+using namespace CieIDLogger;
 
 //#ifdef WIN32
 //
@@ -38,7 +41,7 @@ logged_error::logged_error(std::string message)
 }
 
 logged_error::logged_error(const char *message) : std::runtime_error(message) {
-    OutputDebugString(what());
+	LOG_ERROR("%s", message);
 //    CFuncCallInfoList *ptr = callQueue.get();
 //    while (ptr != nullptr) {
 //        OutputDebugString(ptr->info->FunctionName());

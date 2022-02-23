@@ -1,7 +1,7 @@
 
 #include "AES.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 #ifdef WIN32
 

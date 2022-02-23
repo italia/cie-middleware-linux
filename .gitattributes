@@ -1,1 +1,1 @@
-cie-pkcs11/libcryptopp.a filter=lfs diff=lfs merge=lfs -text
+libcryptopp.a filter=lfs diff=lfs merge=lfs -text

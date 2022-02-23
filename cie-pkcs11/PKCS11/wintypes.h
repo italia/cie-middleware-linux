@@ -10,6 +10,7 @@
 #define __UTILITYTYPES_H
 
 #include <memory.h>
+#include <wintypes.h>
 
 #define IN
 #define OUT

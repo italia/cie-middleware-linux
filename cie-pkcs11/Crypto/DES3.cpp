@@ -2,7 +2,7 @@
 #include "DES3.h"
 #include "../Cryptopp/misc.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 
 

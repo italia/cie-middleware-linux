@@ -5,7 +5,7 @@
 #include "../Crypto/RSA.h"
 #include "../Util/TLV.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 namespace {
 	template<class T>
@@ -217,10 +217,10 @@ namespace p11 {
 					/*if (Log.LogParam) {
 						ByteArray *Label = NULL;
 						pSlot->P11Objects[i]->getAttribute(CKA_LABEL, Label);
-						Log.writePure("Object found %i:", i);
-						Log.writePure("Class: %x", pSlot->P11Objects[i]->ObjClass);
+						//Log.writePure("Object found %i:", i);
+						//Log.writePure("Class: %x", pSlot->P11Objects[i]->ObjClass);
 						if (Label) {
-							Log.writePure("Label:");
+							//Log.writePure("Label:");
 							info.logParameter(Label->data(), Label->size());
 						}
 					}*/

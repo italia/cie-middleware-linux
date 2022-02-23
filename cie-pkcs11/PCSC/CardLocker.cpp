@@ -1,7 +1,7 @@
 
 #include "CardLocker.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 CCardLocker::CCardLocker(SCARDHANDLE card)
 {

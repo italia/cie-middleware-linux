@@ -2,7 +2,7 @@
 #include "../Util/util.h"
 #include "CardContext.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 void CCardContext::getContext() {
 	init_func

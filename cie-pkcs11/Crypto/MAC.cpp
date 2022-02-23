@@ -2,7 +2,7 @@
 #include "MAC.h"
 #include "../Cryptopp/hmac.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 
 

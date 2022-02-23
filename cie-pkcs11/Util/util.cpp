@@ -5,8 +5,9 @@
 //#include <dbghelp.h>
 #include <iomanip>
 #include <sstream>
+#include "../LOGGER/Logger.h"
 
-extern CLog Log;
+using namespace CieIDLogger;
 
 DWORD ERR_ATTRIBUTE_IS_SENSITIVE = 0x40000008;
 DWORD ERR_OBJECT_HASNT_ATTRIBUTE = 0x40000009;
@@ -177,8 +178,7 @@ std::string dumpHexData(ByteArray data)
 void Debug(ByteArray ba) {
 	std::string out;
 	dumpHexData(ba,out);
-	OutputDebugString(out.c_str());
-	OutputDebugString("\n");
+	LOG_DEBUG(out.c_str());
 }
 
 std::string dumpHexDataLowerCase(ByteArray data, std::string& dump)

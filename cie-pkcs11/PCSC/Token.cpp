@@ -5,7 +5,7 @@
 #include <vector>
 #include "../Cryptopp/misc.h"
 
-extern CLog Log;
+//extern CLog Log;
 
 CToken::CToken()
 {
