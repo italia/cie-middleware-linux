@@ -13,7 +13,7 @@ project(cie_sign_sdk)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(SRC_LIST 
+set(SRC_LIST
     ${SOURCE_DIR}/Base64.cpp
     ${SOURCE_DIR}/BigInteger.cpp
     ${SOURCE_DIR}/BigIntegerAlgorithms.cpp
@@ -89,10 +89,11 @@ set(SRC_LIST
     ${SOURCE_DIR}/RSA/sha1.c
     ${SOURCE_DIR}/RSA/sha2.c
     ${SOURCE_DIR}/CSP/IAS.cpp
+    ${SOURCE_DIR}/CSP/ATR.cpp
     ${SOURCE_DIR}/CSP/ExtAuthKey.cpp
-    ${SOURCE_DIR}/PCSC/APDU.cpp  
-    ${SOURCE_DIR}/PCSC/CardLocker.cpp  
-    ${SOURCE_DIR}/PCSC/PCSC.cpp  
+    ${SOURCE_DIR}/PCSC/APDU.cpp
+    ${SOURCE_DIR}/PCSC/CardLocker.cpp
+    ${SOURCE_DIR}/PCSC/PCSC.cpp
     ${SOURCE_DIR}/PCSC/Token.cpp
     ${SOURCE_DIR}/Util/Array.cpp
     ${SOURCE_DIR}/Util/CacheLib.cpp
@@ -122,7 +123,7 @@ set(SRC_LIST
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 
-set(INCLUDE_LIST 
+set(INCLUDE_LIST
     ${INCLUDE_DIR}
     ${SOURCE_DIR}/ASN1
     ${SOURCE_DIR}
