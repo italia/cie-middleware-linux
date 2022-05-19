@@ -156,7 +156,7 @@
 #define  DISIGON_ERROR_WRONG_PIN     DISIGON_ERROR_BASE + 40
 #define  DISIGON_ERROR_PIN_LOCKED  DISIGON_ERROR_BASE + 41
 
-    
+
 #define DISIGON_FILETYPE_PLAINTEXT	0
 #define DISIGON_FILETYPE_P7M			1
 #define DISIGON_FILETYPE_PDF			2
@@ -184,7 +184,7 @@
 #define LOG_TYPE_ERROR			1
 #define LOG_TYPE_WARNING		2
 #define LOG_TYPE_MESSAGE		3
-#define LOG_TYPE_DEBUG			4  
+#define LOG_TYPE_DEBUG			4
 
 #define TYPE_OCSP 1
 #define TYPE_CRL 2
@@ -233,14 +233,14 @@ typedef struct _SIGNER_INFO
 typedef struct _TS_INFO
 {
 	SIGNER_INFO signerInfo;
-	char szTimestamp[MAX_LEN];  
+	char szTimestamp[MAX_LEN];
 	char szTimeStampImprintAlgorithm[MAX_LEN];
 	char szTimeStampMessageImprint[MAX_LEN];
 	char szTimeStampSerial[MAX_LEN];
 } TS_INFO;
- 
 
-typedef struct _SIGNER_INFOS 
+
+typedef struct _SIGNER_INFOS
 {
 	SIGNER_INFO* pSignerInfo;
 	int nCount;
@@ -277,7 +277,7 @@ typedef struct _CERTIFICATE
 } CERTIFICATE;
 
 
-typedef struct _CERTIFICATES 
+typedef struct _CERTIFICATES
 {
 	CERTIFICATE* pCertificate;
 	int nCount;
@@ -349,7 +349,7 @@ DISIGON_API long disigon_verify_cleanup_result(VERIFY_RESULT* pVerifyResult);
 DISIGON_API long disigon_verify_cleanup(DISIGON_CTX ctx);
 // operazione di sbustamento veloce
 
-//estra il documento originale da un file p7m
+// estrae il documento originale da un file p7m
 DISIGON_API long disigon_get_file_from_p7m(DISIGON_CTX ctx);
 
 /*
@@ -358,4 +358,3 @@ DISIGON_API long disigon_get_file_from_p7m(DISIGON_CTX ctx);
 #endif
 */
 #endif // __DISIGON_H
-

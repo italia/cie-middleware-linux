@@ -48,6 +48,9 @@ Release/
 build/
 dist/
 cie-pkcs11/dependencies/*.a
+packages/**/*.jar
+packages/**/*.deb
+packages/**/*.rpm
 *.gz
 *.so
 libcie_sign_sdk.a

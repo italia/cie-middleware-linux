@@ -1,5 +1,6 @@
 
 #include "Slot.h"
+#include "../CSP/ATR.h"
 #include "PKCS11Functions.h"
 #include "../PCSC/Token.h"
 
@@ -400,7 +401,20 @@ namespace p11 {
 		CryptoPP::memcpy_s((char*)pInfo->label, 32, pTemplate->szName.c_str(), min1(pTemplate->szName.length(), sizeof(pInfo->label)));
 		memset(pInfo->manufacturerID, ' ', sizeof(pInfo->manufacturerID));
 
+		LOG_DEBUG("[PKCS11] GetTokenInfo - CIE ATR:");
+		LOG_BUFFER(baATR.data(), baATR.size());
+
 		std::string manifacturer;
+
+		std::vector<uint8_t> atr_vector(baATR.data(), baATR.data() + baATR.size());
+		manifacturer = get_manufacturer(atr_vector);
+
+		if (manifacturer.size() == 0){
+			throw p11_error(CKR_TOKEN_NOT_RECOGNIZED, "CIE not recognized");
+		}
+
+		LOG_INFO("[PKCS11] GetTokenInfo - CIE Detected: %s", manifacturer.c_str());
+#if 0
 		size_t position;
 		if (baATR.indexOf(baNXP_ATR, position))
 			manifacturer = "NXP";
@@ -422,7 +436,7 @@ namespace p11 {
 			pSerialTemplate = pTemplate;
 			baSerial = pTemplate->FunctionList.templateGetSerial(*this);
 		}
-
+#endif
 		std::string model;
 		pTemplate->FunctionList.templateGetModel(*this, model);
 
