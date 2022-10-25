@@ -18,9 +18,9 @@
 - pcsc-dev
 
 ## Step
-- Creare una cartella con il nome *Dependencies* nella root del progetto che conterrà tutte le dipendenze precedentemente elencate. Per ogni dipendenza va creata la cartella con il nome e che conterrà sia la libreria statica, sia i relativi header files. 
+- Creare una cartella con il nome *Dependencies* nella root del progetto che conterrà tutte le dipendenze precedentemente elencate. Per ogni dipendenza va creata la cartella con il nome e che conterrà sia la libreria statica, sia i relativi header files.
 
-    Ad esempio: 
+    Ad esempio:
 
     ```
     Dependencies
@@ -33,14 +33,15 @@
     │       │   headerfile2.h
     │       │   ...
     ```
-- Creare una cartella con il nome *build* nella root del progetto che conterrò tutti i file di build. 
+- Creare una cartella con il nome *build* nella root del progetto che conterrà tutti i file di build.
 - Aprire il terminale, spostarsi nella cartella *build* ed eseguire il seguente comando:
-    
-    *cmake ..*
+
+    cmake ..
+
 - Eseguire il comando:
 
-    *cmake --build .*
+    cmake --build .
 
 - Al termine della build eseguire il comando:
 
-    *cmake --install .*  
+    cmake --install .
