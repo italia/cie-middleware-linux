@@ -418,13 +418,11 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
     	free(readers);
     
     LOG_INFO("AbbinaCIE - CIE paired successfully");
-    progressCallBack(100, "");
+    progressCallBack(100, "OK!");
     LOG_INFO("***** AbbinaCIE Ended *****");
     
     return SCARD_S_SUCCESS;
 }
-
-
 
 DWORD CardAuthenticateEx(IAS*       ias,
                          DWORD       PinId,

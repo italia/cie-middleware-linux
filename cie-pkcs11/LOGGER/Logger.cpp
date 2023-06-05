@@ -122,7 +122,7 @@ Logger* Logger::getInstance() throw ()
 	}
 
 	int log_level = m_Instance->getLogConfig();
-    printf("Lib log level: %d\n", log_level);
+    //printf("Lib log level: %d\n", log_level);
 
 	if (log_level == LOG_STATUS_DISABLED) {
 		m_Instance->disableLog();
