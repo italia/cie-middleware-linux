@@ -47,7 +47,6 @@ x64/Release/
 Release/
 build/
 dist/
-cie-pkcs11/dependencies/*.a
 packages/**/*.jar
 packages/**/*.deb
 packages/**/*.rpm
