@@ -28,7 +28,6 @@ static const char* level_strings[] = {
  "", "[DEBUG]", "[INFO]", "[ERROR]"
 };
 
-
 Logger::Logger()
 {
 	char pProcessInfo[PATH_MAX];
