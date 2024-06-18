@@ -39,6 +39,7 @@ enum logMode {
 	LM_Module_Thread	// un file per modulo e per thread
 } LogMode = LM_Module;
 
+CLog Log;
 
 void initLog(const char *moduleName, const char *iniFile,const char *version)
 {

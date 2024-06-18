@@ -21,11 +21,12 @@ extern "C" {
     CK_RV CK_ENTRY estraiP7m(const char* inFilePath, const char* outFilePath);
 }
 
-CK_RV CK_ENTRY verificaConCIE(const char* inFilePath, const char* proxyAddress, int proxyPort, const char* usrPass)
-{
-	CIEVerify* verifier = new CIEVerify();
 
-	verifier->verify(inFilePath, (VERIFY_RESULT*)&verifyResult, proxyAddress, proxyPort, usrPass);
+CK_RV CK_ENTRY verificaConCIE( const char* inFilePath, const char* proxyAddress, int proxyPort, const char* usrPass)
+{
+    CIEVerify* verifier = new CIEVerify();
+
+    verifier->verify(inFilePath, (VERIFY_RESULT*)&verifyResult, proxyAddress, proxyPort, usrPass);
 
 	if (verifyResult.nErrorCode == 0)
 	{
@@ -37,6 +38,7 @@ CK_RV CK_ENTRY verificaConCIE(const char* inFilePath, const char* proxyAddress, 
 		printf("Errore nella verifica: %lu\n", verifyResult.nErrorCode);
 		return verifyResult.nErrorCode;
 	}
+
 }
 
 CK_RV CK_ENTRY getNumberOfSign(void)

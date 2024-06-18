@@ -54,7 +54,7 @@
 #define logParamBuf(p,l)
 #define logParamBufHide(p,l)
 
-CLog Log;
+extern CLog Log;
 
 #define init_func \
   	CFuncCallInfo info(__FUNCTION__ ,Log);
