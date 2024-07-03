@@ -2,7 +2,7 @@
 //  VerificaConCIE.h
 //  cie-pkcs11
 //
-//  Copyright © 2021 IPZS. All rights reserved.
+//  SPDX-License-Identifier: BSD-3-Clause
 //
 
 #ifndef VerificaConCIE_h

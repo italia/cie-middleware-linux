@@ -3,7 +3,7 @@
 //  cie-pkcs11
 //
 //  Created by ugo chirico on 02/09/18. http://www.ugochirico.com
-//  Copyright © 2018 IPZS. All rights reserved.
+//  SPDX-License-Identifier: BSD-3-Clause
 //
 #include "../PKCS11/cryptoki.h"
 #include <string>
