@@ -1,7 +1,7 @@
 //
 //  FirmaConCIE.cpp
 //  cie-pkcs11
-//  SPDX-License-Identifier: BSD-3-Clause
+//  Copyright © 2021 IPZS. All rights reserved.
 //
 
 #include "FirmaConCIE.h"

@@ -2,7 +2,8 @@
  *            utiltypes.h
  *
  *  Fri Nov 17 01:15:58 2006
- *  SPDX-License-Identifier: BSD-3-Clause
+ *  Copyright  2006  Ugo Chirico
+ *  Email
  ****************************************************************************/
 
 #ifndef __UTILITYTYPES_H

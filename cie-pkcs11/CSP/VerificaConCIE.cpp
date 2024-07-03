@@ -3,7 +3,7 @@
 //  cie-pkcs11
 //
 //  Created by Pierluigi De Gregorio on 18/02/21.
-//  SPDX-License-Identifier: BSD-3-Clause
+//  Copyright © 2021 IPZS. All rights reserved.
 //
 
 #include "VerificaConCIE.h"

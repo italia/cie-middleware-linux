@@ -3,7 +3,7 @@
 //  cie-pkcs11
 //
 //  Created by ugo chirico on 06/10/18. http://www.ugochirico.com
-//  SPDX-License-Identifier: BSD-3-Clause
+//  Copyright © 2018 IPZS. All rights reserved.
 //
 #include <string.h>
 #include "IAS.h"

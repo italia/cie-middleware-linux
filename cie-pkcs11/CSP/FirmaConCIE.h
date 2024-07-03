@@ -2,7 +2,7 @@
 //  FirmaConCIE.hpp
 //  cie-pkcs11
 //
-//  SPDX-License-Identifier: BSD-3-Clause
+//  Copyright © 2021 IPZS. All rights reserved.
 //
 
 #ifndef FirmaConCIE_h

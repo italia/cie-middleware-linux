@@ -1,8 +1,22 @@
 // TestCIE.cpp : Questo file contiene la funzione 'main', in cui inizia e termina l'esecuzione del programma.
 //
 /*
- *  Copyright (c) 2018 Istituto Poligrafico e Zecca dello Stato
- * SPDX-License-Identifier: BSD-3-Clause
+ *  Copyright (c) 2000-2018 by Ugo Chirico - http://www.ugochirico.com
+ *  All Rights Reserved
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 #include <iostream>
@@ -748,6 +762,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "----------------------------------------------" << std::endl;
 	std::cout << "- Benvenuti nella Console di test del PKCS#11" << std::endl;
+	std::cout << "- Copyright (c) 2006-2019 by Ugo Chirico\n- http://www.ugochirico.com\n- All right reserved" << std::endl;
 	std::cout << "----------------------------------------------" << std::endl;
 
 	g_nLogLevel = 5;
