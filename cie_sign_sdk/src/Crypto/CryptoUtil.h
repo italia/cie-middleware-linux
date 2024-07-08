@@ -3,7 +3,7 @@
 //  cie-pkcs11
 //
 //  Created by ugo chirico on 07/01/2019.
-//  Copyright © 2019 IPZS. All rights reserved.
+//  SPDX-License-Identifier: BSD-3-Clause
 //
 
 #ifndef CryptoUtil_h
