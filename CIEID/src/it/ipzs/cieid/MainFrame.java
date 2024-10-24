@@ -11,10 +11,13 @@ import java.awt.GraphicsEnvironment;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +28,14 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -89,6 +96,8 @@ import javax.swing.JRadioButton;
 import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import java.awt.Rectangle;
+import java.awt.Point;
 
 public class MainFrame extends JFrame {
     private Logger logger;
@@ -347,6 +356,13 @@ public class MainFrame extends JFrame {
     private JButton btnDigitalSignatureVerify;
     private boolean shouldSignWithoutPairing = false;
     private String signingCIEPAN = "";
+    private JPanel configPreferencesPanel;
+    private JLabel lblConfigPreferencesTitle;
+    private JLabel lblConfigPreferencesCaption;
+    private JLabel lblConfigPreferencesCaption_1;
+    private JCheckBox cboxShowTutorial;
+    private JButton btnDeleteLogs;
+    private JButton btnCollectLogs;
 
     private enum SignOp {
         OP_NONE,
@@ -620,6 +636,9 @@ public class MainFrame extends JFrame {
                 rdbtnLoggingLibInfo.setSelected(logConfig.lib.equals(LogLevel.INFO));
                 rdbtnLoggingLibError.setSelected(logConfig.lib.equals(LogLevel.ERROR));
                 selectButton(btnSettings);
+                boolean showTutorial = ("false".equals(Utils.getProperty("nomore", "false"))) ?
+                		true : false;
+                cboxShowTutorial.setSelected(showTutorial);
                 tabbedPane.setSelectedIndex(17);
             }
         });
@@ -940,7 +959,7 @@ public class MainFrame extends JFrame {
                 if (selectedCIE.getCard().getIsCustomSign()) {
                     logger.Debug("Firma personalizzata presente");
                     lblCustomize.setText("Aggiorna");
-                    lblHint.setText("Un tua firma personalizzata è già stata caricata. Vuoi aggiornarla?");
+                    lblHint.setText("La tua firma personalizzata è già stata caricata. Vuoi aggiornarla?");
                     lblFPOK.setVisible(true);
                     lblSFP.setVisible(false);
                 } else {
@@ -2673,6 +2692,56 @@ public class MainFrame extends JFrame {
         panelConfigLoggingLib.add(rdbtnLoggingLibError);
         verticalGlue_4 = Box.createVerticalGlue();
         panelConfigLoggingLib.add(verticalGlue_4);
+        
+        btnDeleteLogs = new JButton("Elimina cache dei log");
+        btnDeleteLogs.setForeground(Color.WHITE);
+        btnDeleteLogs.setBackground(new Color(30, 144, 255));
+        btnDeleteLogs.setBounds(292, 436, 236, 25);
+        btnDeleteLogs.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		logger.Info("Inizia 'deleteLogs'");
+        		deleteLogs();
+        	}
+        });
+        configLoggingPanel.add(btnDeleteLogs);
+        
+        btnCollectLogs = new JButton("Raccogli log per diagnostica");
+        btnCollectLogs.setForeground(Color.WHITE);
+        btnCollectLogs.setBackground(new Color(30, 144, 255));
+        btnCollectLogs.setBounds(47, 436, 236, 25);
+        btnCollectLogs.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                logger.Info("Inizia  'CollectLogs'");
+                collectLogs();
+            }
+        });
+        configLoggingPanel.add(btnCollectLogs);
+        
+        configPreferencesPanel = new JPanel();
+        configTabbedPane.addTab("Preferenze", null, configPreferencesPanel, null);
+        configPreferencesPanel.setLayout(null);
+        
+        lblConfigPreferencesTitle = new JLabel("Configurazione preferenze");
+        lblConfigPreferencesTitle.setBounds(72, 5, 421, 33);
+        lblConfigPreferencesTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        lblConfigPreferencesTitle.setFont(new Font("Dialog", Font.BOLD, 28));
+        configPreferencesPanel.add(lblConfigPreferencesTitle);
+        
+        lblConfigPreferencesCaption = new JLabel("Le opzioni di seguito riportate consentono di personalizzare");
+        lblConfigPreferencesCaption.setBounds(40, 43, 486, 18);
+        lblConfigPreferencesCaption.setFont(new Font("Dialog", Font.BOLD, 15));
+        configPreferencesPanel.add(lblConfigPreferencesCaption);
+        
+        lblConfigPreferencesCaption_1 = new JLabel("il comportamento di CIE ID secondo le proprie preferenze");
+        lblConfigPreferencesCaption_1.setBounds(45, 66, 475, 18);
+        lblConfigPreferencesCaption_1.setFont(new Font("Dialog", Font.BOLD, 15));
+        configPreferencesPanel.add(lblConfigPreferencesCaption_1);
+        
+        cboxShowTutorial = new JCheckBox("Mostra schermate introduttive all'avvio di CIE ID");
+        cboxShowTutorial.setSize(363, 23);
+        cboxShowTutorial.setLocation(new Point(94, 148));
+        configPreferencesPanel.add(cboxShowTutorial);
+        cboxShowTutorial.setActionCommand("");
         configButtonsPanel = new JPanel();
         configButtonsPanel.setBackground(Color.WHITE);
         configButtonsPanel.setBounds(0, 524, 595, 47);
@@ -2735,7 +2804,8 @@ public class MainFrame extends JFrame {
                 } else {
                     Utils.setProperty("proxyPort", txtPort.getText());
                 }
-
+                
+				Utils.setProperty("nomore", cboxShowTutorial.isSelected() ? "false" : "true");
                 disableConfigurationPaneControls();
             }
         });
@@ -2760,6 +2830,88 @@ public class MainFrame extends JFrame {
         }
         
         System.out.println("tabbedPanel: " + tabbedPane);
+    }
+    
+    private void collectLogs() {
+    	boolean logFound = false;
+    	JFileChooser fileChooser = new JFileChooser();
+    	
+        fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
+        fileChooser.setDialogTitle("Seleziona il percorso in cui salvare l'archivio dei log");
+        FileNameExtensionFilter filter;
+        filter = new FileNameExtensionFilter("Archivio zip", ".zip");
+        fileChooser.setFileFilter(filter);
+        fileChooser.setSelectedFile(new File(System.getProperty("user.home") + "/CIEIDLog_" +
+        new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(Calendar.getInstance().getTime()) + ".zip"));
+    	
+    	if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+    	    File zipFile = fileChooser.getSelectedFile();
+    	    ZipOutputStream logZipOutputStream;
+	  		try {
+	  			logZipOutputStream = new ZipOutputStream(new FileOutputStream(zipFile));
+	  			File folder = new File(System.getProperty("user.home"), ".CIEPKI");
+	  			for (final File fileEntry : folder.listFiles()) {
+	  		            if (fileEntry.getName().endsWith(".log")) {
+	  		            	logFound = true;
+		  			    	ZipEntry entry = new ZipEntry(fileEntry.getName());
+		  			    	logZipOutputStream.putNextEntry(entry);
+		  					
+		  			    	byte[] data = Files.readAllBytes(fileEntry.toPath());
+		  			    	logZipOutputStream.write(data, 0, data.length);
+		  			    	logZipOutputStream.closeEntry();
+	  		            }
+	  		        }
+	
+	  			logZipOutputStream.close();
+	  			
+	  			if(logFound) {
+	  				logger.Info("[INFO] collectLogs() - Archivio dei log creato con successo al path: " + zipFile.getAbsolutePath());
+	  				JOptionPane.showMessageDialog(this.getContentPane(), "La raccolta dei log di diagnostica è avvenuta con successo.\n" + 
+	  						"Puoi adesso condividere con gli sviluppatori l'archivio\ngenerato per un'analisi della problematica riscontrata.",
+	  						"Raccolta completata", JOptionPane.INFORMATION_MESSAGE);
+	  			}
+	  			
+	  			else {
+	  				JOptionPane.showMessageDialog(this.getContentPane(), "Non sono presenti log. Effettua prima delle operazioni con l'applicativo, " + 
+	  						"quindi ripeti l'operazione di raccolta dei log.", "Raccolta log", JOptionPane.INFORMATION_MESSAGE);
+	  				
+	  				Files.deleteIfExists(zipFile.toPath());
+	  			}
+	  		} catch (IOException ex) {
+	  			logger.Error("[ERROR] collectLogs() - Si è verificato un errore durante l'operazione:\n\n" + ex.getLocalizedMessage());
+	            JOptionPane.showMessageDialog(this.getContentPane(), "Si è verificato un errore durante l'operazione:\n\n" + ex.getLocalizedMessage(),
+	            		"Attenzione", JOptionPane.ERROR_MESSAGE);
+	  		}
+    	}
+    }
+    
+    private void deleteLogs() {
+        if (JOptionPane.showConfirmDialog(this.getContentPane(), "Avanzando con l'operazione, verranno eliminati tutti i file di log\n" + 
+        		"generati dal software CIE ID. Confermi di voler procedere?", "Eliminazione log", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+            return;
+        }
+    	
+    	try {
+  			File folder = new File(System.getProperty("user.home"), ".CIEPKI");
+  			for (final File fileEntry : folder.listFiles()) {
+  		            if (fileEntry.getName().endsWith(".log")) {
+  		            	Files.deleteIfExists(fileEntry.toPath());
+  		            }
+  		        }
+
+			logger.Info("[INFO] deleteLogs() - Log eliminati con successo.");
+			JOptionPane.showMessageDialog(this.getContentPane(), "L'eliminazione dei log è avvenuta con successo. Se hai riscontrato un'anomalia nel software\n" + 
+					"che intendi segnalare, puoi impostare il livello di logging su 'Debug', replicare l'operazione,\n" + 
+					"raccogliere i log con l'apposito pulsante e condividerli con lo sviluppatore.",
+					"Eliminazione completata", JOptionPane.ERROR_MESSAGE);
+
+  		} catch (Exception ex) {
+  			logger.Error("[ERROR] deleteLogs() - Si è verificato un errore durante l'operazione:" + ex.getLocalizedMessage());
+            JOptionPane.showMessageDialog(this.getContentPane(), "Si è verificato un errore durante la cancellazione dei log.\n" + 
+            		"È possibile che alcuni file siano aperti ed in uso da terze parti, per cui non\n" + 
+            		" è stato possibile procedere con l'eliminazione. Motivazione:\n\n" + ex.getLocalizedMessage(),
+            		"Attenzione", JOptionPane.ERROR_MESSAGE);
+  		}
     }
 
     private void chooseSignOrVerifyFileOperation(String filePath) {
@@ -2807,6 +2959,7 @@ public class MainFrame extends JFrame {
         rdbtnLoggingLibDebug.setEnabled(value);
         rdbtnLoggingLibInfo.setEnabled(value);
         rdbtnLoggingLibError.setEnabled(value);
+        cboxShowTutorial.setEnabled(value);
     }
 
     private void selectButton(JButton button) {
@@ -3959,5 +4112,4 @@ public class MainFrame extends JFrame {
             System.out.println(exception);
         }
     }
-
 }
