@@ -50,7 +50,13 @@ long CCIESigner::Init(const char* szPIN)
 //        m_pIAS->ReadIdServizi(IdServizi);
         
         ByteDynArray data;
-        m_pIAS->ReadDappPubKey(data);
+        LOG_DBG((0, "CIESigner::Init - Verifying DAPP key via CSCA chain", ""));
+        if (!m_pIAS->VerifyAndAuthenticateDappKey()) {
+            LOG_ERR((0, "CIESigner::Init - DAPP key verification failed", ""));
+            throw logged_error("CIESigner::Init - DAPP key verification failed");
+        }
+        LOG_DBG((0, "CIESigner::Init - DAPP key successfully verified", ""));
+        
         m_pIAS->InitExtAuthKeyParam();
         m_pIAS->DHKeyExchange();
         m_pIAS->DAPP();

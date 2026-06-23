@@ -46,7 +46,9 @@ using namespace CieIDLogger;
 
 #define ROLE_USER 				1
 #define ROLE_ADMIN 				2
-#define CARD_ALREADY_ENABLED	0x000000F0;
+#define CARD_ALREADY_ENABLED	0x000000F0
+#define CARD_CSCA_VERIFY_NOT_DONE   0x000000F2
+#define CARD_CSCA_VERIFY_FAILED     0x000000F3
 
 OID OID_SURNAME = ((OID(2) += 5) += 4) += 4;
 
@@ -118,6 +120,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
 
     LOG_INFO("***** Starting AbbinaCIE *****");
     LOG_DEBUG("szPAN:%s, pin len : %d", szPAN, strlen(szPIN));
+    bool verifiedSOD = false;
 
     // verifica bontà PIN
     if(szPIN == NULL || strnlen(szPIN, 9) != 8)
@@ -215,9 +218,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ias.ReadPAN();
         
             
-            ByteDynArray IntAuth;
             ias.SelectAID_CIE();
-            ias.ReadDappPubKey(IntAuth);
             //ias.SelectAID_CIE();
             ias.InitEncKey();
             
@@ -239,10 +240,8 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ByteDynArray SOD;
             ias.ReadSOD(SOD);
             uint8_t digest = ias.GetSODDigestAlg(SOD);
-                        
-            ByteArray intAuthData(IntAuth.left(GetASN1DataLenght(IntAuth)));
-            
-			ByteDynArray IntAuthServizi;
+
+            ByteDynArray IntAuthServizi;
             ias.ReadServiziPubKey(IntAuthServizi);
             ByteArray intAuthServiziData(IntAuthServizi.left(GetASN1DataLenght(IntAuthServizi)));
 
@@ -252,8 +251,8 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ByteArray dhData(DH.left(GetASN1DataLenght(DH)));
 
             // poichè la CIE abilitata sul desktop può essere solo una, szPAN passato da CIEID è sempre null
-//            if (szPAN && IdServizi != ByteArray((uint8_t*)szPAN, strnlen(szPAN, 20)))
-//                continue;
+            if (szPAN && IdServizi != ByteArray((uint8_t*)szPAN, strnlen(szPAN, 20)))
+                continue;
 
             foundCIE = true;
             
@@ -302,29 +301,44 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             ias.ReadCertCIE(CertCIE);
             ByteArray certCIEData = CertCIE.left(GetASN1DataLenght(CertCIE));
             
-            LOG_INFO("AbbinaCIE - Verifying SOD, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
-            if (digest == 1)
-            {
-                CSHA256 sha256;
-                hashSet[0xa1] = sha256.Digest(serviziData);
-                hashSet[0xa4] = sha256.Digest(intAuthData);
-                hashSet[0xa5] = sha256.Digest(intAuthServiziData);
-                hashSet[0x1b] = sha256.Digest(dhData);
-                hashSet[0xa2] = sha256.Digest(serialData);
-                hashSet[0xa3] = sha256.Digest(certCIEData);
-                ias.VerificaSOD(SOD, hashSet);
+            LOG_INFO("AbbinaCIE - Verifying SOD BEFORE authentication, digest algorithm: %s", (digest == 1) ? "RSA/SHA256" : "RSA-PSS/SHA512");
 
+            ByteDynArray intAuthRaw = ias.DappPubKeyRaw;
+            ByteArray intAuthData(intAuthRaw.left(GetASN1DataLenght(intAuthRaw)));
+
+            LOG_DEBUG("AbbinaCIE - IntAuth RAW from DappPubKeyRaw (EF.1004) length: %zu", intAuthRaw.size());
+            LOG_DEBUG("AbbinaCIE - IntAuth data length after GetASN1DataLenght: %zu", intAuthData.size());
+
+            if (intAuthData.size() != intAuthRaw.size()) {
+                LOG_DEBUG("AbbinaCIE - IntAuth size differs: parsed=%zu, raw=%zu", intAuthData.size(), intAuthRaw.size());
             }
-            else
-            {
+
+            try {
+                CSHA256 sha256;
                 CSHA512 sha512;
-                hashSet[0xa1] = sha512.Digest(serviziData);
-                hashSet[0xa4] = sha512.Digest(intAuthData);
-                hashSet[0xa5] = sha512.Digest(intAuthServiziData);
-                hashSet[0x1b] = sha512.Digest(dhData);
-                hashSet[0xa2] = sha512.Digest(serialData);
-                hashSet[0xa3] = sha512.Digest(certCIEData);
-                ias.VerificaSODPSS(SOD, hashSet);
+                hashSet[0xa1] = (digest == 1) ? sha256.Digest(serviziData) : sha512.Digest(serviziData);
+
+                ByteDynArray hashA4Parsed = (digest == 1) ? sha256.Digest(intAuthData) : sha512.Digest(intAuthData);
+                ByteDynArray hashA4Raw = (digest == 1) ? sha256.Digest(intAuthRaw) : sha512.Digest(intAuthRaw);
+
+                if (hashA4Parsed != hashA4Raw) {
+                    LOG_DEBUG("AbbinaCIE - Hash A4 differs: parsed vs raw!");
+                    LOG_DEBUG("AbbinaCIE - Hash A4 %s from PARSED data, length: %zu", (digest == 1) ? "SHA256" : "SHA512", hashA4Parsed.size());
+                    LOG_DEBUG("AbbinaCIE - Hash A4 %s from RAW file, length: %zu", (digest == 1) ? "SHA256" : "SHA512", hashA4Raw.size());
+                }
+
+                hashSet[0xa4] = hashA4Raw;
+                hashSet[0xa5] = (digest == 1) ? sha256.Digest(intAuthServiziData) : sha512.Digest(intAuthServiziData);
+                hashSet[0x1b] = (digest == 1) ? sha256.Digest(dhData) : sha512.Digest(dhData);
+                hashSet[0xa2] = (digest == 1) ? sha256.Digest(serialData) : sha512.Digest(serialData);
+                hashSet[0xa3] = (digest == 1) ? sha256.Digest(certCIEData) : sha512.Digest(certCIEData);
+
+                verifiedSOD = (digest == 1) ? ias.VerificaSOD(SOD, hashSet) : ias.VerificaSODPSS(SOD, hashSet);
+            } catch (std::exception &ex) {
+                LOG_ERROR("AbbinaCIE - SOD verification exception: %s", ex.what());
+                free(ATR);
+                free(readers);
+                return CARD_CSCA_VERIFY_FAILED;
             }
 
             ByteArray pinBa((uint8_t*)szPIN, 4);
@@ -391,6 +405,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             
             std::string fullname = name + " " + surname;
             completedCallBack(span.c_str(), fullname.c_str(), st_serial.c_str());
+            break;
 		}
         
 		if (!foundCIE) {
@@ -418,8 +433,13 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
     	free(readers);
     
     LOG_INFO("AbbinaCIE - CIE paired successfully");
-    progressCallBack(100, "OK!");
+    progressCallBack(100, "");
     LOG_INFO("***** AbbinaCIE Ended *****");
+    
+    if (!verifiedSOD) {
+        LOG_ERROR("AbbinaCIE - SOD verification failed");
+        return CARD_CSCA_VERIFY_NOT_DONE;
+    }
     
     return SCARD_S_SUCCESS;
 }
@@ -454,10 +474,15 @@ DWORD CardAuthenticateEx(IAS*       ias,
 
     progressCallBack(24, "read DappPubKey");
 
-    ByteDynArray dappData;
-    ias->ReadDappPubKey(dappData);
-    
-    LOG_INFO("CardAuthenticateEx - Performing DH Exchange");
+    LOG_INFO("CardAuthenticateEx - Verifying DAPP key with CSCA chain");
+    try {
+        ias->VerifyAndAuthenticateDappKey();
+    }
+    catch (std::exception &ex) {
+        LOG_ERROR("CardAuthenticateEx - DAPP key verification failed: %s", ex.what());
+        throw logged_error(stdPrintf("CardAuthenticateEx - DAPP key verification failed: %s", ex.what()));
+    }
+    LOG_INFO("CardAuthenticateEx - DAPP key verified and authenticated, proceeding with protocol");
 
     progressCallBack(26, "InitExtAuthKeyParam");
     ias->InitExtAuthKeyParam();

@@ -1,9 +1,9 @@
 #pragma once
 #include "../PCSC/Token.h"
-
 #include "../CSP/ATR.h"
 
 #include <map>
+#include <vector>
 
 #define DirCIE				"CIE"
 
@@ -55,6 +55,8 @@ class IAS
 
 	void readfile_SM(uint16_t id, ByteDynArray &content);
 	void readfile(uint16_t id, ByteDynArray &content);
+	bool RunCSCAVerification(const ByteDynArray& certDSData);
+	bool VerifyCSCAChain(const ByteDynArray& certDSData, const std::vector<ByteDynArray>& cscaCertificates);
 
 	void increment(ByteArray &seq);
 	void ReadCIEType();
@@ -72,6 +74,8 @@ public:
 	ByteDynArray PAN;
 	ByteDynArray DappModule;
 	ByteDynArray DappPubKey;
+	ByteDynArray DappPubKeyRaw;
+	bool DappKeyVerified;
 
 	void ReadPAN();
 	void ReadSOD(ByteDynArray &data);
@@ -100,13 +104,14 @@ public:
 	void SetCache(const char *PAN, ByteArray &certificate, ByteArray &FirstPIN);
 	bool IsEnrolled();
     bool Unenroll();
-    static bool IsEnrolled(const char *szPAN);
-    static bool Unenroll(const char *szPAN);
+    static bool IsEnrolled(const char *PAN);
+    static bool Unenroll(const char *PAN);
 	void IconaSbloccoPIN();
 
     uint8_t GetSODDigestAlg(ByteArray &SOD);
     void VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
 	void VerificaSOD(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSet);
+	bool VerifyAndAuthenticateDappKey();
 
 	void(*Callback)(int progress, char *desc,void *data);
 	void* CallbackData;

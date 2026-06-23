@@ -13,8 +13,9 @@ logFunc pfnCrashliticsLog = NULL;
 
 
 UUCLogger::UUCLogger(void)
-: m_nLogLevel(1)
+: m_nLogLevel(m_nLogLevel)
 {
+	initializeLogFile();
 }
 
 UUCLogger::UUCLogger(const char* szLogFileName)
@@ -25,6 +26,12 @@ UUCLogger::UUCLogger(const char* szLogFileName)
 
 UUCLogger::~UUCLogger(void)
 {
+}
+
+void UUCLogger::initializeLogFile()
+{
+	// For non-Windows platforms, disable file logging by default
+	m_szLogFileName[0] = '\0';
 }
 
 void UUCLogger::setLogLevel(int loglevel)
@@ -74,7 +81,7 @@ void UUCLogger::log(const unsigned int nType, const char* szMsg, const unsigned 
 
 void UUCLogger::log(const unsigned int nType, const char *szMsg, const unsigned int nID, const char *szModuleName)
 {
-	if(nType > m_nLogLevel)
+	if(nType > m_nLogLevel || nType == LOG_TYPE_NONE)
 		return;
 
 #ifdef __ANDROID__

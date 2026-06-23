@@ -1,8 +1,5 @@
 #include "ATR.h"
-#include "../LOGGER/Logger.h"
 #include <algorithm>
-
-using namespace CieIDLogger;
 
 cie_atr atr_list[] = {
         {CIE_Type::CIE_NXP,     "NXP",      		{ 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50 }},
@@ -34,11 +31,9 @@ string get_manufacturer(vector<uint8_t> atr) {
 
 	for (cie_atr el : atr_list) {
 		if (IsSubset(atr, el.atr)) {
-			LOG_INFO("ReadCIEType - get_manufacturer() CIE %s detected", el.type.c_str());
 			return el.type;
 		}
 	}
-	LOG_INFO("ReadCIEType - get_manufacturer() Unknown CIE detected");
 	return "";
 }
 
@@ -47,10 +42,8 @@ CIE_Type get_type(vector<uint8_t> atr) {
 
 	for (cie_atr el : atr_list) {
 		if (IsSubset(atr, el.atr)) {
-			LOG_INFO("ReadCIEType - cie_type() CIE %s detected", el.type.c_str());
 			return el.cie_type;
 		}
 	}
-	LOG_INFO("ReadCIEType - cie_type() Unknown CIE detected");
 	return CIE_Type::CIE_Unknown;
 }

@@ -127,10 +127,21 @@ CK_RV CK_ENTRY CambioPIN(const char*  szCurrentPIN, const char*  szNewPIN, int* 
             ias.SelectAID_CIE();
             
             ias.InitEncKey();
-            ias.ReadDappPubKey(resp);
             
             foundCIE = true;
             
+            LOG_INFO("PINManager::ChangePIN - Verifying DAPP key with CSCA chain");
+            try {
+                ias.VerifyAndAuthenticateDappKey();
+            }
+            catch (std::exception &ex) {
+                LOG_ERROR("PINManager::ChangePIN - DAPP key verification failed: %s", ex.what());
+                free(readers);
+                free(ATR);
+                return CKR_FUNCTION_FAILED;
+            }
+            LOG_INFO("PINManager::ChangePIN - DAPP key verified, proceeding");
+
             // leggo i parametri di dominio DH e della chiave di extauth
             ias.InitDHParam();
             
@@ -317,9 +328,21 @@ CK_RV CK_ENTRY SbloccoPIN(const char*  szPUK, const char*  szNewPIN, int* pAttem
             ias.SelectAID_CIE();
         
             ias.InitEncKey();
-            ias.ReadDappPubKey(resp);
             
             foundCIE = true;
+
+            LOG_INFO("PINManager::UnlockPIN - Verifying DAPP key with CSCA chain");
+            try {
+                ias.VerifyAndAuthenticateDappKey();
+            }
+            catch (std::exception &ex) {
+                LOG_ERROR("PINManager::UnlockPIN - DAPP key verification failed: %s", ex.what());
+                free(readers);
+                free(ATR);
+                return CKR_FUNCTION_FAILED;
+            }
+            LOG_INFO("PINManager::UnlockPIN - DAPP key verified, proceeding");
+
     
             // leggo i parametri di dominio DH e della chiave di extauth
             ias.InitDHParam();

@@ -7,12 +7,12 @@
 #include "../Crypto/SHA1.h"
 #include "../Crypto/DES3.h"
 #include "../Crypto/MAC.h"
-#include "cryptopp/misc.h"
 #include "../Util/ModuleInfo.h"
-#include "cryptopp/misc.h"
-#include "cryptopp/cryptlib.h"
-#include "cryptopp/asn.h"
-#include "cryptopp/queue.h"
+#include "CSCACertificates.h"
+
+#include "../cryptopp/cryptlib.h"
+#include "../cryptopp/asn.h"
+#include "../cryptopp/queue.h"
 
 //#include "../res/resource.h"
 #include "../Util/CacheLib.h"
@@ -26,12 +26,51 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <vector>
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <openssl/pem.h>
 
 extern CLog Log;
 
 extern CModuleInfo moduleInfo;
 extern ByteArray SkipZero(ByteArray &ba);
 //extern DWORD WINAPI _abilitaCIE(LPVOID lpThreadParameter);
+
+// Struttura per embedded CSCA certificates
+struct EmbeddedCertInfo_sdk {
+	const unsigned char* data;
+	size_t size;
+};
+
+static const EmbeddedCertInfo_sdk embeddedCSCA_sdk[] = {
+	{ EmbeddedTestCSCA_1, sizeof(EmbeddedTestCSCA_1) },
+	{ EmbeddedTestCSCA_2, sizeof(EmbeddedTestCSCA_2) },
+	{ EmbeddedTestCSCA_3, sizeof(EmbeddedTestCSCA_3) },
+	{ EmbeddedTestCSCA_4, sizeof(EmbeddedTestCSCA_4) },
+	{ EmbeddedTestCSCA_5, sizeof(EmbeddedTestCSCA_5) },
+	{ EmbeddedTestCSCA_6, sizeof(EmbeddedTestCSCA_6) },
+	{ EmbeddedProdCSCA_1, sizeof(EmbeddedProdCSCA_1) },
+	{ EmbeddedProdCSCA_2, sizeof(EmbeddedProdCSCA_2) },
+	{ EmbeddedProdCSCA_3, sizeof(EmbeddedProdCSCA_3) },
+	{ EmbeddedProdCSCA_4, sizeof(EmbeddedProdCSCA_4) },
+	{ EmbeddedProdCSCA_5, sizeof(EmbeddedProdCSCA_5) },
+	{ EmbeddedProdCSCA_6, sizeof(EmbeddedProdCSCA_6) },
+	{ nullptr, 0 }
+};
+
+static bool LoadEmbeddedCSCACertificates_sdk(std::vector<ByteDynArray>& certificates) {
+	certificates.clear();
+	int loadedCount = 0;
+	for (int i = 0; embeddedCSCA_sdk[i].data != nullptr; ++i) {
+		ByteDynArray derCert;
+		derCert.resize(embeddedCSCA_sdk[i].size);
+		memcpy(derCert.data(), embeddedCSCA_sdk[i].data, embeddedCSCA_sdk[i].size);
+		certificates.push_back(derCert);
+		loadedCount++;
+	}
+	return loadedCount > 0;
+}
 
 void GetPublicKeyFromCert(CryptoPP::BufferedTransformation & certin,
                           CryptoPP::BufferedTransformation & keyout,
@@ -55,6 +94,7 @@ IAS::IAS(CToken::TokenTransmitCallback transmit,ByteArray ATR)
 
 	ActiveSM = false;
 	ActiveDF = DF_Root;
+	DappKeyVerified = false;
 
 	token.setTransmitCallback(transmit, nullptr);
 }
@@ -71,15 +111,11 @@ uint8_t defPubExp[] = { 0x00, 0x01, 0x00, 0x01 };
 void IAS::ReadSOD(ByteDynArray &data) {
 	init_func
 	readfile(0x1006,data);
-
-
 	exit_func
 }
 void IAS::ReadDH(ByteDynArray &data) {
 	init_func
 	readfile(0xd004, data);
-
-
 
 	exit_func
 }
@@ -87,32 +123,22 @@ void IAS::ReadCertCIE(ByteDynArray &data) {
 	init_func
 	readfile(0x1003, data);
 
-
-
 	exit_func
 }
 void IAS::ReadServiziPubKey(ByteDynArray &data) {
 	init_func
 	readfile(0x1005, data);
-
-
-
 	exit_func
 }
 void IAS::ReadSerialeCIE(ByteDynArray &data) {
 	init_func
 	readfile(0x1002, data);
 
-
-
-	exit_func
+    exit_func
 }
 void IAS::ReadIdServizi(ByteDynArray &data) {
 	init_func
 	readfile(0x1001, data);
-
-
-
 	exit_func
 }
 
@@ -124,21 +150,17 @@ void IAS::Sign(ByteArray &data, ByteDynArray &signedData) {
 	uint8_t keyId = CIE_KEY_Sign_ID;
 
 
-
-
 	StatusWord sw;
     ByteArray val02Ba = VarToByteArray(val02);
     ByteArray keyIdBa = VarToByteArray(keyId);
     if ((sw = SendAPDU_SM(VarToByteArray(SetKey), ASN1Tag(0x80, val02Ba).append(ASN1Tag(0x84, keyIdBa)), resp)) != 0x9000){
-
-		throw scard_error(sw);
+        throw scard_error(sw);
     }
 
 	uint8_t Sign[] = { 0x00, 0x88, 0x00, 0x00 };
     if ((sw = SendAPDU_SM(VarToByteArray(Sign), data, signedData)) != 0x9000){
-
-		throw scard_error(sw);
-}
+        throw scard_error(sw);
+    }
 
 }
 
@@ -146,25 +168,22 @@ StatusWord IAS::VerifyPUK(ByteArray &PIN) {
 	init_func
 	ByteDynArray resp;
 
-
 	uint8_t verifyPIN[] = { 0x00, 0x20, 0x00, CIE_PUK_ID };
-	return SendAPDU_SM(VarToByteArray(verifyPIN), PIN, resp);
+	return SendAPDU_SM(VarToByteArray(verifyPIN), PIN.left(8), resp);
 }
 
 StatusWord IAS::VerifyPIN(ByteArray &PIN) {
 	init_func
 	ByteDynArray resp;
 
-
 	uint8_t verifyPIN[] = { 0x00, 0x20, 0x00, CIE_PIN_ID };
-	return SendAPDU_SM(VarToByteArray(verifyPIN), PIN, resp);
+	return SendAPDU_SM(VarToByteArray(verifyPIN), PIN.left(8), resp);
 	exit_func
 }
 
 StatusWord IAS::UnblockPIN() {
 	init_func
 	ByteDynArray resp;
-
 
 	uint8_t UnblockPIN[] = { 0x00, 0x2C, 0x03, CIE_PIN_ID };
 	return SendAPDU_SM(VarToByteArray(UnblockPIN), ByteArray(), resp);
@@ -184,7 +203,6 @@ StatusWord IAS::ChangePIN(ByteArray &oldPIN,ByteArray &newPIN) {
 StatusWord IAS::ChangePIN(ByteArray &newPIN) {
 	init_func
 	ByteDynArray resp;
-
 
 	uint8_t ChangePIN[] = { 0x00, 0x2C, 0x02, CIE_PIN_ID };
 	return SendAPDU_SM(VarToByteArray(ChangePIN), newPIN, resp);
@@ -223,7 +241,7 @@ void IAS::readfile(uint16_t id, ByteDynArray &content){
             cnt = content.size();
 //            WORD chnSize;
 //            if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
-//                throw
+//                throw logged_error("File troppo grande");
 			chunk = 128;
 		}
 		else {
@@ -263,7 +281,7 @@ void IAS::readfile_SM(uint16_t id, ByteDynArray &content) {
             cnt = content.size();
 //            WORD chnSize;
 //            if (FAILED(SizeTToWord(chn.size(), &chnSize)) || FAILED(WordAdd(cnt, chnSize, &cnt)))
-//                throw
+//                throw logged_error("File troppo grande");
 			chunk = 128;
 		}
 		else {
@@ -300,25 +318,55 @@ void IAS::SelectAID_CIE(bool SM) {
 }
 
 void IAS::ReadCIEType() {
-	init_func
+    init_func
 
-	std::vector<uint8_t> atr_vector((ATR.data()), ATR.data() + ATR.size());
+    std::vector<uint8_t> atr_vector((ATR.data()), ATR.data() + ATR.size());
 
-	type = get_type(atr_vector);
-	if (type == CIE_Type::CIE_Unknown) {
-		throw logged_error("ReadCIEType - CIE not recognized");
-	}
+    type = get_type(atr_vector);
+    if (type == CIE_Type::CIE_Unknown) {
+        throw logged_error("ReadCIEType - CIE not recognized");
+    }
 
+#if 0
+    if (ATR.indexOf(baNXP_ATR, position)) {
+        type = CIE_Type::CIE_NXP;
+
+    }
+    else if (ATR.indexOf(baGemalto_ATR, position)) {
+        type = CIE_Type::CIE_Gemalto;
+
+    }
+    else if (ATR.indexOf(baGemalto2_ATR, position)) {
+        type = CIE_Type::CIE_Gemalto;
+
+    }
+    else if (ATR.indexOf(baSTM_ATR, position)) {
+        type = CIE_Type::CIE_STM;
+
+    }
+    else if (ATR.indexOf(baSTM2_ATR, position)) {
+        type = CIE_Type::CIE_STM2;
+
+    }
+    else if (ATR.indexOf(baSTM3_ATR, position))
+    {
+        type = CIE_Type::CIE_STM3;
+
+    }
+    else
+        throw logged_error("ReadCIEType - CIE not recognized");
+#endif
 }
 
+
 void IAS::SelectAID_IAS(bool SM) {
-	init_func
-	if (type == CIE_Type::CIE_Unknown) {
-		ReadCIEType();
-	}
-	ByteDynArray resp;
-	StatusWord sw;
-	if ((type >= CIE_Type::CIE_NXP)) {
+    init_func
+    if (type == CIE_Type::CIE_Unknown) {
+        ReadCIEType();
+    }
+    ByteDynArray resp;
+    StatusWord sw;
+    if ((type >= CIE_Type::CIE_NXP)) {
         uint8_t selectMF[] = { 0x00, 0xa4, 0x00, 0x00 };
         if (SM)
         {
@@ -331,35 +379,40 @@ void IAS::SelectAID_IAS(bool SM) {
                 throw scard_error(sw);
         }
     }
-	else
-		if ((type < CIE_Type::CIE_NXP) && (type != CIE_Type::CIE_Unknown)) {
-        uint8_t selectIAS[] = { 0x00, 0xa4, 0x04, 0x0c };
-        if (SM)
-        {
-            if ((sw = SendAPDU_SM(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
-                throw scard_error(sw);
+    else
+        if ((type < CIE_Type::CIE_NXP) && (type != CIE_Type::CIE_Unknown)) {
+            uint8_t selectIAS[] = { 0x00, 0xa4, 0x04, 0x0c };
+            if (SM)
+            {
+                if ((sw = SendAPDU_SM(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+                    throw scard_error(sw);
+            }
+            else
+            {
+                if ((sw = SendAPDU(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
+                    throw scard_error(sw);
+            }
         }
         else
         {
-            if ((sw = SendAPDU(VarToByteArray(selectIAS), IAS_AID, resp)) != 0x9000)
-                throw scard_error(sw);
+            throw logged_error("SelectAID_IAS - CIE not recognized");
         }
-    }
-    else
-    {
-			throw logged_error("SelectAID_IAS - CIE not recognized");
-    }
 
     SM = false;
     ActiveDF = DF_IAS;
     ActiveSM = false;
     exit_func
 }
+
 void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	init_func
 
 	ByteDynArray resp;
-	readfile(0x1004, DappKey);
+	readfile(0x1004, resp);
+
+	DappKey = resp;
+	DappPubKeyRaw = resp;
+	DappKeyVerified = false;
 
 	CASNParser parser;
 	parser.Parse(DappKey);
@@ -372,12 +425,6 @@ void IAS::ReadDappPubKey(ByteDynArray &DappKey) {
 	while (pubKey[0] == 0)
 		pubKey = pubKey.mid(1);
 	DappPubKey = pubKey;
-
-
-
-
-
-	exit_func
 }
 
 void IAS::ReadPAN() {
@@ -400,8 +447,32 @@ void IAS::DAPP() {
 	CSHA256 sha256;
 //    uint8_t Val01 = 1;
 
-	if (DappPubKey.isEmpty()) {
+	if (DappPubKey.isEmpty() || DappPubKeyRaw.isEmpty()) {
 		throw logged_error("DAPP - DAPP key not available");
+	}
+
+	// TOCTOU protection: re-parse the raw key and verify it matches cached DappModule/DappPubKey
+	try {
+		CASNParser reParser;
+		ByteDynArray reRaw = DappPubKeyRaw;
+		reParser.Parse(reRaw);
+
+		ByteArray reModule = reParser.tags[0]->tags[0]->content;
+		while (reModule[0] == 0)
+			reModule = reModule.mid(1);
+		ByteArray rePubKey = reParser.tags[0]->tags[1]->content;
+		while (rePubKey[0] == 0)
+			rePubKey = rePubKey.mid(1);
+
+		if (reModule != DappModule) {
+			throw logged_error("DAPP - Key integrity check failed: modulus mismatch");
+		}
+		if (rePubKey != DappPubKey) {
+			throw logged_error("DAPP - Key integrity check failed: exponent mismatch");
+		}
+	}
+	catch (std::exception &e) {
+		throw logged_error(stdPrintf("DAPP - TOCTOU protection failed: %s", e.what()));
 	}
 
 	ByteDynArray module = VarToByteArray(defModule);
@@ -885,27 +956,26 @@ StatusWord IAS::SendAPDU_SM(ByteArray head, ByteArray data, ByteDynArray &resp, 
 		smApdu.set(&head, (uint8_t)data.size(), &data, (le == nullptr) ? &emptyBa : &leBa);
 
 
-//		//Log.writePure("%s", std::string().append("\nClear APDU:").append(dumpHexData(smApdu, str)).append("\n").c_str());
+//		Log.writePure("%s", std::string().append("\nClear APDU:").append(dumpHexData(smApdu, str)).append("\n").c_str());
 		smApdu = SM(sessENC, sessMAC, smApdu, sessSSC);
 
-//        //Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(smApdu)).append("\n").c_str());
+//        Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(smApdu)).append("\n").c_str());
 
 		sw = token.Transmit(smApdu, &curresp);
 
-//        //Log.writePure("%s", std::string().append("RESP:").append(dumpHexData(curresp)).append("\n").c_str());
+//        Log.writePure("%s", std::string().append("RESP:").append(dumpHexData(curresp)).append("\n").c_str());
 
 		sw = getResp_SM(curresp, sw, resp);
 
 
-//		//Log.writePure("%s", std::string().append("Clear RESP:").append(dumpHexData(resp, str)).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
+//		Log.writePure("%s", std::string().append("Clear RESP:").append(dumpHexData(resp, str)).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
 		return sw;
 	}
 	else {
 		// attenzione:
 		// in alcuni casi la carta ritorna 61xx fra un comando e l'altro in chaining. Questo è un grosso problema, perchè
 		// la get response sembra che faccia saltare il chaining. Forse è una questione di driver del lettore?
-		// Per daesso l'ho osservato solo su una virtual machine Win7 con il lettore in sharing con l'host
-
+		// Per adesso l'ho osservato solo su una virtual machine Win7 con il lettore in sharing con l'host
 
 //        size_t ds = data.size();
 		size_t i = 0;
@@ -922,18 +992,18 @@ StatusWord IAS::SendAPDU_SM(ByteArray head, ByteArray data, ByteDynArray &resp, 
 			else
 				smApdu.set(&head, (le == nullptr || i < data.size()) ? &emptyBa : &leBa);
 
-//			//Log.writePure("%s", std::string("Clear APDU:").append(dumpHexData(smApdu, str)).append("\n").c_str());
+//			Log.writePure("%s", std::string("Clear APDU:").append(dumpHexData(smApdu, str)).append("\n").c_str());
 			smApdu = SM(sessENC, sessMAC, smApdu, sessSSC);
 
-//            //Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(smApdu)).append("\n").c_str());
+//            Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(smApdu)).append("\n").c_str());
 
 			sw = token.Transmit(smApdu, &curresp);
 
-//            //Log.writePure("%s",std::string().append("\nRESP:").append(dumpHexData(curresp)).append("\n").c_str());
+//            Log.writePure("%s",std::string().append("\nRESP:").append(dumpHexData(curresp)).append("\n").c_str());
 
 			sw = getResp_SM(curresp, sw, resp);
 
-//			//Log.writePure("%s", std::string("Clear RESP:").append(dumpHexData(resp, str)).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
+//			Log.writePure("%s", std::string("Clear RESP:").append(dumpHexData(resp, str)).append(HexByte(sw >> 8)).append(HexByte(sw & 0xff)).append("\n").c_str());
 			if (i == data.size())
 				return sw;
 		}
@@ -980,11 +1050,11 @@ StatusWord IAS::SendAPDU(ByteArray head, ByteArray data, ByteDynArray &resp, uin
 		else
 			apdu.set(&head, le == nullptr ? &emptyBa : &leBa);
 
-//        //Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(apdu)).append("\n").c_str());
+//        Log.writePure("%s", std::string().append("\nAPDU:").append(dumpHexData(apdu)).append("\n").c_str());
 
 		StatusWord sw = token.Transmit(apdu, &curresp);
 
-//        //Log.writePure("%s",std::string().append("RESP:").append(dumpHexData(curresp)).append("\n").c_str());
+//        Log.writePure("%s",std::string().append("RESP:").append(dumpHexData(curresp)).append("\n").c_str());
 
 		sw=getResp(curresp, sw, resp);
 
@@ -995,52 +1065,53 @@ StatusWord IAS::SendAPDU(ByteArray head, ByteArray data, ByteDynArray &resp, uin
 
 
 void IAS::InitDHParam() {
-	init_func
-	ByteDynArray resp;
+    init_func
+    ByteDynArray resp;
 
-	CASNParser parser;
-	StatusWord sw;
+    CASNParser parser;
+    StatusWord sw;
 
-	if (type == CIE_Type::CIE_Gemalto) {
-		uint8_t getDHDoup[] = { 00, 0xcb, 0x3f, 0xff };
-		uint8_t getDHDuopData[] = { 0x4d, 0x08, 0x70, 0x06, 0xBF, 0xA1, 0x01, 0x02, 0xA3, 0x80 };
+    if (type == CIE_Type::CIE_Gemalto) {
+        uint8_t getDHDoup[] = { 00, 0xcb, 0x3f, 0xff };
+        uint8_t getDHDuopData[] = { 0x4d, 0x08, 0x70, 0x06, 0xBF, 0xA1, 0x01, 0x02, 0xA3, 0x80 };
 
-		if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData), resp)) != 0x9000)
-		throw scard_error(sw);
+        if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData), resp)) != 0x9000)
+        throw scard_error(sw);
 
-		parser.Parse(resp);
+        parser.Parse(resp);
 
-		dh_g = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
-		dh_p = parser.tags[0]->tags[0]->tags[0]->tags[1]->content;
-		dh_q = parser.tags[0]->tags[0]->tags[0]->tags[2]->content;
-	}
-	else if ((type > CIE_Type::CIE_Gemalto)) {
-		uint8_t getDHDoup[] = { 00, 0xcb, 0x3f, 0xff };
-		uint8_t getDHDuopData_g[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x97, 0x00 };
+        dh_g = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
+        dh_p = parser.tags[0]->tags[0]->tags[0]->tags[1]->content;
+        dh_q = parser.tags[0]->tags[0]->tags[0]->tags[2]->content;
+    }
+    else if ((type > CIE_Type::CIE_Gemalto)) {
+        uint8_t getDHDoup[] = { 00, 0xcb, 0x3f, 0xff };
+        uint8_t getDHDuopData_g[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x97, 0x00 };
 
-		if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_g), resp)) != 0x9000)
-		throw scard_error(sw);
-		parser.Parse(resp);
-		dh_g = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
+        if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_g), resp)) != 0x9000)
+        throw scard_error(sw);
+        parser.Parse(resp);
+        dh_g = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
 
-		uint8_t getDHDuopData_p[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x98, 0x00 };
-		if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_p), resp)) != 0x9000)
-		throw scard_error(sw);
-		parser.Parse(resp);
-		dh_p = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
+        uint8_t getDHDuopData_p[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x98, 0x00 };
+        if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_p), resp)) != 0x9000)
+        throw scard_error(sw);
+        parser.Parse(resp);
+        dh_p = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
 
-		uint8_t getDHDuopData_q[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x99, 0x00 };
-		if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_q), resp)) != 0x9000)
-		throw scard_error(sw);
-		parser.Parse(resp);
-		dh_q = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
-	}
-	else
-		throw logged_error("InitDHParam - CIE type not recognizes");
+        uint8_t getDHDuopData_q[] = { 0x4D, 0x0A, 0x70, 0x08, 0xBF, 0xA1, 0x01, 0x04, 0xA3, 0x02, 0x99, 0x00 };
+        if ((sw = SendAPDU(VarToByteArray(getDHDoup), VarToByteArray(getDHDuopData_q), resp)) != 0x9000)
+        throw scard_error(sw);
+        parser.Parse(resp);
+        dh_q = parser.tags[0]->tags[0]->tags[0]->tags[0]->content;
+    }
+    else
+        throw logged_error("InitDHParam - CIE type not recognizes");
 
 
-	exit_func
+    exit_func
 }
+
 
 CASNTag *GetTag(CASNTagArray &tags, DWORD id) {
 	for (std::size_t i = 0; i < tags.size(); i++) {
@@ -1111,6 +1182,7 @@ void IAS::InitEncKey() {
 	else {
 		if ((sw = SendAPDU_SM(VarToByteArray(mseSet), VarToByteArray(mseSetData), resp)) != 0x9000)
         {
+
             throw scard_error(sw);
         }
 		uint8_t intAuth[] = { 0x00, 0x88, 0x00, 0x00 };
@@ -1216,8 +1288,8 @@ bool IAS::IsEnrolled() {
 }
 
 bool IAS::IsEnrolled(const char* szPAN) {
-	init_func
-	return CacheExists(szPAN);
+    init_func
+    return CacheExists(szPAN);
 }
 
 
@@ -1450,6 +1522,10 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 //        throw logged_error("Issuer name non corrispondente");
         printf("Issuer name non corrispondente");
 
+	// Verifica CSCA chain per autenticare il Document Signer certificate
+	ByteDynArray certDSData(certRaw);
+	RunCSCAVerification(certDSData);
+
     uint8_t val = 1;
     signedData.Child(0, 02).Verify(VarToByteArray(val));
     signedData.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SHA512));
@@ -1471,11 +1547,11 @@ void IAS::VerificaSODPSS(ByteArray &SOD, std::map<uint8_t, ByteDynArray> &hashSe
 
     /*if (CSCA != null && CSCA.Count > 0)
     {
-        //log.Info("Verifica catena CSCA");
+        log.Info("Verifica catena CSCA");
         X509CertChain chain = new X509CertChain(CSCA);
         var certChain = chain.getPath(certDS);
         if (certChain == null)
-            throw Exception("Il certificato di Document Signer non č valido");
+            throw Exception("Il certificato di Document Signer non è valido");
 
         var rootCert = certChain[0];
         if (!new ByteArray(rootCert.SubjectName.RawData).IsEqual(rootCert.IssuerName.RawData))
@@ -1640,6 +1716,10 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 //        throw logged_error("Issuer name non corrispondente");
         printf("Issuer name non corrispondente");
 
+	// Verifica CSCA chain per autenticare il Document Signer certificate
+	ByteDynArray certDSData_sod(certRaw);
+	RunCSCAVerification(certDSData_sod);
+
 	uint8_t val0=0;
 	signedData.Child(0, 02).Verify(VarToByteArray(val0));
 	signedData.Child(1, 0x30).Child(0, 06).Verify(VarToByteArray(OID_SH256));
@@ -1663,18 +1743,153 @@ void IAS::VerificaSOD(ByteArray &SOD, std::map<BYTE, ByteDynArray> &hashSet) {
 
 	/*if (CSCA != null && CSCA.Count > 0)
 	{
-		//log.Info("Verifica catena CSCA");
+		log.Info("Verifica catena CSCA");
 		X509CertChain chain = new X509CertChain(CSCA);
 		var certChain = chain.getPath(certDS);
 		if (certChain == null)
 			throw Exception("Il certificato di Document Signer non č valido");
-
 		var rootCert = certChain[0];
 		if (!new ByteArray(rootCert.SubjectName.RawData).IsEqual(rootCert.IssuerName.RawData))
 			throw Exception("Impossibile validare il certificato di Document Signer");
 	}
 	*/
 	exit_func
+}
+
+bool IAS::VerifyCSCAChain(const ByteDynArray& certDSData, const std::vector<ByteDynArray>& cscaCertificates) {
+	init_func
+
+	if (cscaCertificates.empty()) {
+		return false;
+	}
+
+	// Parse DS certificate with OpenSSL
+	const unsigned char* certPtr = certDSData.data();
+	X509* certDS = d2i_X509(nullptr, &certPtr, (long)certDSData.size());
+	if (!certDS) {
+		return false;
+	}
+
+	// Create store and add CSCA certificates
+	X509_STORE* store = X509_STORE_new();
+	if (!store) {
+		X509_free(certDS);
+		return false;
+	}
+
+	int addedCerts = 0;
+	for (const auto& certData : cscaCertificates) {
+		const unsigned char* p = certData.data();
+		X509* cscaCert = d2i_X509(nullptr, &p, (long)certData.size());
+		if (cscaCert) {
+			if (X509_STORE_add_cert(store, cscaCert) == 1) {
+				addedCerts++;
+			}
+			X509_free(cscaCert);
+		}
+	}
+
+	bool result = false;
+	if (addedCerts > 0) {
+		X509_STORE_CTX* ctx = X509_STORE_CTX_new();
+		if (ctx) {
+			if (X509_STORE_CTX_init(ctx, store, certDS, nullptr) == 1) {
+				int ret = X509_verify_cert(ctx);
+				if (ret == 1) {
+					result = true;
+				} else {
+					int err = X509_STORE_CTX_get_error(ctx);
+					// Allow untrusted root: the CSCA roots may not be in the system store
+					if (err == X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN ||
+					    err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY ||
+					    err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) {
+						// Check that the chain was actually built (partial trust)
+						STACK_OF(X509)* chain = X509_STORE_CTX_get0_chain(ctx);
+						if (chain && sk_X509_num(chain) > 1) {
+							result = true;
+						}
+					}
+				}
+			}
+			X509_STORE_CTX_free(ctx);
+		}
+	}
+
+	X509_STORE_free(store);
+	X509_free(certDS);
+
+	exit_func
+	return result;
+}
+
+bool IAS::RunCSCAVerification(const ByteDynArray& certDSData) {
+	init_func
+
+	std::vector<ByteDynArray> embeddedCerts;
+	if (!LoadEmbeddedCSCACertificates_sdk(embeddedCerts)) {
+		throw logged_error("RunCSCAVerification - No embedded CSCA certificates available");
+	}
+
+	if (!VerifyCSCAChain(certDSData, embeddedCerts)) {
+		throw logged_error("RunCSCAVerification - Document Signer certificate is not valid according to CSCA verification chain");
+	}
+
+	DappKeyVerified = true;
+
+	exit_func
+	return true;
+}
+
+bool IAS::VerifyAndAuthenticateDappKey() {
+	init_func
+
+	// Read DAPP key from card (always fresh)
+	ByteDynArray DAPPKey;
+	ReadDappPubKey(DAPPKey);
+
+	if (DappPubKeyRaw.isEmpty() || DappPubKey.isEmpty() || DappModule.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - Failed to read DAPP key from card");
+	}
+
+	// Read SOD from card
+	ByteDynArray SOD;
+	ReadSOD(SOD);
+
+	if (SOD.isEmpty()) {
+		throw logged_error("VerifyAndAuthenticateDappKey - Failed to read SOD from card");
+	}
+
+	// Determine digest algorithm
+	uint8_t digest = GetSODDigestAlg(SOD);
+
+	// Compute hash of raw DAPP key
+	CSHA256 sha256;
+	CSHA512 sha512;
+	ByteDynArray hashA4 = (digest == 1) ? sha256.Digest(DappPubKeyRaw) : sha512.Digest(DappPubKeyRaw);
+
+	std::map<uint8_t, ByteDynArray> hashSet;
+	hashSet[0xa4] = hashA4;
+
+	// Verify SOD and CSCA chain
+	bool verified = false;
+	try {
+		if (digest == 1) {
+			VerificaSOD(SOD, hashSet);
+		} else {
+			VerificaSODPSS(SOD, hashSet);
+		}
+		verified = true;
+	}
+	catch (std::exception &ex) {
+		throw logged_error(stdPrintf("VerifyAndAuthenticateDappKey - SOD verification exception: %s", ex.what()));
+	}
+
+	if (!verified) {
+		throw logged_error("VerifyAndAuthenticateDappKey - CSCA chain verification failed");
+	}
+
+	exit_func
+	return true;
 }
 
 #define DWL_MSGRESULT 0

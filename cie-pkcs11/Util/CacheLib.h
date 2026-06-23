@@ -2,6 +2,7 @@
 #include <vector>
 #include <stdint.h>
 
+std::string GetCardDir();
 bool CacheExists(const char *PAN);
 void CacheGetCertificate(const char *PAN, std::vector<uint8_t>&certificate);
 void CacheGetPIN(const char *PAN, std::vector<uint8_t>&PIN);

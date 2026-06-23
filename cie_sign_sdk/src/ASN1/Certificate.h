@@ -71,4 +71,6 @@ public:
 	static CCertificate* createCertificate(UUCByteArray& contentArray);
 };
 
+long HTTPRequest(UUCByteArray& data, const char* szUrl, const char* szContentType, UUCByteArray& response);
+
 #endif // !defined(AFX_CERTIFICATE_H__2DF2B808_9398_479F_9FD2_9A229517EF9D__INCLUDED_)
