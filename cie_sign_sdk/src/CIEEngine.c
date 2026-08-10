@@ -62,14 +62,14 @@ static const ENGINE_CMD_DEFN cie_engine_cmd_defns[] = {
     size_t requestedLen;
     switch(algid)
     {
-    
+
     case NID_sha1:
         //printf("** HASH = SHA1 **");
-        
+
         requestedLen = 2 + 2 + 9 + 2 + btDigestLen;
         if(*pbtDigestInfoLen < requestedLen)// protezione memoria e memcpy in basso
                         return 0;
-            
+
         pbtDigestInfo[0] = 0x30;
         pbtDigestInfo[1] = 2 + 9 + 2 + btDigestLen;
         pbtDigestInfo[2] = 0x30;
@@ -92,7 +92,7 @@ static const ENGINE_CMD_DEFN cie_engine_cmd_defns[] = {
 
     case NID_sha256:
            //printf("** HASH = SHA256 **");
-            
+
             requestedLen = 2 + 2 + 9 + 6 + btDigestLen;
             if(*pbtDigestInfoLen < requestedLen)// protezione memoria e memcpy in basso
              return 0;
@@ -120,10 +120,10 @@ static const ENGINE_CMD_DEFN cie_engine_cmd_defns[] = {
            memcpy(pbtDigestInfo + 19, pbtDigest, btDigestLen);
            *pbtDigestInfoLen = 2 + 2 + 9 + 6 + btDigestLen;
            break;
-            
+
     case NID_sha384:
         //printf("** HASH = SHA384 **");
-            
+
         requestedLen = 2 + 2 + 9 + 6 + btDigestLen;
         if(*pbtDigestInfoLen < requestedLen)// protezione memoria e memcpy in basso
              return 0;
@@ -151,14 +151,14 @@ static const ENGINE_CMD_DEFN cie_engine_cmd_defns[] = {
         memcpy(pbtDigestInfo + 19, pbtDigest, btDigestLen);
         *pbtDigestInfoLen = 2 + 2 + 9 + 6 + btDigestLen;
         break;
-            
+
     case NID_sha512:
         //printf("** HASH = SHA512 **");
-        
+
         requestedLen = 2 + 2 + 9 + 6 + btDigestLen;
         if(*pbtDigestInfoLen < requestedLen)// protezione memoria e memcpy in basso
                  return 0;
-            
+
         pbtDigestInfo[0] = 0x30;
         pbtDigestInfo[1] = 2 + 9 + 6 + btDigestLen;
         pbtDigestInfo[2] = 0x30;
@@ -182,7 +182,7 @@ static const ENGINE_CMD_DEFN cie_engine_cmd_defns[] = {
         memcpy(pbtDigestInfo + 19, pbtDigest, btDigestLen);
         *pbtDigestInfoLen = 2 + 2 + 9 + 6 + btDigestLen;
         break;
-            
+
 //    case CALG_SSL3_SHAMD5:
 //        //printf("** HASH = SSL3_SHAMD5 **");
 //        memcpy(pbtDigestInfo, pbtDigest, btDigestLen);
@@ -219,7 +219,7 @@ static int cie_pkey_rsa_sign(EVP_PKEY_CTX *evp_pkey_ctx,
         const unsigned char *tbs, size_t tbslen)
 {
     printf("call cie_pkey_rsa_sign\n");
-    
+
     EVP_PKEY *pkey;
     RSA *rsa;
     const EVP_MD *sig_md;
@@ -227,11 +227,11 @@ static int cie_pkey_rsa_sign(EVP_PKEY_CTX *evp_pkey_ctx,
     printf("%s:%d cie_pkey_rsa_sign() "
         "sig=%p *siglen=%lu tbs=%p tbslen=%lu\n",
         __FILE__, __LINE__, sig, *siglen, tbs, tbslen);
-    
+
     pkey = EVP_PKEY_CTX_get0_pkey(evp_pkey_ctx);
     if (!pkey)
         return 0;
-    
+
     rsa = EVP_PKEY_get0_RSA(pkey);
     if (!rsa)
         return 0;
@@ -247,11 +247,11 @@ static int cie_pkey_rsa_sign(EVP_PKEY_CTX *evp_pkey_ctx,
 
     int md_type = EVP_MD_type(sig_md);
     printf("hashtype: %x", md_type);
-    
+
     int padding;
     EVP_PKEY_CTX_get_rsa_padding(evp_pkey_ctx, &padding);
     printf("requested padding: %x", padding);
-    
+
     switch (padding) {
         case RSA_PKCS1_PSS_PADDING:
             printf("%s:%d padding=RSA_PKCS1_PSS_PADDING\n",
@@ -272,30 +272,30 @@ static int cie_pkey_rsa_sign(EVP_PKEY_CTX *evp_pkey_ctx,
     } /* end switch(padding) */
 
     int ret = 0;
-    
+
     // DigestInfo
     unsigned char digestinfo[256];
     size_t digestinfolen = 256;
-    
+
     makeDigestInfo(md_type, tbs, tbslen, digestinfo, &digestinfolen);
-        
+
     ret = sign_cb_impl(digestinfo, digestinfolen, sig, siglen) & 0x0000FFFF;
 
-    
+
     if(ret != CIE_CMD_OK)
     {
         cie_error = ret;
         printf("sign Failed: %x", ret);
         return ret;
     }
-    
+
     printf("signature OK\n");
-    
+
     cie_error = 0;
-    
+
     X509_free(cie_x509_certificate);
     cie_x509_certificate = NULL;
-        
+
     return 1;
 
 }
@@ -334,26 +334,26 @@ int cie_ecdh_compute_key(unsigned char ** a, size_t * b, const EC_POINT *c, cons
 EC_KEY_METHOD *cie_get_ec_key_method(void)
 {
     printf("call cie_get_ec_key_method\n");
-    
+
     static EC_KEY_METHOD *ops = NULL;
     int (*orig_sign)(int, const unsigned char *, int, unsigned char *,
         unsigned int *, const BIGNUM *, const BIGNUM *, EC_KEY *) = NULL;
 
     compute_key_fn ossl_ecdh_compute_key;
-    
+
     //alloc_ec_ex_index();
     if (!ops) {
         ops = EC_KEY_METHOD_new((EC_KEY_METHOD *)EC_KEY_OpenSSL());
         EC_KEY_METHOD_get_sign(ops, &orig_sign, NULL, NULL);
-        EC_KEY_METHOD_set_sign(ops, orig_sign, NULL, &orig_sign);
+        EC_KEY_METHOD_set_sign(ops, orig_sign, NULL, NULL);
         EC_KEY_METHOD_get_compute_key(ops, &ossl_ecdh_compute_key);
         EC_KEY_METHOD_set_compute_key(ops, cie_ecdh_compute_key);
-        
+
         fnossl_ecdh_compute_key = ossl_ecdh_compute_key;
     }
     return ops;
 }
-		
+
 /* define old way to keep old engines working without ECDSA */
 void *cie_get_ecdsa_method(void)
 {
@@ -406,7 +406,7 @@ ECDH_METHOD *cie_get_ecdh_method(void)
 static int cie_engine_ctrl(ENGINE *engine, int cmd, long i, void *p, void (*f) (void))
 {
     printf("call cie_engine_ctrl\n");
-    
+
     (void)i; /* We don't currently take integer parameters */
     (void)f; /* We don't currently take callback parameters */
     /*int initialised = ((pkcs11_dso == NULL) ? 0 : 1); */
@@ -419,15 +419,15 @@ static int cie_engine_ctrl(ENGINE *engine, int cmd, long i, void *p, void (*f) (
                 const char *s_slot_cert_id;
                 X509 *cert;
             } *parms = p;
-            
+
             if(!cie_x509_certificate)
             {
                 cie_x509_certificate = d2i_X509(NULL, &cie_certificate, cie_certlen);
             }
-            
+
             parms->cert = X509_dup(cie_x509_certificate);
             parms->s_slot_cert_id = "cie";
-            
+
             return 1;
         }
         case ENGINE_CTRL_SET_USER_INTERFACE:
@@ -447,28 +447,28 @@ static EVP_PKEY *cie_load_privkey(ENGINE *eng, const char *key_id,
                                      void *callback_data)
 {
     printf("call cie_load_privkey\n");
-    
+
     EVP_PKEY *pubkey = NULL;
 
     X509* cert = X509_dup(cie_x509_certificate);
-    
+
     if ((pubkey = X509_get_pubkey(cert)) == NULL)
     {
         printf("get_pubKey failed\n");
        return 0;
     }
-        
+
     X509_free(cert);
-    
+
     return pubkey;
 }
 
 static EVP_PKEY *cie_load_pubkey(ENGINE *engine, const char *s_key_id,
         UI_METHOD *ui_method, void *callback_data)
 {
-    
+
     printf("call cie_load_pubkey\n");
-    
+
     return 1;
 }
 
@@ -476,7 +476,7 @@ static EVP_PKEY *cie_load_pubkey(ENGINE *engine, const char *s_key_id,
 static EVP_PKEY_METHOD *cie_pkey_method_rsa()
 {
     printf("call cie_pkey_method_rsa\n");
-    
+
     EVP_PKEY_METHOD *orig_meth, *new_meth;
 
     orig_meth = (EVP_PKEY_METHOD *)EVP_PKEY_meth_find(EVP_PKEY_RSA);
@@ -485,7 +485,7 @@ static EVP_PKEY_METHOD *cie_pkey_method_rsa()
     EVP_PKEY_meth_get_decrypt(orig_meth,
         &orig_pkey_rsa_decrypt_init,
         &orig_pkey_rsa_decrypt);
-    
+
     new_meth = EVP_PKEY_meth_new(EVP_PKEY_RSA,
         EVP_PKEY_FLAG_AUTOARGLEN);
 
@@ -496,7 +496,7 @@ static EVP_PKEY_METHOD *cie_pkey_method_rsa()
     EVP_PKEY_meth_set_decrypt(new_meth,
         orig_pkey_rsa_decrypt_init, cie_pkey_rsa_decrypt);
 
-    
+
     return new_meth;
 }
 
@@ -504,13 +504,13 @@ int cie_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **pmeth,
         const int **nids, int nid)
 {
     printf("call cie_pkey_meths\n");
-    
+
     static int pkey_nids[] = {
         EVP_PKEY_RSA,
         0
     };
     EVP_PKEY_METHOD *pkey_method_rsa = NULL;
-    
+
     (void)e; /* squash the unused parameter warning */
     /* all PKCS#11 engines currently share the same pkey_meths */
 
@@ -538,7 +538,7 @@ int cie_pkey_meths(ENGINE *e, EVP_PKEY_METHOD **pmeth,
 RSA_METHOD *cie_get_rsa_method(void)
 {
     printf("call cie_pkey_meths\n");
-    
+
     static RSA_METHOD *ops = NULL;
 
     if (ops == NULL) {
@@ -583,11 +583,11 @@ int bind_helper(ENGINE * e, const char *id)
         !ENGINE_set_load_pubkey_function(e, cie_load_pubkey) //||
         //!ENGINE_set_EC(e, cie_get_ec_key_method())
         )
-            
+
     {
         return 0;
     }
-    
+
     return 1;
 }
 
