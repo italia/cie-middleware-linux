@@ -422,7 +422,8 @@ static int cie_engine_ctrl(ENGINE *engine, int cmd, long i, void *p, void (*f) (
 
             if(!cie_x509_certificate)
             {
-                cie_x509_certificate = d2i_X509(NULL, &cie_certificate, cie_certlen);
+                const unsigned char *p = cie_certificate;
+                cie_x509_certificate = d2i_X509(NULL, &p, cie_certlen);
             }
 
             parms->cert = X509_dup(cie_x509_certificate);
