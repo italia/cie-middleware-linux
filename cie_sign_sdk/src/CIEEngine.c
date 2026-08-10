@@ -470,7 +470,7 @@ static EVP_PKEY *cie_load_pubkey(ENGINE *engine, const char *s_key_id,
 
     printf("call cie_load_pubkey\n");
 
-    return 1;
+    return NULL;
 }
 
 
