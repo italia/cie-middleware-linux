@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <cstdint>
 #include "defines.h"
 #include <string>
 #include <wintypes.h>

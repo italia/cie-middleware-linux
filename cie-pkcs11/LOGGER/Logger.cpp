@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <cstring>
 
 #include <regex>
 using namespace std;

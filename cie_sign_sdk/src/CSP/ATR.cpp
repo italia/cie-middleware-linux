@@ -1,6 +1,7 @@
 #include "ATR.h"
 #include "../LOGGER/Logger.h"
 #include <algorithm>
+#include <cstdio>
 
 using namespace CieIDLogger;
 

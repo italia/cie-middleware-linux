@@ -387,7 +387,7 @@ CK_RV CK_ENTRY C_Finalize(CK_VOID_PTR pReserved)
 		CCardContext *tc = CSlot::ThreadContext;
 		if (tc != nullptr) {
 			SCARDCONTEXT hC = tc->hContext;
-			if (hC != NULL)
+			if (hC != 0)
 				SCardCancel(hC);
 		}
 		p11Mutex.unlock();
