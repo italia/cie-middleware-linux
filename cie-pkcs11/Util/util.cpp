@@ -274,7 +274,13 @@ unsigned long RemovePaddingBT2(ByteArray &paddedData)
 unsigned long RemoveISOPad(ByteArray &paddedData)
 {
 	init_func
-		for (unsigned long i = paddedData.size() - 1; i >= 0; i--) {
+		// Stesso underflow di IAS::increment(): "i >= 0" non diventa mai falso,
+		// quindi un buffer di soli zeri scorre oltre l'inizio dell'array invece
+		// di arrivare al throw qui sotto. Questa funzione sta sul percorso
+		// caldo: viene eseguita su ogni risposta Secure Messaging decifrata
+		// (IAS.cpp:843) e su ogni decifratura AES e 3DES (AES.cpp:122 e
+		// DES3.cpp:168).
+		for (unsigned long i = paddedData.size(); i-- > 0; ) {
 		if (paddedData[i]!=0) {
 			if (paddedData[i]!=0x80) {
 				throw logged_error("Errore nel padding");

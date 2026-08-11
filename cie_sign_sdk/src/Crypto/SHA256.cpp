@@ -52,7 +52,9 @@ void CSHA256::Update(ByteArray data) {
 ByteDynArray CSHA256::Final() {
     if (!isInit)
     throw logged_error("Hash non inizializzato");
-    ByteDynArray resp(SHA_DIGEST_LENGTH);
+    // SHA_DIGEST_LENGTH vale 20, cioè la dimensione di SHA-1, ma
+    // SHA256_Final ne scrive 32: overflow di 12 byte e digest troncato.
+    ByteDynArray resp(SHA256_DIGEST_LENGTH);
     SHA256_Final(resp.data(), &ctx);
     isInit = false;
     

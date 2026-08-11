@@ -45,7 +45,13 @@ ByteArray CTLV::getValue(uint8_t Tag)
 	init_func
 	tlvMap::iterator it=map.find(Tag);
 	if (it != map.end()) {
-		if (it->second[0] < 0x255)
+		// Due errori in una riga sola: 0x255 vale 597 e it->second[0] è un
+		// uint8_t, quindi il confronto era sempre vero e il ramo else era
+		// codice morto; inoltre l'indice 0 è il tag, non la lunghezza.
+		// Il costruttore qui sopra usa data[dwPtr+1] con soglia 255 e mette il
+		// valore a offset 2 (forma corta) oppure 2 + sizeof(uint32_t) (forma
+		// lunga): qui va replicata la stessa logica.
+		if (it->second[1] < 255)
 			return it->second.mid(2);
 		else
 			return it->second.mid(6);

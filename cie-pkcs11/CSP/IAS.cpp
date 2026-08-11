@@ -638,7 +638,14 @@ void IAS::DHKeyExchange() {
 }
 
 void IAS::increment(ByteArray &seq) {
-	for (size_t i = seq.size() - 1; i >= 0; i--) {
+	// "i >= 0" è sempre vero per un size_t. Quando tutti i byte valgono 0xFF
+	// l'indice va in underflow a SIZE_MAX e seq[SIZE_MAX] indirizza il byte
+	// che precede il buffer: non viene solo letto, viene incrementato. Lo
+	// stesso accade con un array vuoto, perché seq.size() - 1 vale SIZE_MAX.
+	// "i-- > 0" confronta prima di decrementare, così il corpo vede gli
+	// indici da size-1 a 0 e il ciclo termina per qualsiasi dimensione,
+	// zero compreso.
+	for (size_t i = seq.size(); i-- > 0; ) {
 		if (seq[i] < 255) {
 			seq[i]++;
 			for (size_t j = i + 1; j < seq.size(); j++)
@@ -646,6 +653,11 @@ void IAS::increment(ByteArray &seq) {
 			return;
 		}
 	}
+
+	// Tutti i byte erano a 0xFF: il contatore torna a zero, come deve fare
+	// un send sequence counter.
+	for (size_t j = 0; j < seq.size(); j++)
+		seq[j] = 0;
 }
 
 
