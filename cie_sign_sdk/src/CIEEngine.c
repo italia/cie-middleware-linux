@@ -345,7 +345,7 @@ EC_KEY_METHOD *cie_get_ec_key_method(void)
     if (!ops) {
         ops = EC_KEY_METHOD_new((EC_KEY_METHOD *)EC_KEY_OpenSSL());
         EC_KEY_METHOD_get_sign(ops, &orig_sign, NULL, NULL);
-        EC_KEY_METHOD_set_sign(ops, orig_sign, NULL, &orig_sign);
+        EC_KEY_METHOD_set_sign(ops, orig_sign, NULL, NULL);
         EC_KEY_METHOD_get_compute_key(ops, &ossl_ecdh_compute_key);
         EC_KEY_METHOD_set_compute_key(ops, cie_ecdh_compute_key);
         
@@ -422,7 +422,8 @@ static int cie_engine_ctrl(ENGINE *engine, int cmd, long i, void *p, void (*f) (
             
             if(!cie_x509_certificate)
             {
-                cie_x509_certificate = d2i_X509(NULL, &cie_certificate, cie_certlen);
+                const unsigned char *p = cie_certificate;
+                cie_x509_certificate = d2i_X509(NULL, &p, cie_certlen);
             }
             
             parms->cert = X509_dup(cie_x509_certificate);
@@ -469,7 +470,7 @@ static EVP_PKEY *cie_load_pubkey(ENGINE *engine, const char *s_key_id,
     
     printf("call cie_load_pubkey\n");
     
-    return 1;
+    return NULL;
 }
 
 

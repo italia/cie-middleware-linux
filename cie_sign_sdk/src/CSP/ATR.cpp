@@ -1,8 +1,14 @@
 #include "ATR.h"
-#include "../LOGGER/Logger.h"
 #include <algorithm>
+#include <cstdio>
 
-using namespace CieIDLogger;
+// cie_sign_sdk ships this file as a copy of cie-pkcs11/CSP/ATR.cpp but
+// never vendors the LOGGER/ subsystem it originally relied on. Rather
+// than pull in the whole logger (and its build-system wiring) for a
+// few informational prints, provide a minimal drop-in replacement
+// consistent with the plain printf()-based logging used elsewhere
+// in this SDK (see CIEEngine.c).
+#define LOG_INFO(...) printf(__VA_ARGS__)
 
 cie_atr atr_list[] = {
         {CIE_Type::CIE_NXP,     "NXP",      		{ 0x80, 0x31, 0x80, 0x65, 0x49, 0x54, 0x4E, 0x58, 0x50 }},

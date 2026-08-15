@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <cstring>
 
 #include <regex>
 using namespace std;
@@ -126,7 +127,10 @@ Logger* Logger::getInstance() throw ()
 	if (log_level == LOG_STATUS_DISABLED) {
 		m_Instance->disableLog();
 	}
-	else if(log_level > 0 && log_level < 3){
+	// LOG_LEVEL_ERROR vale 3: con "< 3" il valore 3 non rientrava né in
+	// questo ramo né in quello di LOG_STATUS_DISABLED (0), quindi
+	// LIB_LOG_LEVEL=3 non attivava alcun logging.
+	else if(log_level > 0 && log_level <= 3){
 		m_Instance->enableFileLogging();
 		m_Instance->enableLog();
 		m_Instance->updateLogLevel(static_cast<LogLevel>(log_level));
@@ -145,7 +149,9 @@ void Logger::writeConfigFile(string& filePath, string& sConfig) throw() {
 int Logger::getLogConfig() throw() {
 	char pbConfig[PATH_MAX];
 	string sConfig;
-	int log_level;
+	// Senza inizializzazione, se la sscanf qui sotto non trova la chiave
+	// log_level resta indeterminato e finisce comunque in m_LogLevel.
+	int log_level = LOG_LEVEL_INFO;
 	struct stat result;
 	    
     char* home = getenv("HOME");
@@ -188,7 +194,10 @@ int Logger::getLogConfig() throw() {
             unlock();
             
 			sscanf(sConfig.data(), "LIB_LOG_LEVEL=%d", &log_level);
-			if (log_level < 0 && log_level > 3) {
+			// Con && la condizione è sempre falsa, quindi il controllo di
+			// validità non veniva mai eseguito e un valore fuori intervallo
+			// veniva accettato così com'era.
+			if (log_level < 0 || log_level > 3) {
 				log_level = 0;
 				sConfig = "LIB_LOG_LEVEL=2";
                 string stConfig = string(pbConfig);

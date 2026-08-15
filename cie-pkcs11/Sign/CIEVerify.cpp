@@ -98,6 +98,7 @@ long CIEVerify::verify(const char* input_file, VERIFY_RESULT* verifyResult, cons
 	}
 	catch (long err) {
 		LOG_ERROR("CIEVerify::verify error: %lx", err);
+		return err;
 	}
 }
 

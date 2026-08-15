@@ -264,7 +264,7 @@ CK_RV CK_ENTRY AbilitaCIE(const char*  szPAN, const char*  szPIN, int* attempts,
             free(ATR);
             ATR = NULL;
 
-            DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, sizeof(szPIN)), nullptr, 0, progressCallBack, attempts);
+            DWORD rs = CardAuthenticateEx(&ias, ROLE_USER, FULL_PIN, (BYTE*)szPIN, (DWORD)strnlen(szPIN, 9) /* szPIN e' un const char*: sizeof valeva 8 */, nullptr, 0, progressCallBack, attempts);
             if (rs == SCARD_W_WRONG_CHV)
             {
                 LOG_ERROR("AbbinaCIE - CardAuthenticateEx Wrong Pin");

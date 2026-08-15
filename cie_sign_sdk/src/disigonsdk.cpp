@@ -188,10 +188,10 @@ DISIGON_CTX disigon_sign_init(void)
     strcpy(pContext->szPdfSubfilter, DISIGON_PDF_SUBFILTER_PKCS_DETACHED);
     pContext->szOutputFile[0] = 0;
     pContext->szInputFile[0] = 0;
-    pContext->szPdfLocation[0] = NULL;
-    pContext->szPdfReason[0] = NULL;
-    pContext->szPdfName[0] = NULL;
-    pContext->szPIN[0] = NULL;
+    pContext->szPdfLocation[0] = 0;
+    pContext->szPdfReason[0] = 0;
+    pContext->szPdfName[0] = 0;
+    pContext->szPIN[0] = 0;
     pContext->nSlot = -1;
     pContext->nHashAlgo = CKM_SHA256_RSA_PKCS;
     pContext->fPdfBottom = 0;
@@ -1077,7 +1077,7 @@ long verify_xml(DISIGON_VERIFY_CONTEXT* pContext, VERIFY_INFO* pVerifyInfo)
 
         pSI->pCounterSignatures = NULL;
         pSI->nCounterSignatureCount = 0;
-        pSI->szSigningTime[0] = NULL;
+        pSI->szSigningTime[0] = 0;
         pSI->pRevocationInfo = NULL;
         pSI->pTimeStamp = NULL;
         pSI->b2011Error = false;

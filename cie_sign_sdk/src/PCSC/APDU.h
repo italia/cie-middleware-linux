@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <cstdint>
 
 class CToken;
 class APDU

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 #include <errno.h>
 #include <pthread.h>

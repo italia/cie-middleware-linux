@@ -54,7 +54,9 @@ void CSHA512::Update(ByteArray data) {
 ByteDynArray CSHA512::Final() {
     if (!isInit)
     throw logged_error("Hash non inizializzato");
-    ByteDynArray resp(SHA_DIGEST_LENGTH);
+    // SHA_DIGEST_LENGTH vale 20, cioè la dimensione di SHA-1, ma
+    // SHA512_Final ne scrive 64: overflow di 44 byte e digest troncato.
+    ByteDynArray resp(SHA512_DIGEST_LENGTH);
     SHA512_Final(resp.data(), &ctx);
     isInit = false;
     

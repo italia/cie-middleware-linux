@@ -79,6 +79,7 @@ namespace p11 {
 		init_func
 		dwSessionCnt++;
 		//return InterlockedIncrement(&dwSessionCnt);
+		return dwSessionCnt;
 	}
 
 	CK_SESSION_HANDLE CSession::AddSession(std::unique_ptr<CSession> pSession)

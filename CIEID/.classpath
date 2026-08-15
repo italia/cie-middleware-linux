@@ -11,7 +11,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/javassist-3.23.0-GA.jar"/>
-	<classpathentry kind="lib" path="lib/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jna-4.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/jna-platform-4.5.2.jar"/>
 	<classpathentry kind="lib" path="lib/ShellExecutor-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.25.jar"/>

@@ -54,3 +54,4 @@ packages/**/*.rpm
 *.gz
 *.so
 libcie_sign_sdk.a
+CIEID/nbproject/private/

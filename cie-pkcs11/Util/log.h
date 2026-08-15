@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 //#include "defines.h"
+#include <cstdint>
 #include <string>
 #include <wintypes.h>
 
