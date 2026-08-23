@@ -13,7 +13,6 @@
     <libelement value="jar://$MODULE_DIR$/lib/core-1.0.0.jar!/" />
     <libelement value="jar://$MODULE_DIR$/jgoodies-forms-1.8.0.jar!/" />
     <libelement value="jar://$MODULE_DIR$/lib/gson-2.6.2.jar!/" />
-    <libelement value="jar://$MODULE_DIR$/ghost4j-1.0.1.jar!/" />
     <libelement value="jar://$MODULE_DIR$/jgoodies-forms-1.8.0-sources.jar!/" />
     <src_description expected_position="0">
       <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
@@ -132,15 +131,6 @@
       <library name="gson-2.6.2.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/gson-2.6.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library name="ghost4j-1.0.1.jar">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/ghost4j-1.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

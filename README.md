@@ -19,7 +19,8 @@ This product is **beta software**. Use it in production at your own judgment.
 - ssl library
 
 On Debian and derivatives the lib requirements can be installed with the
-packages `libpcsclite-dev libssl-dev`.
+packages `libpcsclite-dev libssl-dev`
+and `ghostscript` (for the signature preview).
 Library versions as of Ubuntu 18.04 are reported to work.
 
 

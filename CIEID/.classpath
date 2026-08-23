@@ -22,13 +22,10 @@
 	<classpathentry kind="lib" path="lib/core-1.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/gson-2.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/ghost4j-1.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-1.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/itext-2.1.7.jar"/>
-	<classpathentry kind="lib" path="lib/xmlgraphics-commons-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.17.jar"/>
 	<classpathentry kind="lib" path="lib/commons-beanutils-1.9.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
