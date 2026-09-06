@@ -17,9 +17,10 @@ This product is **beta software**. Use it in production at your own judgment.
 
 - pcsclite library (for SC communication )
 - ssl library
+- podofo library (0.9, 0.10 or 1.x)
 
 On Debian and derivatives the lib requirements can be installed with the
-packages `libpcsclite-dev libssl-dev`.
+packages `libpcsclite-dev libssl-dev libpodofo-dev`.
 Library versions as of Ubuntu 18.04 are reported to work.
 
 

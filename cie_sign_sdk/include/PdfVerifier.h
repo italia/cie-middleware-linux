@@ -12,13 +12,34 @@
 
 
 #include "podofo/podofo.h"
-#include "podofo/doc/PdfSignOutputDevice.h"
-#include "podofo/doc/PdfSignatureField.h"
+
+#if PODOFO_VERSION_MAJOR > 0 || PODOFO_VERSION_MINOR >= 10
+#define CIE_PODOFO_MODERN 1
+#else
+#define CIE_PODOFO_MODERN 0
+#endif
 #include "ASN1/UUCByteArray.h"
 #include "disigonsdk.h"
 
 using namespace PoDoFo;
 using namespace std;
+
+inline void ObjectToString(const PdfObject* pObj, std::string& out)
+{
+	out.clear();
+	if (pObj == 0)
+		return;
+
+	pObj->ToString(out);
+
+	while (!out.empty())
+	{
+		const char c = out[out.size() - 1];
+		if (c != '\n' && c != '\r' && c != ' ' && c != '\t')
+			break;
+		out.erase(out.size() - 1);
+	}
+}
 
 typedef struct _SignatureAppearanceInfo
 {

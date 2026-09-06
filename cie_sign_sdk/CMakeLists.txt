@@ -123,7 +123,23 @@ set(SRC_LIST
 
 add_library(${PROJECT_NAME} STATIC ${SRC_LIST})
 
+find_path(PODOFO_INCLUDE_DIR
+    NAMES podofo/podofo.h
+    DOC "PoDoFo headers (0.9, 0.10 o 1.x)"
+    REQUIRED)
+
+if(EXISTS "${PODOFO_INCLUDE_DIR}/podofo/main/PdfSigner.h")
+    message(STATUS "PoDoFo: API moderna (0.10 o 1.x)")
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+elseif(EXISTS "${PODOFO_INCLUDE_DIR}/podofo/doc/PdfSignOutputDevice.h")
+    message(STATUS "PoDoFo: API 0.9")
+else()
+    message(FATAL_ERROR "PoDoFo trovato in ${PODOFO_INCLUDE_DIR} ma non riconosciuto")
+endif()
+
 set(INCLUDE_LIST
+    ${PODOFO_INCLUDE_DIR}
     ${INCLUDE_DIR}
     ${SOURCE_DIR}/ASN1
     ${SOURCE_DIR}
@@ -137,8 +153,6 @@ set(INCLUDE_LIST
     ${DEPENDENCIES_DIR}/libcurl/include
     ${DEPENDENCIES_DIR}/libpng/include
     ${DEPENDENCIES_DIR}/openssl/include
-    ${DEPENDENCIES_DIR}/podofo/include
-    ${DEPENDENCIES_DIR}/podofo/include/podofo
     /usr/include/PCSC
     /usr/include/
     ${DEPENDENCIES_DIR}/zlib/include

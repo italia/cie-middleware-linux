@@ -1959,31 +1959,31 @@ long sign_pdf(DISIGON_SIGN_CONTEXT* pContext, UUCByteArray& data)
     
     LOG_DBG((0, "sign_pdf", "InitSignature OK"));
 
-    UUCByteArray buffer;
-    sigGen.GetBufferForSignature(buffer);
-
-    pContext->pSignatureGenerator->SetData(buffer);
-
-    pContext->pSignatureGenerator->SetHashAlgo(pContext->nHashAlgo);
-
-    LOG_DBG((0, "sign_pdf", "Generate"));
-
-    UUCByteArray signature;
-    long nRes = pContext->pSignatureGenerator->Generate(signature, true, pContext->bVerifyCert);
-    if(nRes)
-    {
-        LOG_ERR((0, "sign_pdf", "Generate NOK: %x", nRes));
-        return nRes;
-    }
-
-    LOG_DBG((0, "sign_pdf", "Generate OK"));
-
-    sigGen.SetSignature((char*)signature.getContent(), signature.getLength());
-
-    LOG_DBG((0, "sign_pdf", "Set Signature OK"));
-
+    // In PoDoFo 0.10/1.x e' PoDoFo::SignDocument() a chiamare questa dall'interno
     UUCByteArray signedPdf;
-    sigGen.GetSignedPdf(signedPdf);
+    long nRes = sigGen.SignDocument(
+        [pContext](const unsigned char* data, unsigned long len, UUCByteArray& signature) -> long
+        {
+            UUCByteArray toSign;
+            toSign.append((BYTE*)data, len);
+
+            pContext->pSignatureGenerator->SetData(toSign);
+            pContext->pSignatureGenerator->SetHashAlgo(pContext->nHashAlgo);
+
+            LOG_DBG((0, "sign_pdf", "Generate"));
+
+            long res = pContext->pSignatureGenerator->Generate(signature, true, pContext->bVerifyCert);
+            if(res)
+                LOG_ERR((0, "sign_pdf", "Generate NOK: %x", res));
+            else
+                LOG_DBG((0, "sign_pdf", "Generate OK"));
+
+            return res;
+        },
+        signedPdf);
+
+    if(nRes)
+        return nRes;
 
     LOG_DBG((0, "sign_pdf", "Get Signed PDF OK"));
 
