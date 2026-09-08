@@ -10,7 +10,11 @@
 
 static BYTE SHA1_RSAcode[]={0x30,0x21,0x30,0x09,0x06,0x05,0x2b,0x0e,0x03,0x02,0x1a,0x05,0x00,0x04,0x14};
 static BYTE MD5_RSAcode[]={0x30,0x20,0x30,0x0C,0x06,0x08,0x2A,0x86,0x48,0x86,0xF7,0x0D,0x02,0x05,0x05,0x00,0x04,0x10};
+// RFC 8017 sezione 9.2: prefisso DigestInfo per SHA-256. Mancava, e
+// CDigestSHA256::DigestInfo() restituiva quello di SHA-1.
+static BYTE SHA256_RSAcode[]={0x30,0x31,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x01,0x05,0x00,0x04,0x20};
 static ByteArray baSHA1DigestInfo(SHA1_RSAcode,sizeof(SHA1_RSAcode));
+static ByteArray baSHA256DigestInfo(SHA256_RSAcode,sizeof(SHA256_RSAcode));
 static ByteArray baMD5DigestInfo(MD5_RSAcode,sizeof(MD5_RSAcode));
 
 namespace p11 {
@@ -113,7 +117,7 @@ namespace p11 {
 	/* ******************** */
 	/*		   SHA256	        */
 	/* ******************** */
-	CDigestSHA256::CDigestSHA256(std::shared_ptr<CSession> Session) : CDigest(CKM_SHA_1, std::move(Session)) {}
+	CDigestSHA256::CDigestSHA256(std::shared_ptr<CSession> Session) : CDigest(CKM_SHA256, std::move(Session)) {}
 	CDigestSHA256::~CDigestSHA256() {}
 
 	void CDigestSHA256::DigestInit() {
@@ -142,7 +146,7 @@ namespace p11 {
 
 	ByteArray CDigestSHA256::DigestInfo() {
 		init_func
-			return baSHA1DigestInfo;
+			return baSHA256DigestInfo;
 	}
 
 	ByteDynArray  CDigestSHA256::DigestGetOperationState()

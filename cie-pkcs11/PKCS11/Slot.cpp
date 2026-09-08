@@ -466,8 +466,13 @@ namespace p11 {
 		pInfo->ulRwSessionCount = dwRWSessCount;
 		pInfo->ulMaxRwSessionCount = MAXSESSIONS;
 
-		pInfo->ulMinPinLen = 8;
-		pInfo->ulMaxPinLen = 8;
+		// L'applicazione deve chiedere solo la seconda meta' del PIN: la
+		// prima la antepone il modulo, leggendola dalla cache creata
+		// dall'abbinamento (IAS::GetFirstPIN). Dichiarando 8, Firefox
+		// rifiuta le 4 cifre corrette e accetta 8 cifre che diventano 12
+		// sulla carta, consumando un tentativo a ogni prova.
+		pInfo->ulMinPinLen = 4;
+		pInfo->ulMaxPinLen = 4;
 
 		pInfo->hardwareVersion.major = 0;
 		pInfo->hardwareVersion.minor = 0;

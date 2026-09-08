@@ -128,7 +128,7 @@ UUCByteArray::~UUCByteArray()
 	//GlobalFree(m_pbtContent);
 	free(m_pbtContent);
 	if(m_szHex)
-		delete m_szHex;
+		delete[] m_szHex;
 }
 
 void UUCByteArray::load(const char* szHexString)
@@ -300,7 +300,7 @@ const char* UUCByteArray::toHexString(int nSize)
 {
 	if(m_szHex)
 	{
-		delete m_szHex;
+		delete[] m_szHex;
 		m_szHex = NULL;
 	}
 

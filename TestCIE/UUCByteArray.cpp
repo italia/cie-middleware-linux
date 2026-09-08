@@ -112,7 +112,7 @@ UUCByteArray::~UUCByteArray()
 	//GlobalFree(m_pbtContent);
 	free(m_pbtContent);
 	if(m_szHex)
-		delete m_szHex;
+		delete[] m_szHex;
 }
 
 long UUCByteArray::load(const char* szHexString)
@@ -288,7 +288,7 @@ const char* UUCByteArray::toHexString(int nSize)
 {
 	if(m_szHex)
 	{
-		delete m_szHex;
+		delete[] m_szHex;
 		m_szHex = NULL;
 	}
 
@@ -313,7 +313,7 @@ const char* UUCByteArray::toHexString(int nSize)
 	}
 	catch(...)
 	{
-		delete m_szHex;
+		delete[] m_szHex;
 		m_szHex = NULL;
 		throw -3L;//new UUCException("UUCByteArray:toHexString:Access Violation");
 	}
