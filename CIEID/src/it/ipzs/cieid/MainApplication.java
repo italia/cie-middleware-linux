@@ -24,6 +24,10 @@ public class MainApplication {
 	 * Launch the application.
 	 */
 	public static void main(final String[] args) {
+		// JNA extracts its native stub to java.io.tmpdir: that fails when /tmp is mounted noexec (#77)
+		if (System.getProperty("jna.tmpdir") == null)
+			System.setProperty("jna.tmpdir", Paths.get(System.getProperty("user.home"), ".CIEPKI", "jna").toString());
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 
