@@ -176,6 +176,14 @@ void WriteAttributes(CK_ATTRIBUTE_PTR pTemplate, CK_ULONG ulCount)
                     break;
             
                 case CKA_VALUE:
+                    // After C_GetAttributeValue an unavailable attribute has ulValueLen set to
+                    // CK_UNAVAILABLE_INFORMATION (~0UL). Building a UUCByteArray from it would call
+                    // malloc(SIZE_MAX), which terminates hosts that use their own allocator (e.g. Chrome).
+                    if(pTemplate[i].ulValueLen == CK_UNAVAILABLE_INFORMATION)
+                    {
+                        LOG_DEBUG("[PKCS11] WriteAttributes - %d) type=%x (%s), value=<unavailable>", i + 1, pTemplate[i].type, getAttributeName(pTemplate[i].type));
+                        break;
+                    }
                     LOG_DEBUG("[PKCS11] WriteAttributes - %d) type=%x (%s), value=%s, len=%x", i + 1, pTemplate[i].type, getAttributeName(pTemplate[i].type), UUCByteArray((BYTE*)pTemplate[i].pValue, pTemplate[i].ulValueLen).toHexString(), pTemplate[i].ulValueLen);
                     break;
                     
